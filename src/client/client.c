@@ -1,5 +1,36 @@
 #include "../../headers/client.h"
 
+// Modified function to take WSADATA and SOCKADDR_IN as parameters
+void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port) {
+    // Initialize Winsock
+    if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
+        fprintf(stderr, "Failed to initialize Winsock. Error Code : %d", WSAGetLastError());
+        *sock = INVALID_SOCKET;
+        return;
+    }
+
+    // Create socket
+    *sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (*sock == INVALID_SOCKET) {
+        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        WSACleanup();
+        return;
+    }
+
+    // Setup the server structure
+    server->sin_family = AF_INET;
+    server->sin_addr.s_addr = inet_addr(ip);
+    server->sin_port = htons(port);
+
+    // Connect to remote server
+    if (connect(*sock, (struct sockaddr *)server, sizeof(*server)) < 0) {
+        fprintf(stderr, "Connect error");
+        closesocket(*sock);
+        WSACleanup();
+        *sock = INVALID_SOCKET;
+    }
+}
+
 int main() {
     const Command *command; // command structure
     char **parameters; // command parameters
