@@ -40,8 +40,7 @@ typedef struct Command {
 extern const Command commands[];
 
 // function prototypes
-int isValidCommand(char *input);
-char *getCommand (char *input);
-char *parseCommandContent (char *input);
+const Command *getCommand (char *input);
+char **parseCommandParameters(const Command *command, char *input);
 
 #endif // CLIENT_H

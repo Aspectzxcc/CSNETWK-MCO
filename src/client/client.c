@@ -12,30 +12,57 @@ const Command commands[] = {
 
 const int commandsCount = sizeof(commands) / sizeof(commands[0]); // number of commands
 
-int isValidCommand(char *input) {
+const Command *getCommand(char *input) {
     char command[DEFAULT_BUFLEN]; // command buffer
     sscanf(input, "%s", command); // extract the command from the input
 
     for (int i = 0; i < commandsCount; i++) {
         if (strcmp(command, commands[i].command) == 0) {
-            return 1; // command is valid
+            return &commands[i]; // return the command
         }
     }
 
-    return 0; // command is not valid
+    return NULL; // command not found
 }
 
-char *getCommand (char *input) {
-    char *command = strtok(input, " ");
-    return command;
-}
-
-char *parseCommandContent (char *input) {
-    char *content = strchr(input, ' ');
-    if (content != NULL) {
-        return content + 1;
+// returns an array of parameters from the input
+char **parseCommandParameters(const Command *command, char *input) {
+    char **parameters = malloc(command->parameterCount * sizeof(char *));
+    if (parameters == NULL) {
+        fprintf(stderr, "Memory allocation failed for parameters\n");
+        return NULL;
     }
-    return NULL;
+
+    char *token = strtok(input, " "); // skip command itself
+    int index = 0;
+    while (token != NULL && index < command->parameterCount) {
+        token = strtok(NULL, " "); // get the next token
+        if (token != NULL) {
+            parameters[index] = strdup(token); // duplicate the token to store in the array
+            if (parameters[index] == NULL) {
+                fprintf(stderr, "Memory allocation failed for parameter %d\n", index);
+                // free previously allocated memory before returning
+                for (int i = 0; i < index; i++) {
+                    free(parameters[i]);
+                }
+                free(parameters);
+                return NULL;
+            }
+            index++;
+        }
+    }
+
+    if (index != command->parameterCount) {
+        fprintf(stderr, ERROR_INVALID_PARAMETERS "\n");
+        // free allocated memory before returning
+        for (int i = 0; i < index; i++) {
+            free(parameters[i]);
+        }
+        free(parameters);
+        return NULL;
+    }
+
+    return parameters;
 }
 
 int main() {
@@ -50,20 +77,37 @@ int main() {
         fgets(userInput, sizeof(userInput), stdin); // get user input
         userInput[strcspn(userInput, "\n")] = 0; // remove newline character
 
-        char *command = getCommand(userInput); // get the command from the user input
+        const Command *command = getCommand(userInput); // get the command from the user input
 
-        if (!isValidCommand(userInput)) {
-            printf(ERROR_COMMAND_NOT_FOUND "\n");
+        if (command == NULL) {
+            fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
             continue;
         }
 
-        if (strcmp(command, COMMAND_LEAVE) == 0) {
+        char **parameters = malloc(command->parameterCount * sizeof(char *));
+
+        if (parameters == NULL) {
+            fprintf(stderr, "Failed to allocate memory for parameters\n");
+            continue; 
+        }
+
+        parameters = parseCommandParameters(command, userInput);
+
+        if (parameters == NULL) {
+            continue;
+        }
+
+        if (strcmp(command->command, COMMAND_LEAVE) == 0) {
             printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
-            return 1;
+            
+            // cleanup before breaking the loop
+            for (int i = 0; i < command->parameterCount; i++) {
+                free(parameters[i]);
+            }
+            free(parameters);
+            break;
         }
     }
-    
-    printf("Command content: %s\n", parseCommandContent(userInput));
 
     // initialize winsock
     WSAStartup(MAKEWORD(2,2), &wsaData); // request version 2.2 of winsock
