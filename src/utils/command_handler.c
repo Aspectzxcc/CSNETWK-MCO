@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../headers/command_parser.h"
+#include "../../headers/command_handler.h"
 
 const Command commands[] = {
     {COMMAND_JOIN, 2}, // /join <server_ip_add> <port>

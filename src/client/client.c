@@ -1,5 +1,4 @@
 #include "../../headers/client.h"
-#include "../../headers/command_parser.h"
 
 int main() {
     const Command *command; // command structure
