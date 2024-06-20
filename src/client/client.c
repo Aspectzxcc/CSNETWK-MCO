@@ -40,7 +40,7 @@ int main() {
         }
 
         // execute the command and pass in the socket, Winsock data, server address, command, and parameters
-        breakLoop = executeCommand(&client, &wsaData, &server, command, parameters, message);
+        breakLoop = executeCommand(&client, &wsaData, &server, command, parameters, userInput);
 
         if (breakLoop) {
             break;

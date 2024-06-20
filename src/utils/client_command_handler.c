@@ -111,7 +111,7 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
     }
 }
 
-void sendMessageToServer(SOCKET *sock, const char *message) {
+void sendMessageToServer(SOCKET *sock, char *message) {
     if (*sock == INVALID_SOCKET || message == NULL) {
         fprintf(stderr, "Invalid socket or message is NULL\n");
         return;
