@@ -40,8 +40,6 @@ typedef struct Command {
 extern const Command commands[];
 
 // function prototypes
-const Command *getCommand (char *input);
-char **parseCommandParameters(const Command *command, char *input);
 int executeCommand(const Command *command, char **parameters);
 
 #endif // CLIENT_H
