@@ -12,6 +12,19 @@ const Command commands[] = {
 
 const int commandsCount = sizeof(commands) / sizeof(commands[0]); // number of commands
 
+int isValidCommand(char *input) {
+    char command[DEFAULT_BUFLEN]; // command buffer
+    sscanf(input, "%s", command); // extract the command from the input
+
+    for (int i = 0; i < commandsCount; i++) {
+        if (strcmp(command, commands[i].command) == 0) {
+            return 1; // command is valid
+        }
+    }
+
+    return 0; // command is not valid
+}
+
 char *getCommand (char *input) {
     char *command = strtok(input, " ");
     return command;
@@ -39,8 +52,13 @@ int main() {
 
         char *command = getCommand(userInput); // get the command from the user input
 
+        if (!isValidCommand(userInput)) {
+            printf(ERROR_COMMAND_NOT_FOUND "\n");
+            continue;
+        }
+
         if (strcmp(command, COMMAND_LEAVE) == 0) {
-            printf("Connection closed. Thank you!\n");
+            printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
             return 1;
         }
     }

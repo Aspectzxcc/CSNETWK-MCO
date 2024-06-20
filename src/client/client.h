@@ -16,6 +16,12 @@
 #define COMMAND_GET "/get"
 #define COMMAND_HELP "/?"
 
+#define MESSAGE_SUCCESSFUL_CONNECTION "Connection to the File Exchange Server is successful!"
+#define MESSAGE_SUCCESSFUL_DISCONNECTION "Connection closed. Thank you!"
+#define MESSAGE_SUCCESSFUL_REGISTRATION "Welcome %s!" // %s is the user's handle or alias
+#define MESSAGE_SUCCESSFUL_FILE_UPLOAD "%s<%s>: Uploaded %s" // %s and %s is the user's handle or alias, timestamp, and filename respectively
+#define MESSAGE_SUCCESSFUL_DIR_LIST "Server Directory\n%s" // %s is the directory listing
+
 #define ERROR_CONNECTION_FAILED "Error: Connection to the Server has failed! Please check IP Address and Port Number."
 #define ERROR_DISCONNECT_FAILED "Error: Disconnection failed. Please connect to the server first."
 #define ERROR_REGISTRATION_FAILED "Error: Registration failed. Handle or alias already exists."
@@ -34,6 +40,7 @@ typedef struct Command {
 extern const Command commands[];
 
 // function prototypes
+int isValidCommand(char *input);
 char *getCommand (char *input);
 char *parseCommandContent (char *input);
 
