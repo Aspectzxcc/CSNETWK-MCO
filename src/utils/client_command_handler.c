@@ -100,7 +100,7 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
 
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)server, sizeof(*server)) < 0) {
-        fprintf(stderr, "connection failed\n");
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         closesocket(*sock);
         WSACleanup();
         *sock = INVALID_SOCKET;
