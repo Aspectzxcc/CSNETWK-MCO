@@ -31,6 +31,25 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
     }
 }
 
+int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Command *command, char **parameters) {
+    if (strcmp(command->command, COMMAND_JOIN) == 0) {
+        initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
+    } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
+        return 1;
+    } else if (strcmp(command->command, COMMAND_REGISTER) == 0) {
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_STORE) == 0) { 
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_DIR) == 0) {
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_GET) == 0) {
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_HELP) == 0) {
+        // Implement other commands
+    }
+    return 0;
+}
+
 int main() {
     const Command *command; // command structure
     char **parameters; // command parameters
@@ -70,33 +89,13 @@ int main() {
             continue;
         }
 
-        // breakLoop = executeCommand(command, parameters);
+        // execute the command and pass in the socket, Winsock data, server address, command, and parameters
+        breakLoop = executeCommand(&s, &wsaData, &server, command, parameters);
 
-        // if (breakLoop) {
-        //     break;
-        // }
+        if (breakLoop) {
+            break;
+        }
     }
-
-    // initialize winsock
-    WSAStartup(MAKEWORD(2,2), &wsaData); // request version 2.2 of winsock
-
-    // create socket
-    s = socket(AF_INET, SOCK_STREAM, 0); // create a socket for the IPv4 address family using TCP
-
-    // setup the server structure
-    server.sin_family = AF_INET; // set address family to IPv4
-    server.sin_addr.s_addr = inet_addr("127.0.0.1"); // set server address
-    server.sin_port = htons(12345); // set server port, converting from host to network byte order
-
-    // connect to remote server
-    if (connect(s, (struct sockaddr *)&server, sizeof(server)) < 0) {
-        puts("connect error"); // if connection fails, print error
-        return 1;
-    }
-
-    // cleanup
-    closesocket(s); // close the socket
-    WSACleanup(); // clean up winsock
 
     // free allocated memory
     for (int i = 0; i < command->parameterCount; i++) {
