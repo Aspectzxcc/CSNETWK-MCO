@@ -5,13 +5,22 @@ DWORD WINAPI client_handler(void* data) {
     // cast the void pointer back to a socket type
     SOCKET clientSocket = *(SOCKET*)data;
 
-    // message to send to the client
-    char* message = "hello client";
+    // buffer to store the message received from the client
+    char recvbuf[DEFAULT_BUFLEN];
+    int recvbuflen = DEFAULT_BUFLEN;
 
-    // send the message to the client
-    send(clientSocket, message, strlen(message), 0);
+    // Receive message from client
+    int bytesRead = recv(clientSocket, recvbuf, recvbuflen, 0); // Renamed iResult to bytesRead for clarity
+    if (bytesRead > 0) {
+        recvbuf[bytesRead] = '\0'; // Null-terminate the received data
+        printf("Message received from client: %s\n", recvbuf);
+    } else if (bytesRead == 0) {
+        printf("Connection closing...\n");
+    } else {
+        printf("recv failed with error: %d\n", WSAGetLastError());
+    }
 
-    // close the client socket after sending the message
+    // close the client socket after sending and receiving the message
     closesocket(clientSocket);
     return 0;
 }
