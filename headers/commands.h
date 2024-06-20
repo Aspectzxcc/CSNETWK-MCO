@@ -31,4 +31,8 @@ typedef struct Command {
 extern const Command commands[];
 extern const int commandsCount;
 
+// function prototypes
+const Command *getCommand(char *input);
+char **parseCommandParameters(const Command *command, char *input);
+
 #endif // COMMANDS_H
