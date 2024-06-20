@@ -5,7 +5,16 @@
 // function to handle client connections
 DWORD WINAPI client_handler(void* data) {
     SOCKET clientSocket = *(SOCKET*)data;
-    char* clientAlias; // alias of the client
+    char *clientAlias;
+    
+    // allocate memory for the client alias
+    clientAlias = malloc(MAX_ALIAS_LENGTH * sizeof(char));
+    if (clientAlias == NULL) {
+        fprintf(stderr, "Memory allocation for clientAlias failed\n");
+        closesocket(clientSocket);
+        return 1; // Return an error code
+    }
+    clientAlias[0] = '\0'; // Initialize with an empty string
 
     char clientMessage[DEFAULT_BUFLEN];
     int messageLength = DEFAULT_BUFLEN;
@@ -13,6 +22,12 @@ DWORD WINAPI client_handler(void* data) {
     // Loop to continuously receive and process messages from the client
     while (1) {
         int bytesRead = recv(clientSocket, clientMessage, messageLength, 0);
+
+        if (clientAlias != NULL) {
+            printf("Client: %s\n", clientAlias);
+        } else {
+            printf("Client: \n");
+        }
 
         if (bytesRead == SOCKET_ERROR) {
             fprintf(stderr, "recv failed with error code : %d", WSAGetLastError());
@@ -38,16 +53,17 @@ DWORD WINAPI client_handler(void* data) {
                 continue; // skip to next iteration on error
             }
 
-            handleCommand(clientSocket, command->command, parameters, clientAlias);
+            handleCommand(clientSocket, command->command, parameters, &clientAlias);
         }
     }
 
     // Cleanup before exiting the thread
     closesocket(clientSocket);
+    free(clientAlias);
     return 0;
 }
 
-void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char *clientAlias) {
+void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias) {
     if (strcmp(command, COMMAND_JOIN) == 0) {
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
@@ -55,12 +71,12 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
         closesocket(clientSocket); // Close the client socket to properly disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         if (parameters[0] != NULL) {
-            clientAlias = parameters[0];
+            *clientAlias = parameters[0];
             clientAliases[clientAliasCount++] = parameters[0]; // store the client alias and increment the count
         }
         
         char response[DEFAULT_BUFLEN];
-        sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, clientAlias);
+        sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, *clientAlias);
         send(clientSocket, response, strlen(response), 0);
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // Assuming STORE command takes three parameters: user's handle, timestamp, and filename
