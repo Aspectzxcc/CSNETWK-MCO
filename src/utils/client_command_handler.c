@@ -24,15 +24,23 @@ const Command *getCommand(char *input) {
 
 // function to parse and return parameters from the command input
 char **parseCommandParameters(const Command *command, char *input) {
+    // Copy input to avoid modifying the original string
+    char *inputCopy = strdup(input);
+    if (inputCopy == NULL) {
+        fprintf(stderr, "memory allocation failed for input copy\n");
+        return NULL;
+    }
+
     // allocate memory for parameters array based on expected parameter count
     char **parameters = malloc(command->parameterCount * sizeof(char *));
     if (parameters == NULL) {
         fprintf(stderr, "memory allocation failed for parameters\n");
+        free(inputCopy); // Free the input copy if parameters allocation fails
         return NULL;
     }
 
-    // tokenize input to skip the command itself and extract parameters
-    char *token = strtok(input, " ");
+    // tokenize inputCopy to skip the command itself and extract parameters
+    char *token = strtok(inputCopy, " ");
     int index = 0;
     while (token != NULL && index < command->parameterCount) {
         token = strtok(NULL, " "); // get next parameter
@@ -40,11 +48,12 @@ char **parseCommandParameters(const Command *command, char *input) {
             parameters[index] = strdup(token); // duplicate parameter to ensure it's not overwritten
             if (parameters[index] == NULL) {
                 fprintf(stderr, "memory allocation failed for parameter %d\n", index);
-                // free allocated memory for parameters before error return
+                // free allocated memory for parameters and inputCopy before error return
                 for (int i = 0; i < index; i++) {
                     free(parameters[i]);
                 }
                 free(parameters);
+                free(inputCopy); // Don't forget to free the input copy
                 return NULL;
             }
             index++;
@@ -53,14 +62,16 @@ char **parseCommandParameters(const Command *command, char *input) {
 
     // check if the number of parameters matches the expected count
     if (index != command->parameterCount) {
-        // free allocated memory before returning null
+        // free allocated memory for parameters and inputCopy before returning null
         for (int i = 0; i < index; i++) {
             free(parameters[i]);
         }
         free(parameters);
+        free(inputCopy); // Don't forget to free the input copy
         return NULL;
     }
 
+    free(inputCopy); // Free the input copy after use
     return parameters; // return the array of parameters
 }
 
