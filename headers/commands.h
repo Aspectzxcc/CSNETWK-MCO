@@ -19,6 +19,8 @@
 #define ERROR_COMMAND_NOT_FOUND "Error: Command not found."
 #define ERROR_INVALID_PARAMETERS "Error: Command parameters do not match or is not allowed."
 
+#define DEFAULT_BUFLEN 1024 // default buffer length
+
 // command structure
 typedef struct Command {
     const char* command;

@@ -5,39 +5,42 @@
 #include "../../headers/commands.h"
 #include "../../headers/command_handler.h"
 
-#define DEFAULT_BUFLEN 1024 // default buffer length
+#define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
-// return the command struct from the input
+// function to identify the command struct based on user input
 const Command *getCommand(char *input) {
-    char command[DEFAULT_BUFLEN]; // command buffer
-    sscanf(input, "%s", command); // extract the command from the input
+    char command[DEFAULT_BUFLEN]; // buffer to hold the extracted command
+    sscanf(input, "%s", command); // extract the first word from input as command
 
+    // loop through available commands to find a match
     for (int i = 0; i < commandsCount; i++) {
         if (strcmp(command, commands[i].command) == 0) {
-            return &commands[i]; // return the command
+            return &commands[i]; // return matching command struct
         }
     }
 
-    return NULL; // command not found
+    return NULL; // return null if no matching command is found
 }
 
-// returns an array of parameters from the input
+// function to parse and return parameters from the command input
 char **parseCommandParameters(const Command *command, char *input) {
+    // allocate memory for parameters array based on expected parameter count
     char **parameters = malloc(command->parameterCount * sizeof(char *));
     if (parameters == NULL) {
-        fprintf(stderr, "Memory allocation failed for parameters\n");
+        fprintf(stderr, "memory allocation failed for parameters\n");
         return NULL;
     }
 
-    char *token = strtok(input, " "); // skip command itself
+    // tokenize input to skip the command itself and extract parameters
+    char *token = strtok(input, " ");
     int index = 0;
     while (token != NULL && index < command->parameterCount) {
-        token = strtok(NULL, " "); // get next token, NULL to continue from previous position
+        token = strtok(NULL, " "); // get next parameter
         if (token != NULL) {
-            parameters[index] = strdup(token); // duplicate token stored in array to prevent token reference from being overwritten
+            parameters[index] = strdup(token); // duplicate parameter to ensure it's not overwritten
             if (parameters[index] == NULL) {
-                fprintf(stderr, "Memory allocation failed for parameter %d\n", index);
-                // free previously allocated memory before returning
+                fprintf(stderr, "memory allocation failed for parameter %d\n", index);
+                // free allocated memory for parameters before error return
                 for (int i = 0; i < index; i++) {
                     free(parameters[i]);
                 }
@@ -48,8 +51,9 @@ char **parseCommandParameters(const Command *command, char *input) {
         }
     }
 
-    if (index != command->parameterCount) { // if number of parameters do not match
-        // free allocated memory before returning
+    // check if the number of parameters matches the expected count
+    if (index != command->parameterCount) {
+        // free allocated memory before returning null
         for (int i = 0; i < index; i++) {
             free(parameters[i]);
         }
@@ -57,53 +61,46 @@ char **parseCommandParameters(const Command *command, char *input) {
         return NULL;
     }
 
-    return parameters;
+    return parameters; // return the array of parameters
 }
 
+// function to execute the identified command with given parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Command *command, char **parameters) {
+    // execute command based on its type
     if (strcmp(command->command, COMMAND_JOIN) == 0) {
         initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
     } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
-        return 1;
-    } else if (strcmp(command->command, COMMAND_REGISTER) == 0) {
-        // Implement other commands
-    } else if (strcmp(command->command, COMMAND_STORE) == 0) { 
-        // Implement other commands
-    } else if (strcmp(command->command, COMMAND_DIR) == 0) {
-        // Implement other commands
-    } else if (strcmp(command->command, COMMAND_GET) == 0) {
-        // Implement other commands
-    } else if (strcmp(command->command, COMMAND_HELP) == 0) {
-        // Implement other commands
+        return 1; // example return value for leave command
     }
-    return 0;
+    // additional command checks can be implemented here
+    return 0; // return 0 to indicate successful execution
 }
 
-// Modified function to take WSADATA and SOCKADDR_IN as parameters
+// function to initialize socket connection based on provided ip and port
 void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port) {
-    // Initialize Winsock
+    // start winsock api
     if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
-        fprintf(stderr, "Failed to initialize Winsock. Error Code : %d", WSAGetLastError());
+        fprintf(stderr, "failed to initialize winsock. error code : %d", WSAGetLastError());
         *sock = INVALID_SOCKET;
         return;
     }
 
-    // Create socket
+    // create socket
     *sock = socket(AF_INET, SOCK_STREAM, 0);
     if (*sock == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        fprintf(stderr, "could not create socket : %d", WSAGetLastError());
         WSACleanup();
         return;
     }
 
-    // Setup the server structure
+    // setup server address structure
     server->sin_family = AF_INET;
     server->sin_addr.s_addr = inet_addr(ip);
     server->sin_port = htons(port);
 
-    // Connect to remote server
+    // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)server, sizeof(*server)) < 0) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        fprintf(stderr, "connection failed\n");
         closesocket(*sock);
         WSACleanup();
         *sock = INVALID_SOCKET;

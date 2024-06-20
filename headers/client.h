@@ -10,6 +10,4 @@
 // link with winsock library
 #pragma comment(lib, "ws2_32.lib")
 
-#define DEFAULT_BUFLEN 1024 // default buffer length
-
 #endif // CLIENT_H
