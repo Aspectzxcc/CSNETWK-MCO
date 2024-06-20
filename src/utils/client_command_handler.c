@@ -65,15 +65,19 @@ char **parseCommandParameters(const Command *command, char *input) {
 }
 
 // function to execute the identified command with given parameters
-int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Command *command, char **parameters) {
+int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Command *command, char **parameters, char *message) {
     // execute command based on its type
     if (strcmp(command->command, COMMAND_JOIN) == 0) {
         initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
+        sendMessageToServer(sock, message);
     } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
+        sendMessageToServer(sock, message);
         return 1; // indicate disconnection
+    } else {
+        sendMessageToServer(sock, message);
     }
     // additional command checks can be implemented here
-    return 0; // return 0 to indicate successful execution
+    return 0; // no disconnection
 }
 
 // function to initialize socket connection based on provided ip and port
@@ -104,5 +108,20 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
         closesocket(*sock);
         WSACleanup();
         *sock = INVALID_SOCKET;
+    }
+}
+
+void sendMessageToServer(SOCKET *sock, const char *message) {
+    if (*sock == INVALID_SOCKET || message == NULL) {
+        fprintf(stderr, "Invalid socket or message is NULL\n");
+        return;
+    }
+
+    int messageLength = strlen(message); // Get the length of the message
+    int bytesSent = send(*sock, message, messageLength, 0); // Send the message
+
+    if (bytesSent == SOCKET_ERROR) {
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        return;
     }
 }

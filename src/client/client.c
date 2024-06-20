@@ -7,7 +7,7 @@ int main() {
     int breakLoop; // flag to break the loop
 
     WSADATA wsaData; // holds Winsock data
-    SOCKET s; // client socket descriptor
+    SOCKET client; // client socket descriptor
     SOCKADDR_IN server; // server address structure
     char *message, server_reply[DEFAULT_BUFLEN]; // message to send and server reply buffer
     int recv_size; // size of received data
@@ -40,12 +40,16 @@ int main() {
         }
 
         // execute the command and pass in the socket, Winsock data, server address, command, and parameters
-        breakLoop = executeCommand(&s, &wsaData, &server, command, parameters);
+        breakLoop = executeCommand(&client, &wsaData, &server, command, parameters, message);
 
         if (breakLoop) {
             break;
         }
     }
+
+    // cleanup
+    WSACleanup(); // cleanup Winsock
+    closesocket(client); // close the socket
 
     // free allocated memory
     for (int i = 0; i < command->parameterCount; i++) {
