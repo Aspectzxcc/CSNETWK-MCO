@@ -1,16 +1,21 @@
 #include "client.h"
 
 const Command commands[] = {
-    {COMMAND_JOIN, ERROR_CONNECTION_FAILED, 2}, // /join <server_ip_add> <port>
-    {COMMAND_LEAVE, ERROR_DISCONNECT_FAILED, 0}, // /leave
-    {COMMAND_REGISTER, ERROR_REGISTRATION_FAILED, 1}, // /register <handle>
-    {COMMAND_STORE, ERROR_FILE_NOT_FOUND, 1}, // /store <filename>
-    {COMMAND_DIR, ERROR_FILE_NOT_FOUND_SERVER, 0}, // /dir
-    {COMMAND_GET, ERROR_FILE_NOT_FOUND_SERVER, 1}, // /get <filename>
-    {COMMAND_HELP, ERROR_COMMAND_NOT_FOUND, 0} // /?
+    {COMMAND_JOIN, 2}, // /join <server_ip_add> <port>
+    {COMMAND_LEAVE, 0}, // /leave
+    {COMMAND_REGISTER, 1}, // /register <handle>
+    {COMMAND_STORE, 1}, // /store <filename>
+    {COMMAND_DIR, 0}, // /dir
+    {COMMAND_GET, 1}, // /get <filename>
+    {COMMAND_HELP, 0} // /?
 };
 
-const int commandsCount = sizeof(commands) / sizeof(commands[0]);
+const int commandsCount = sizeof(commands) / sizeof(commands[0]); // number of commands
+
+char *getCommand (char *input) {
+    char *command = strtok(input, " ");
+    return command;
+}
 
 char *parseCommandContent (char *input) {
     char *content = strchr(input, ' ');
@@ -29,8 +34,6 @@ int main() {
     int recv_size; // size of received data
 
     fgets(userInput, sizeof(userInput), stdin);
-
-    parseCommandContent(userInput);
     
     printf("Command content: %s\n", parseCommandContent(userInput));
 

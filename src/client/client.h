@@ -28,13 +28,13 @@
 
 typedef struct Command {
     const char* command;
-    const char* errorMessage;
     const int parameterCount;
 } Command;
 
 extern const Command commands[];
 
 // function prototypes
+char *getCommand (char *input);
 char *parseCommandContent (char *input);
 
 #endif // CLIENT_H
