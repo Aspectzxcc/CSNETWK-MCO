@@ -1,28 +1,6 @@
 #include "../../headers/client.h"
 #include "../../headers/command_parser.h"
 
-// execute the command
-// int executeCommand(const Command *command, char **parameters) {
-//     if (strcmp(command->command, COMMAND_JOIN) == 0) {
-
-//     } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
-//         printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
-
-//         return 1;
-//     } else if (strcmp(command->command, COMMAND_REGISTER) == 0) {
-//         // Implement other commands
-//     } else if (strcmp(command->command, COMMAND_STORE) == 0) { 
-//         // Implement other commands
-//     } else if (strcmp(command->command, COMMAND_DIR) == 0) {
-//         // Implement other commands
-//     } else if (strcmp(command->command, COMMAND_GET) == 0) {
-//         // Implement other commands
-//     } else if (strcmp(command->command, COMMAND_HELP) == 0) {
-//         // Implement other commands
-//     }
-//     return 0;
-// }
-
 int main() {
     const Command *command; // command structure
     char **parameters; // command parameters

@@ -16,6 +16,28 @@ DWORD WINAPI client_handler(void* data) {
     return 0;
 }
 
+// execute the command
+// int executeCommand(const Command *command, char **parameters) {
+//     if (strcmp(command->command, COMMAND_JOIN) == 0) {
+
+//     } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
+//         printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
+
+//         return 1;
+//     } else if (strcmp(command->command, COMMAND_REGISTER) == 0) {
+//         // Implement other commands
+//     } else if (strcmp(command->command, COMMAND_STORE) == 0) { 
+//         // Implement other commands
+//     } else if (strcmp(command->command, COMMAND_DIR) == 0) {
+//         // Implement other commands
+//     } else if (strcmp(command->command, COMMAND_GET) == 0) {
+//         // Implement other commands
+//     } else if (strcmp(command->command, COMMAND_HELP) == 0) {
+//         // Implement other commands
+//     }
+//     return 0;
+// }
+
 int main() {
     WSADATA wsaData; // holds Winsock data
     SOCKET serverSocket, clientSocket; // server and client socket descriptors
