@@ -1,38 +1,58 @@
-# CSNETWK-MCO
-This is the final output for our CSNETWK course which is a File Exchange System, enabling clients to store, share, and fetch files from a single server using either TCP or UDP protocol. The File Exchange System will consist of a server application and a client application.
+# CSNETWK-MCO File Exchange System
 
-Project Roadmap
-1. Understand the Basics
-Learn C Socket Programming: Understand how to create sockets, bind them, listen for connections, accept connections, and send/receive data over TCP/UDP.
-Study Client-Server Model: Grasp the basics of how a client-server architecture works, focusing on TCP and UDP protocols.
-2. Plan Your Project
-Define Project Structure: Decide on the directory structure, naming conventions, and how you'll organize your code (modularize for reusability).
-Choose TCP or UDP: Based on the requirements, decide whether to use TCP (reliable, connection-oriented) or UDP (unreliable, connectionless) for your application.
-3. Implement Server Application
-Socket Initialization: Create a socket using socket().
-Bind Socket: Bind the socket to a server address and port using bind().
-Listen for Connections (TCP): If using TCP, listen for incoming connections with listen() and accept them with accept().
-Handle Client Requests: Implement logic to handle different client requests (/join, /leave, /register, /store, /dir, /get, /?) based on the input command.
-Send and Receive Data: Use send() and recv() for TCP or sendto() and recvfrom() for UDP to exchange data with clients.
-Concurrency: Consider using fork(), threads (with pthread library), or select/poll for handling multiple clients simultaneously.
-File Management: Implement functions to manage file storage, retrieval, and listing.
-4. Implement Client Application
-User Interface: Design a simple text-based interface for input commands and displaying messages.
-Connect to Server: Use connect() for TCP or just sendto() for UDP to communicate with the server.
-Input Handling: Parse user input and send appropriate commands to the server.
-Receive Server Responses: Display messages from the server based on the responses to commands.
-5. Testing and Debugging
-Unit Testing: Write tests for individual functions, especially those handling file operations and protocol-specific behaviors.
-Integration Testing: Test the client and server applications together to ensure they work as expected.
-Debugging: Use tools like gdb for debugging and fixing issues.
-6. Documentation and Submission
-Code Documentation: Comment your code thoroughly to explain the logic and flow.
-User Guide: Write a simple user guide on how to run the server and client applications.
-Submission Package: Prepare your submission package as per the project specifications, including a video demonstration.
-7. Bonus Features (Optional)
-GUI: Consider adding a graphical user interface for the client application using libraries like GTK or Qt for C.
-Group Messaging: Implement additional features like group messaging or file sharing among multiple clients.
-Resources
-C Socket Programming Tutorials: Look into online resources and tutorials to get a deeper understanding of socket programming in C.
-C Standard Library Documentation: Familiarize yourself with the functions available in the C standard library, especially those related to sockets, threads, and file handling.
-This roadmap provides a structured approach to tackling the project. Adjustments may be necessary as you progress and encounter specific challenges.
+## Overview
+
+The CSNETWK-MCO File Exchange System is designed as the final project for our CSNETWK course. It facilitates the storage, sharing, and retrieval of files among clients through a single server, utilizing either TCP or UDP protocols. The system is divided into two main applications: the server application and the client application.
+
+## Project Roadmap
+
+### 1. Understand the Basics
+
+- **C Socket Programming:** Learn to create, bind, listen, accept, and manage sockets for data transmission over TCP/UDP.
+- **Client-Server Model:** Understand the fundamentals of client-server architecture with a focus on TCP and UDP protocols.
+
+### 2. Plan Your Project
+
+- **Project Structure:** Decide on directory structure, naming conventions, and code organization for modularity and reusability.
+- **Protocol Selection:** Choose between TCP (reliable, connection-oriented) and UDP (unreliable, connectionless) based on project requirements.
+
+### 3. Implement Server Application
+
+- **Socket Initialization:** Use `socket()` to create a socket.
+- **Bind Socket:** Bind the socket to an address and port with `bind()`.
+- **Listen for Connections:** For TCP, use `listen()` and `accept()` to manage incoming connections.
+- **Client Request Handling:** Implement logic to process commands like `/join`, `/leave`, `/register`, `/store`, `/dir`, `/get`, and `/?`.
+- **Data Transmission:** Utilize `send()` and `recv()` for TCP, or `sendto()` and `recvfrom()` for UDP.
+- **Concurrency:** Employ `fork()`, threads (via pthread library), or select/poll for simultaneous client handling.
+- **File Management:** Develop functions for file storage, retrieval, and listing.
+
+### 4. Implement Client Application
+
+- **User Interface:** Create a simple text-based interface for command input and message display.
+- **Server Connection:** Use `connect()` for TCP or `sendto()` for UDP to interact with the server.
+- **Input Handling:** Parse user commands and communicate with the server accordingly.
+- **Server Response Handling:** Display server responses based on command outcomes.
+
+### 5. Testing and Debugging
+
+- **Unit Testing:** Test individual functions, focusing on file operations and protocol behaviors.
+- **Integration Testing:** Ensure the client and server applications function together as expected.
+- **Debugging:** Utilize debugging tools like `gdb` to identify and resolve issues.
+
+### 6. Documentation and Submission
+
+- **Code Documentation:** Thoroughly comment your code to explain logic and flow.
+- **User Guide:** Provide a guide on running the server and client applications.
+- **Submission Package:** Prepare your project for submission, including a video demonstration.
+
+### 7. Bonus Features (Optional)
+
+- **GUI:** Add a graphical user interface for the client application using GTK or Qt for C.
+- **Group Messaging:** Implement group messaging or file sharing among clients.
+
+## Resources
+
+- **C Socket Programming Tutorials:** Explore online resources for a deeper understanding of socket programming in C.
+- **C Standard Library Documentation:** Familiarize with the C standard library, especially socket, thread, and file handling functions.
+
+This roadmap outlines a structured approach to developing the File Exchange System. Adjustments may be necessary as the project progresses and new challenges arise.
