@@ -12,6 +12,7 @@ const Command commands[] = {
 
 const int commandsCount = sizeof(commands) / sizeof(commands[0]); // number of commands
 
+// return the command struct from the input
 const Command *getCommand(char *input) {
     char command[DEFAULT_BUFLEN]; // command buffer
     sscanf(input, "%s", command); // extract the command from the input
@@ -64,16 +65,41 @@ char **parseCommandParameters(const Command *command, char *input) {
     return parameters;
 }
 
+// execute the command
+int executeCommand(const Command *command, char **parameters) {
+    if (strcmp(command->command, COMMAND_JOIN) == 0) {
+
+    } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
+        printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
+
+        return 1;
+    } else if (strcmp(command->command, COMMAND_REGISTER) == 0) {
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_STORE) == 0) { 
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_DIR) == 0) {
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_GET) == 0) {
+        // Implement other commands
+    } else if (strcmp(command->command, COMMAND_HELP) == 0) {
+        // Implement other commands
+    }
+    return 0;
+}
+
 int main() {
     const Command *command; // command structure
     char **parameters; // command parameters
     char userInput[DEFAULT_BUFLEN]; // user input buffer
+    int breakLoop; // flag to break the loop
+
     WSADATA wsaData; // holds Winsock data
     SOCKET s; // client socket descriptor
-    struct sockaddr_in server; // server address structure
+    SOCKADDR_IN server; // server address structure
     char *message, server_reply[DEFAULT_BUFLEN]; // message to send and server reply buffer
     int recv_size; // size of received data
 
+    // unlimited loop to get user input
     while (1) {
         fgets(userInput, sizeof(userInput), stdin); // get user input
         userInput[strcspn(userInput, "\n")] = 0; // remove newline character
@@ -100,14 +126,9 @@ int main() {
             continue;
         }
 
-        if (strcmp(command->command, COMMAND_LEAVE) == 0) {
-            printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
-            
-            // cleanup before breaking the loop
-            for (int i = 0; i < command->parameterCount; i++) {
-                free(parameters[i]);
-            }
-            free(parameters);
+        breakLoop = executeCommand(command, parameters);
+
+        if (breakLoop) {
             break;
         }
     }
@@ -132,6 +153,13 @@ int main() {
     // cleanup
     closesocket(s); // close the socket
     WSACleanup(); // clean up winsock
+
+    // free allocated memory
+    for (int i = 0; i < command->parameterCount; i++) {
+        free(parameters[i]);
+    }
+
+    free(parameters);
 
     return 0;
 }
