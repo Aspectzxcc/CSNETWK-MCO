@@ -4,56 +4,63 @@
 
 // function to handle client connections
 DWORD WINAPI client_handler(void* data) {
-    // cast the void pointer back to a socket type
     SOCKET clientSocket = *(SOCKET*)data;
+    char* clientAlias; // alias of the client
 
-    // buffer to store the message received from the client
     char clientMessage[DEFAULT_BUFLEN];
     int messageLength = DEFAULT_BUFLEN;
 
-    // Receive message from client
-    int bytesRead = recv(clientSocket, clientMessage, messageLength, 0);
+    // Loop to continuously receive and process messages from the client
+    while (1) {
+        int bytesRead = recv(clientSocket, clientMessage, messageLength, 0);
 
-    if (bytesRead == SOCKET_ERROR) {
-        fprintf(stderr, "recv failed with error code : %d", WSAGetLastError());
-    } else if (bytesRead == 0) {
-        printf("Client disconnected\n");
-    } else {
-        clientMessage[bytesRead] = '\0'; // Null-terminate the received data
-        printf("Message received from client: %s\n", clientMessage);
+        if (bytesRead == SOCKET_ERROR) {
+            fprintf(stderr, "recv failed with error code : %d", WSAGetLastError());
+            break; // exit loop on error
+        } else if (bytesRead == 0) {
+            printf("Client disconnected\n");
+            break; // exit loop if client disconnected
+        } else {
+            clientMessage[bytesRead] = '\0'; // Null-terminate the received data
+            printf("Message received from client: %s\n", clientMessage);
 
-        // Extract command and parameters from the received message
-        const Command *command = getCommand(clientMessage);
+            const Command *command = getCommand(clientMessage);
 
-        if (command == NULL) {
-            printf(ERROR_COMMAND_NOT_FOUND "\n");
-            return 0;
+            if (command == NULL) {
+                printf(ERROR_COMMAND_NOT_FOUND "\n");
+                continue; // skip to next iteration on error
+            }
+
+            char **parameters = parseCommandParameters(command, clientMessage);
+
+            if (parameters == NULL) {
+                printf(ERROR_INVALID_PARAMETERS "\n");
+                continue; // skip to next iteration on error
+            }
+
+            handleCommand(clientSocket, command->command, parameters, clientAlias);
         }
-
-        char **parameters = parseCommandParameters(command, clientMessage);
-
-        if (parameters == NULL) {
-            printf(ERROR_INVALID_PARAMETERS "\n");
-            return 0;
-        }
-
-        // Handle the command based on the extracted command and parameters
-        handleCommand(clientSocket, command->command, parameters);
     }
-    
+
+    // Cleanup before exiting the thread
+    closesocket(clientSocket);
     return 0;
 }
 
-void handleCommand(SOCKET clientSocket, const char *command, char **parameters) {
+void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char *clientAlias) {
     if (strcmp(command, COMMAND_JOIN) == 0) {
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         printf("Client disconnected\n");
         closesocket(clientSocket); // Close the client socket to properly disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
-        // Assuming REGISTER command takes one parameter: the user's handle or alias
+        if (parameters[0] != NULL) {
+            clientAlias = parameters[0];
+            clientAliases[clientAliasCount++] = parameters[0]; // store the client alias and increment the count
+        }
+        
         char response[DEFAULT_BUFLEN];
-        sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, parameters[0]);
+        sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, clientAlias);
         send(clientSocket, response, strlen(response), 0);
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // Assuming STORE command takes three parameters: user's handle, timestamp, and filename

@@ -1,5 +1,9 @@
 #include "../../headers/server.h"
 
+// array to hold client aliases
+char* clientAliases[MAX_CLIENTS]; 
+int clientAliasCount = 0;
+
 int main() {
     WSADATA wsaData; // holds Winsock data
     SOCKET serverSocket, clientSocket; // server and client socket descriptors
