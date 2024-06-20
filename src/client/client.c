@@ -9,7 +9,8 @@ const char *validCommands[] = {
         "/get",     // fetch a file from a server
         "/?"        // request command help
     };
-    int validCommandsCount = sizeof(validCommands) / sizeof(validCommands[0]);
+
+const int validCommandsCount = sizeof(validCommands) / sizeof(validCommands[0]);
 
 // function to check if the user input is a valid command
 int isValidCommand(char *input) {
@@ -36,6 +37,11 @@ int main() {
     int recv_size; // size of received data
 
     fgets(userInput, sizeof(userInput), stdin);
+
+    if (strncmp(userInput, "/join", 5) != 0) {
+        puts("invalid command");
+        return 1;
+    }
 
     // initialize winsock
     WSAStartup(MAKEWORD(2,2), &wsaData); // request version 2.2 of winsock
