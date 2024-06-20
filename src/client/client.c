@@ -12,6 +12,14 @@ const Command commands[] = {
 
 const int commandsCount = sizeof(commands) / sizeof(commands[0]);
 
+char *parseCommandContent (char *input) {
+    char *content = strchr(input, ' ');
+    if (content != NULL) {
+        return content + 1;
+    }
+    return NULL;
+}
+
 int main() {
     char userInput[DEFAULT_BUFLEN]; // user input buffer
     WSADATA wsaData; // holds Winsock data
@@ -22,10 +30,9 @@ int main() {
 
     fgets(userInput, sizeof(userInput), stdin);
 
-    if (strncmp(userInput, "/join", 5) != 0) {
-        puts("invalid command");
-        return 1;
-    }
+    parseCommandContent(userInput);
+    
+    printf("Command content: %s\n", parseCommandContent(userInput));
 
     // initialize winsock
     WSAStartup(MAKEWORD(2,2), &wsaData); // request version 2.2 of winsock

@@ -34,5 +34,6 @@ typedef struct Command {
 extern const Command commands[];
 
 // function prototypes
+char *parseCommandContent (char *input);
 
 #endif // CLIENT_H
