@@ -46,18 +46,11 @@ int main() {
         replyLength = recv(client, serverReply, DEFAULT_BUFLEN, 0);
 
         if (replyLength == SOCKET_ERROR) {
-            int errorCode = WSAGetLastError();
-            if (errorCode == WSAECONNABORTED) {
-                printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
-                break; // Exit loop assuming disconnection is intentional
-            } else {
-                fprintf(stderr, "recv failed with error code : %d", errorCode);
-            }
+            break; // exit loop if receiving fails
         } else if (replyLength == 0) {
-            printf("Server connection closed.\n");
-            break; // Exit loop if server closed the connection
+            break; // exit loop if server closed the connection
         } else {
-            // Null-terminate the received data before printing
+            // null-terminate the received data before printing
             serverReply[replyLength] = '\0';
             printf("%s\n", serverReply);
         }

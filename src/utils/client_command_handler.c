@@ -25,6 +25,12 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
 
 // function to initialize socket connection based on provided ip and port
 void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port) {
+    // close the socket if it is already open
+    if (*sock != INVALID_SOCKET) {
+        closesocket(*sock);
+        WSACleanup();
+    }
+
     // start winsock api
     if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
         fprintf(stderr, "failed to initialize winsock. error code : %d", WSAGetLastError());
@@ -56,7 +62,6 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
 
 void sendMessageToServer(SOCKET *sock, char *message) {
     if (*sock == INVALID_SOCKET || message == NULL) {
-        fprintf(stderr, "Invalid socket or message is NULL\n");
         return;
     }
 

@@ -23,9 +23,6 @@ int main() {
     // listen for incoming connections
     listen(serverSocket, 3);
 
-    // waiting for incoming connections
-    puts("waiting for incoming connections...");
-
     c = sizeof(SOCKADDR_IN);
 
     // accept a connection from a client

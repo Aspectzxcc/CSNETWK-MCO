@@ -14,7 +14,11 @@ DWORD WINAPI client_handler(void* data) {
     // Receive message from client
     int bytesRead = recv(clientSocket, clientMessage, messageLength, 0);
 
-    if (bytesRead > 0) {
+    if (bytesRead == SOCKET_ERROR) {
+        fprintf(stderr, "recv failed with error code : %d", WSAGetLastError());
+    } else if (bytesRead == 0) {
+        printf("Client disconnected\n");
+    } else {
         clientMessage[bytesRead] = '\0'; // Null-terminate the received data
         printf("Message received from client: %s\n", clientMessage);
 
@@ -35,14 +39,8 @@ DWORD WINAPI client_handler(void* data) {
 
         // Handle the command based on the extracted command and parameters
         handleCommand(clientSocket, command->command, parameters);
-    } else if (bytesRead == 0) {
-        printf("Client disconnected\n");
-    } else {
-        printf("recv failed with error: %d\n", WSAGetLastError());
     }
-
-    // close the client socket after sending and receiving the message
-    closesocket(clientSocket);
+    
     return 0;
 }
 
