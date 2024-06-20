@@ -4,55 +4,43 @@
 
 The CSNETWK-MCO File Exchange System is designed as the final project for our CSNETWK course. It facilitates the storage, sharing, and retrieval of files among clients through a single server, utilizing either TCP or UDP protocols. The system is divided into two main applications: the server application and the client application.
 
-## Project Roadmap
+## Current State of the Project
 
-### 1. Understand the Basics
+As of now, the project has successfully implemented the foundational aspects of both the server and client applications using TCP protocol. The server can initialize sockets, bind to an address and port, and listen for connections. The server still lacks handling of the commands and no commands are being sent to the server from the client yet as the client command execution is still being developed.
 
-- **C Socket Programming:** Learn to create, bind, listen, accept, and manage sockets for data transmission over TCP/UDP.
-- **Client-Server Model:** Understand the fundamentals of client-server architecture with a focus on TCP and UDP protocols.
+### Project Structure and Dependencies
 
-### 2. Plan Your Project
+The project is organized into several key directories to ensure modularity and ease of navigation:
 
-- **Project Structure:** Decide on directory structure, naming conventions, and code organization for modularity and reusability.
-- **Protocol Selection:** Choose between TCP (reliable, connection-oriented) and UDP (unreliable, connectionless) based on project requirements.
+- `src/`: Contains the source code for the project, further organized into subdirectories for clarity:
+  - `client/`: Houses the client application source code (`client.c`), responsible for interfacing with the user and communicating with the server.
+  - `server/`: Contains the server application source code (`server.c`), which listens for and handles requests from clients.
+  - `utils/`: Includes utility functions and common code used by both the client and server applications, such as file handling and network utilities.
+- `headers/`: Includes header files such as `server.h` and `client.h`, which define necessary structures and prototypes for the server and client applications, respectively.
+- `.gitignore`: Specifies intentionally untracked files to ignore.
 
-### 3. Implement Server Application
+Dependencies include:
 
-- **Socket Initialization:** Use `socket()` to create a socket.
-- **Bind Socket:** Bind the socket to an address and port with `bind()`.
-- **Listen for Connections:** For TCP, use `listen()` and `accept()` to manage incoming connections.
-- **Client Request Handling:** Implement logic to process commands like `/join`, `/leave`, `/register`, `/store`, `/dir`, `/get`, and `/?`.
-- **Data Transmission:** Utilize `send()` and `recv()` for TCP, or `sendto()` and `recvfrom()` for UDP.
-- **Concurrency:** Employ `fork()`, threads (via pthread library), or select/poll for simultaneous client handling.
-- **File Management:** Develop functions for file storage, retrieval, and listing.
+- **Winsock2 Library**: For socket programming on Windows.
+- **C Standard Library**: Utilized for basic input/output operations, string manipulation, and memory management.
 
-### 4. Implement Client Application
+### Development and Testing
 
-- **User Interface:** Create a simple text-based interface for command input and message display.
-- **Server Connection:** Use `connect()` for TCP or `sendto()` for UDP to interact with the server.
-- **Input Handling:** Parse user commands and communicate with the server accordingly.
-- **Server Response Handling:** Display server responses based on command outcomes.
+#### Development Tools
 
-### 5. Testing and Debugging
+- **Visual Studio Code**: Editor used for code editing and version control.
+- **GCC Compiler**: For compiling the C code. [MinGW](https://sourceforge.net/projects/mingw/).
 
-- **Unit Testing:** Test individual functions, focusing on file operations and protocol behaviors.
-- **Integration Testing:** Ensure the client and server applications function together as expected.
-- **Debugging:** Utilize debugging tools like `gdb` to identify and resolve issues.
+### Running the Applications
 
-### 6. Documentation and Submission
+To set up the applications, open multiple terminals - one for the server and additional ones for each client. Navigate to the server directory in one terminal and to the client directory in others. Run the designated batch files for compilation and execution in each terminal individually:
 
-- **Code Documentation:** Thoroughly comment your code to explain logic and flow.
-- **User Guide:** Provide a guide on running the server and client applications.
-- **Submission Package:** Prepare your project for submission, including a video demonstration.
-
-### 7. Bonus Features (Optional)
-
-- **GUI:** Add a graphical user interface for the client application using GTK or Qt for C.
-- **Group Messaging:** Implement group messaging or file sharing among clients.
+- For the server: Execute `compile_server.bat` to compile and then run the server application.
+- For each client: Execute `compile_client.bat` to compile and then run the client application.
 
 ## Resources
 
-- **C Socket Programming Tutorials:** Explore online resources for a deeper understanding of socket programming in C.
-- **C Standard Library Documentation:** Familiarize with the C standard library, especially socket, thread, and file handling functions.
+- **Winsock2 Documentation**: Essential for understanding Windows socket programming. [Winsock2 Documentation](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/).
+- **C Standard Library**: For a comprehensive overview of available functions and their uses.
 
-This roadmap outlines a structured approach to developing the File Exchange System. Adjustments may be necessary as the project progresses and new challenges arise.
+This README provides a snapshot of the project's current state, dependencies, and how to run the applications. Future updates will include more detailed instructions on using the system and additional features as they are developed.
