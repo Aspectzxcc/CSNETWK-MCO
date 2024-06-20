@@ -1,9 +1,6 @@
 #include "client.h"
 
-// function to check if the user input is a valid command
-int isValidCommand(char *input) {
-    // list of valid commands as per the specifications
-    const char *validCommands[] = {
+const char *validCommands[] = {
         "/join",    // connect to the server application
         "/leave",   // disconnect from the server application
         "/register",// register a unique handle or alias
@@ -14,8 +11,10 @@ int isValidCommand(char *input) {
     };
     int validCommandsCount = sizeof(validCommands) / sizeof(validCommands[0]);
 
+// function to check if the user input is a valid command
+int isValidCommand(char *input) {
     // extract the command from the input (first word)
-    char command[100];
+    char command[DEFAULT_BUFLEN];
     sscanf(input, "%s", command);
 
     // check if the extracted command is in the list of valid commands
@@ -29,11 +28,14 @@ int isValidCommand(char *input) {
 }
 
 int main() {
-    WSADATA wsaData;
-    SOCKET s;
-    struct sockaddr_in server;
-    char *message, server_reply[2000];
-    int recv_size;
+    char userInput[DEFAULT_BUFLEN]; // user input buffer
+    WSADATA wsaData; // holds Winsock data
+    SOCKET s; // client socket descriptor
+    struct sockaddr_in server; // server address structure
+    char *message, server_reply[DEFAULT_BUFLEN]; // message to send and server reply buffer
+    int recv_size; // size of received data
+
+    fgets(userInput, sizeof(userInput), stdin);
 
     // initialize winsock
     WSAStartup(MAKEWORD(2,2), &wsaData); // request version 2.2 of winsock
