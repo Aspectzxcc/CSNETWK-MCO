@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../headers/commands.h"
-#include "../../headers/command_handler.h"
+#include "../../headers/client_command_handler.h"
 
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
@@ -70,7 +70,7 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Co
     if (strcmp(command->command, COMMAND_JOIN) == 0) {
         initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
     } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
-        return 1; // example return value for leave command
+        return 1; // indicate disconnection
     }
     // additional command checks can be implemented here
     return 0; // return 0 to indicate successful execution
