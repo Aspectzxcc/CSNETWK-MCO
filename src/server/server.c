@@ -44,31 +44,31 @@ DWORD WINAPI client_handler(void* data) {
 }
 
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters) {
-    if (strcmp(command, "JOIN") == 0) {
+    if (strcmp(command, COMMAND_JOIN) == 0) {
         // Assuming JOIN command requires no parameters for this context
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0);
-    } else if (strcmp(command, "LEAVE") == 0) {
+    } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // Assuming LEAVE command signifies disconnection
         send(clientSocket, MESSAGE_SUCCESSFUL_DISCONNECTION, strlen(MESSAGE_SUCCESSFUL_DISCONNECTION), 0);
         closesocket(clientSocket); // Close the client socket to properly disconnect
-    } else if (strcmp(command, "REGISTER") == 0) {
+    } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // Assuming REGISTER command takes one parameter: the user's handle or alias
         char response[DEFAULT_BUFLEN];
         sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, parameters[0]);
         send(clientSocket, response, strlen(response), 0);
-    } else if (strcmp(command, "UPLOAD") == 0) {
-        // Assuming UPLOAD command takes three parameters: user's handle, timestamp, and filename
+    } else if (strcmp(command, COMMAND_STORE) == 0) {
+        // Assuming STORE command takes three parameters: user's handle, timestamp, and filename
         char response[DEFAULT_BUFLEN]; 
         sprintf(response, MESSAGE_SUCCESSFUL_FILE_UPLOAD, parameters[0], parameters[1], parameters[2]);
         send(clientSocket, response, strlen(response), 0);
-    } else if (strcmp(command, "LIST") == 0) {
+    } else if (strcmp(command, COMMAND_DIR) == 0) {
         // Assuming LIST command requires no parameters and returns a directory listing
         char directoryListing[] = "File1.txt\nFile2.txt\nFile3.txt"; // Example directory listing
         char response[DEFAULT_BUFLEN];
         sprintf(response, MESSAGE_SUCCESSFUL_DIR_LIST, directoryListing);
         send(clientSocket, response, strlen(response), 0);
     } else {
-        // Handle unknown command or add more commands as needed
+        send(clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0);
     }
 }
 
