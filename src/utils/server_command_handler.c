@@ -8,24 +8,25 @@ DWORD WINAPI client_handler(void* data) {
     SOCKET clientSocket = *(SOCKET*)data;
 
     // buffer to store the message received from the client
-    char recvbuf[DEFAULT_BUFLEN];
-    int recvbuflen = DEFAULT_BUFLEN;
+    char clientMessage[DEFAULT_BUFLEN];
+    int messageLength = DEFAULT_BUFLEN;
 
     // Receive message from client
-    int bytesRead = recv(clientSocket, recvbuf, recvbuflen, 0);
+    int bytesRead = recv(clientSocket, clientMessage, messageLength, 0);
+
     if (bytesRead > 0) {
-        recvbuf[bytesRead] = '\0'; // Null-terminate the received data
-        printf("Message received from client: %s\n", recvbuf);
+        clientMessage[bytesRead] = '\0'; // Null-terminate the received data
+        printf("Message received from client: %s\n", clientMessage);
 
         // Extract command and parameters from the received message
-        const Command *command = getCommand(recvbuf);
+        const Command *command = getCommand(clientMessage);
 
         if (command == NULL) {
             printf(ERROR_COMMAND_NOT_FOUND "\n");
             return 0;
         }
 
-        char **parameters = parseCommandParameters(command, recvbuf);
+        char **parameters = parseCommandParameters(command, clientMessage);
 
         if (parameters == NULL) {
             printf(ERROR_INVALID_PARAMETERS "\n");
@@ -35,7 +36,7 @@ DWORD WINAPI client_handler(void* data) {
         // Handle the command based on the extracted command and parameters
         handleCommand(clientSocket, command->command, parameters);
     } else if (bytesRead == 0) {
-        printf(ERROR_CONNECTION_FAILED "\n");
+        printf("Client disconnected\n");
     } else {
         printf("recv failed with error: %d\n", WSAGetLastError());
     }
@@ -47,11 +48,9 @@ DWORD WINAPI client_handler(void* data) {
 
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters) {
     if (strcmp(command, COMMAND_JOIN) == 0) {
-        // Assuming JOIN command requires no parameters for this context
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
-        // Assuming LEAVE command signifies disconnection
-        send(clientSocket, MESSAGE_SUCCESSFUL_DISCONNECTION, strlen(MESSAGE_SUCCESSFUL_DISCONNECTION), 0);
+        printf("Client disconnected\n");
         closesocket(clientSocket); // Close the client socket to properly disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // Assuming REGISTER command takes one parameter: the user's handle or alias

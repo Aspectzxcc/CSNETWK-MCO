@@ -2,7 +2,7 @@
 #define COMMAND_PARSER_H
 
 // function prototypes
-int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Command *command, char **parameters, char *message);
+int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message);
 void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port);
 void sendMessageToServer(SOCKET *sock, char *message);
 

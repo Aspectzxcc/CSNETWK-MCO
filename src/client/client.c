@@ -9,8 +9,9 @@ int main() {
     WSADATA wsaData; // holds Winsock data
     SOCKET client; // client socket descriptor
     SOCKADDR_IN server; // server address structure
-    char *message, server_reply[DEFAULT_BUFLEN]; // message to send and server reply buffer
-    int recv_size; // size of received data
+
+    char serverReply[DEFAULT_BUFLEN]; // server reply buffer
+    int replyLength; // size of received data
 
     // unlimited loop to get user input
     while (1) {
@@ -41,6 +42,25 @@ int main() {
 
         // execute the command and pass in the socket, Winsock data, server address, command, and parameters
         breakLoop = executeCommand(&client, &wsaData, &server, command->command, parameters, userInput);
+
+        replyLength = recv(client, serverReply, DEFAULT_BUFLEN, 0);
+
+        if (replyLength == SOCKET_ERROR) {
+            int errorCode = WSAGetLastError();
+            if (errorCode == WSAECONNABORTED) {
+                printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
+                break; // Exit loop assuming disconnection is intentional
+            } else {
+                fprintf(stderr, "recv failed with error code : %d", errorCode);
+            }
+        } else if (replyLength == 0) {
+            printf("Server connection closed.\n");
+            break; // Exit loop if server closed the connection
+        } else {
+            // Null-terminate the received data before printing
+            serverReply[replyLength] = '\0';
+            printf("%s\n", serverReply);
+        }
 
         if (breakLoop) {
             break;
