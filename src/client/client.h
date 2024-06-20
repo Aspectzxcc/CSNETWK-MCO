@@ -29,6 +29,7 @@
 typedef struct Command {
     const char* command;
     const char* errorMessage;
+    const int parameterCount;
 } Command;
 
 extern const Command commands[];

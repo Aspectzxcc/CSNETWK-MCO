@@ -1,13 +1,13 @@
 #include "client.h"
 
 const Command commands[] = {
-    {COMMAND_JOIN, ERROR_CONNECTION_FAILED},
-    {COMMAND_LEAVE, ERROR_DISCONNECT_FAILED},
-    {COMMAND_REGISTER, ERROR_REGISTRATION_FAILED},
-    {COMMAND_STORE, ERROR_FILE_NOT_FOUND},
-    {COMMAND_DIR, ERROR_FILE_NOT_FOUND_SERVER},
-    {COMMAND_GET, ERROR_FILE_NOT_FOUND_SERVER},
-    {COMMAND_HELP, ERROR_COMMAND_NOT_FOUND}
+    {COMMAND_JOIN, ERROR_CONNECTION_FAILED, 2}, // /join <server_ip_add> <port>
+    {COMMAND_LEAVE, ERROR_DISCONNECT_FAILED, 0}, // /leave
+    {COMMAND_REGISTER, ERROR_REGISTRATION_FAILED, 1}, // /register <handle>
+    {COMMAND_STORE, ERROR_FILE_NOT_FOUND, 1}, // /store <filename>
+    {COMMAND_DIR, ERROR_FILE_NOT_FOUND_SERVER, 0}, // /dir
+    {COMMAND_GET, ERROR_FILE_NOT_FOUND_SERVER, 1}, // /get <filename>
+    {COMMAND_HELP, ERROR_COMMAND_NOT_FOUND, 0} // /?
 };
 
 const int commandsCount = sizeof(commands) / sizeof(commands[0]);
@@ -50,17 +50,6 @@ int main() {
         puts("connect error"); // if connection fails, print error
         return 1;
     }
-
-    puts("connected"); // print success message
-
-    // receive a reply from the server
-    if((recv_size = recv(s, server_reply, 2000, 0)) == SOCKET_ERROR) {
-        puts("recv failed"); // if receiving fails, print error
-    }
-
-    puts("reply received\n"); // print success message
-    server_reply[recv_size] = '\0'; // null-terminate the received data
-    puts(server_reply); // print the server reply
 
     // cleanup
     closesocket(s); // close the socket
