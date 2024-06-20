@@ -33,7 +33,17 @@ int main() {
     char *message, server_reply[DEFAULT_BUFLEN]; // message to send and server reply buffer
     int recv_size; // size of received data
 
-    fgets(userInput, sizeof(userInput), stdin);
+    while (1) {
+        fgets(userInput, sizeof(userInput), stdin); // get user input
+        userInput[strcspn(userInput, "\n")] = 0; // remove newline character
+
+        char *command = getCommand(userInput); // get the command from the user input
+
+        if (strcmp(command, COMMAND_LEAVE) == 0) {
+            printf("Connection closed. Thank you!\n");
+            return 1;
+        }
+    }
     
     printf("Command content: %s\n", parseCommandContent(userInput));
 
