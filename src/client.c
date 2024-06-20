@@ -1,9 +1,34 @@
-#include <winsock2.h>
-#include <stdio.h>
+#include "client.h"
 
-#pragma comment(lib, "ws2_32.lib") // link with Windows Socket Library
+// function to check if the user input is a valid command
+int isValidCommand(char *input) {
+    // list of valid commands as per the specifications
+    const char *validCommands[] = {
+        "/join",    // connect to the server application
+        "/leave",   // disconnect from the server application
+        "/register",// register a unique handle or alias
+        "/store",   // send file to server
+        "/dir",     // request directory file list from a server
+        "/get",     // fetch a file from a server
+        "/?"        // request command help
+    };
+    int validCommandsCount = sizeof(validCommands) / sizeof(validCommands[0]);
 
-int main(int argc, char *argv[]) {
+    // extract the command from the input (first word)
+    char command[100];
+    sscanf(input, "%s", command);
+
+    // check if the extracted command is in the list of valid commands
+    for (int i = 0; i < validCommandsCount; i++) {
+        if (strcmp(command, validCommands[i]) == 0) {
+            return 1; // command is valid
+        }
+    }
+
+    return 0; // command is not valid
+}
+
+int main() {
     WSADATA wsaData;
     SOCKET s;
     struct sockaddr_in server;

@@ -1,2 +1,5 @@
 # ignore compiled executables
 *.exe
+
+# ignore .vscsode
+.vscode

@@ -1,14 +1,10 @@
-#include <winsock2.h>
-#include <stdio.h>
-#include <windows.h>
-
-// link with the Windows Socket Library
-#pragma comment(lib, "ws2_32.lib")
+#include "server.h"
 
 // function to handle client connections
 DWORD WINAPI client_handler(void* data) {
     // cast the void pointer back to a socket type
     SOCKET clientSocket = *(SOCKET*)data;
+
     // message to send to the client
     char* message = "hello client";
 
@@ -45,7 +41,9 @@ int main() {
 
     // waiting for incoming connections
     puts("waiting for incoming connections...");
+
     c = sizeof(struct sockaddr_in);
+
     // accept a connection from a client
     while((clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c)) != INVALID_SOCKET) {
         puts("connection accepted");
