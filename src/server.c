@@ -1,48 +1,74 @@
 #include <winsock2.h>
 #include <stdio.h>
+#include <windows.h>
 
-#pragma comment(lib, "ws2_32.lib") // link with Windows Socket Library
+// link with the Windows Socket Library
+#pragma comment(lib, "ws2_32.lib")
+
+// function to handle client connections
+DWORD WINAPI client_handler(void* data) {
+    // cast the void pointer back to a socket type
+    SOCKET clientSocket = *(SOCKET*)data;
+    // message to send to the client
+    char* message = "hello client";
+
+    // send the message to the client
+    send(clientSocket, message, strlen(message), 0);
+
+    // close the client socket after sending the message
+    closesocket(clientSocket);
+    return 0;
+}
 
 int main() {
-    WSADATA wsaData;
-    SOCKET serverSocket, clientSocket;
-    struct sockaddr_in server, client;
-    int c;
+    WSADATA wsaData; // holds Winsock data
+    SOCKET serverSocket, clientSocket; // server and client socket descriptors
+    struct sockaddr_in server, client; // server and client address structures
+    int c; // size of the address structure
 
-    // initialize winsock library for use
-    WSAStartup(MAKEWORD(2,2), &wsaData); // request version 2.2 of Winsock on the system
+    // initialize Winsock
+    WSAStartup(MAKEWORD(2,2), &wsaData);
 
-    // create a new socket for communication
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0); // specify the IPv4 address family, TCP type socket
+    // create a socket for the server
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // set up the sockaddr_in structure for the server
-    server.sin_family = AF_INET; // use IPv4 addresses
+    // configure server address structure
+    server.sin_family = AF_INET; // internet protocol v4 addresses
     server.sin_addr.s_addr = INADDR_ANY; // accept connections to all the IPs of the machine
-    server.sin_port = htons(12345); // specify port number, converting host byte order to network byte order
+    server.sin_port = htons(12345); // port number
 
-    // bind the socket to the local IP address and port
+    // bind the socket to the server address
     bind(serverSocket, (struct sockaddr *)&server, sizeof(server));
 
-    // listen on the socket for incoming connections
-    listen(serverSocket, 3); // set the maximum number of queued connections
+    // listen for incoming connections
+    listen(serverSocket, 3);
 
-    // wait for incoming connections
+    // waiting for incoming connections
     puts("waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
-    clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c); // accept a connection
-    if (clientSocket == INVALID_SOCKET) {
-        printf("accept failed with error code : %d", WSAGetLastError()); // if failed, print error
+    // accept a connection from a client
+    while((clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c)) != INVALID_SOCKET) {
+        puts("connection accepted");
+
+        // create a thread to handle the client
+        HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clientSocket, 0, NULL);
+        if (thread == NULL) {
+            // if thread creation fails, print the error
+            printf("CreateThread failed with error code : %d", GetLastError());
+        } else {
+            // close the thread handle as it's not needed anymore
+            CloseHandle(thread);
+        }
     }
 
-    puts("connection accepted");
+    // if accepting a client fails, print the error
+    if (clientSocket == INVALID_SOCKET) {
+        printf("accept failed with error code : %d", WSAGetLastError());
+    }
 
-    // send a welcome message to the client
-    char *message = "hello client";
-    send(clientSocket, message, strlen(message), 0); // send the message to the client
-
-    // close the socket and clean up
+    // cleanup: close the server socket and deinitialize Winsock
     closesocket(serverSocket);
-    WSACleanup(); // clean up Winsock
+    WSACleanup();
 
     return 0;
 }
