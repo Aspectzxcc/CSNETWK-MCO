@@ -1,7 +1,7 @@
 #include <winsock2.h>
 #include <stdio.h>
 
-#pragma comment(lib, "ws2_32.lib") // Link with ws2_32.lib
+#pragma comment(lib, "ws2_32.lib") // link with ws2_32.lib
 
 int main() {
     WSADATA wsaData;
@@ -9,24 +9,24 @@ int main() {
     struct sockaddr_in server, client;
     int c;
 
-    // Initialize Winsock
+    // init winsock library
     WSAStartup(MAKEWORD(2,2), &wsaData);
 
-    // Create socket
+    // create socket
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // Prepare the sockaddr_in structure
+    // prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(12345);
 
-    // Bind
+    // bind the socket
     bind(serverSocket, (struct sockaddr *)&server, sizeof(server));
 
-    // Listen
+    // listen for incoming connections
     listen(serverSocket, 3);
 
-    // Accept and incoming connection
+    // accept incoming connection
     puts("Waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
     clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c);
@@ -36,11 +36,11 @@ int main() {
 
     puts("Connection accepted");
 
-    // Communicate with client
+    // communicate with client
     char *message = "Hello Client";
     send(clientSocket, message, strlen(message), 0);
 
-    // Cleanup
+    // disconnect and cleanup
     closesocket(serverSocket);
     WSACleanup();
 
