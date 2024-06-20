@@ -1,9 +1,9 @@
 #ifndef COMMAND_PARSER_H
 #define COMMAND_PARSER_H
 
-#include "client.h" // Assuming this includes the definition of Command and other necessary includes
+#include "client.h" // include client header file
 
-// Function prototypes
+// function prototypes
 const Command *getCommand(char *input);
 char **parseCommandParameters(const Command *command, char *input);
 

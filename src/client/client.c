@@ -1,32 +1,6 @@
 #include "../../headers/client.h"
 #include "../../headers/command_parser.h"
 
-const Command commands[] = {
-    {COMMAND_JOIN, 2}, // /join <server_ip_add> <port>
-    {COMMAND_LEAVE, 0}, // /leave
-    {COMMAND_REGISTER, 1}, // /register <handle>
-    {COMMAND_STORE, 1}, // /store <filename>
-    {COMMAND_DIR, 0}, // /dir
-    {COMMAND_GET, 1}, // /get <filename>
-    {COMMAND_HELP, 0} // /?
-};
-
-const int commandsCount = sizeof(commands) / sizeof(commands[0]); // number of commands
-
-// return the command struct from the input
-const Command *getCommand(char *input) {
-    char command[DEFAULT_BUFLEN]; // command buffer
-    sscanf(input, "%s", command); // extract the command from the input
-
-    for (int i = 0; i < commandsCount; i++) {
-        if (strcmp(command, commands[i].command) == 0) {
-            return &commands[i]; // return the command
-        }
-    }
-
-    return NULL; // command not found
-}
-
 // execute the command
 int executeCommand(const Command *command, char **parameters) {
     if (strcmp(command->command, COMMAND_JOIN) == 0) {

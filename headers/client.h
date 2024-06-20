@@ -38,6 +38,7 @@ typedef struct Command {
 } Command;
 
 extern const Command commands[];
+extern const int commandsCount;
 
 // function prototypes
 int executeCommand(const Command *command, char **parameters);
