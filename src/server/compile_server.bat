@@ -1,5 +1,5 @@
 @echo off
-gcc server.c -o server -lws2_32
+gcc server.c ../utils/server_command_handler.c ../utils/commands.c -o server -lws2_32
 if %ERRORLEVEL% NEQ 0 (
     echo Compilation failed.
     pause
