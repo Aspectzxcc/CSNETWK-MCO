@@ -36,9 +36,9 @@ char **parseCommandParameters(const Command *command, char *input) {
     char *token = strtok(input, " "); // skip command itself
     int index = 0;
     while (token != NULL && index < command->parameterCount) {
-        token = strtok(NULL, " "); // get the next token
+        token = strtok(NULL, " "); // get next token, NULL to continue from previous position
         if (token != NULL) {
-            parameters[index] = strdup(token); // duplicate the token to store in the array
+            parameters[index] = strdup(token); // duplicate token stored in array to prevent token reference from being overwritten
             if (parameters[index] == NULL) {
                 fprintf(stderr, "Memory allocation failed for parameter %d\n", index);
                 // free previously allocated memory before returning
@@ -52,8 +52,7 @@ char **parseCommandParameters(const Command *command, char *input) {
         }
     }
 
-    if (index != command->parameterCount) {
-        fprintf(stderr, ERROR_INVALID_PARAMETERS "\n");
+    if (index != command->parameterCount) { // if number of parameters do not match
         // free allocated memory before returning
         for (int i = 0; i < index; i++) {
             free(parameters[i]);
@@ -66,6 +65,8 @@ char **parseCommandParameters(const Command *command, char *input) {
 }
 
 int main() {
+    const Command *command; // command structure
+    char **parameters; // command parameters
     char userInput[DEFAULT_BUFLEN]; // user input buffer
     WSADATA wsaData; // holds Winsock data
     SOCKET s; // client socket descriptor
@@ -77,14 +78,15 @@ int main() {
         fgets(userInput, sizeof(userInput), stdin); // get user input
         userInput[strcspn(userInput, "\n")] = 0; // remove newline character
 
-        const Command *command = getCommand(userInput); // get the command from the user input
+        command = getCommand(userInput); // get the command from the user input
 
+        // check if the command is valid
         if (command == NULL) {
             fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
             continue;
         }
 
-        char **parameters = malloc(command->parameterCount * sizeof(char *));
+        parameters = malloc(command->parameterCount * sizeof(char *));
 
         if (parameters == NULL) {
             fprintf(stderr, "Failed to allocate memory for parameters\n");
@@ -94,6 +96,7 @@ int main() {
         parameters = parseCommandParameters(command, userInput);
 
         if (parameters == NULL) {
+            fprintf(stderr, ERROR_INVALID_PARAMETERS "\n");
             continue;
         }
 
