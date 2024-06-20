@@ -4,6 +4,8 @@
 #include "../../headers/commands.h"
 #include "../../headers/command_handler.h"
 
+#define DEFAULT_BUFLEN 1024 // default buffer length
+
 const Command commands[] = {
     {COMMAND_JOIN, 2}, // /join <server_ip_add> <port>
     {COMMAND_LEAVE, 0}, // /leave
