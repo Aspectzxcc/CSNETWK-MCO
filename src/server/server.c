@@ -50,7 +50,7 @@ DWORD WINAPI client_handler(void* data) {
 int main() {
     WSADATA wsaData; // holds Winsock data
     SOCKET serverSocket, clientSocket; // server and client socket descriptors
-    struct sockaddr_in server, client; // server and client address structures
+    SOCKADDR_IN server, client; // server and client address structures
     int c; // size of the address structure
 
     // initialize Winsock
@@ -73,7 +73,7 @@ int main() {
     // waiting for incoming connections
     puts("waiting for incoming connections...");
 
-    c = sizeof(struct sockaddr_in);
+    c = sizeof(SOCKADDR_IN);
 
     // accept a connection from a client
     while((clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c)) != INVALID_SOCKET) {
