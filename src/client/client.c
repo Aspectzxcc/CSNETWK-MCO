@@ -1,32 +1,16 @@
 #include "client.h"
 
-const char *validCommands[] = {
-        "/join",    // connect to the server application
-        "/leave",   // disconnect from the server application
-        "/register",// register a unique handle or alias
-        "/store",   // send file to server
-        "/dir",     // request directory file list from a server
-        "/get",     // fetch a file from a server
-        "/?"        // request command help
-    };
+const Command commands[] = {
+    {COMMAND_JOIN, ERROR_CONNECTION_FAILED},
+    {COMMAND_LEAVE, ERROR_DISCONNECT_FAILED},
+    {COMMAND_REGISTER, ERROR_REGISTRATION_FAILED},
+    {COMMAND_STORE, ERROR_FILE_NOT_FOUND},
+    {COMMAND_DIR, ERROR_FILE_NOT_FOUND_SERVER},
+    {COMMAND_GET, ERROR_FILE_NOT_FOUND_SERVER},
+    {COMMAND_HELP, ERROR_COMMAND_NOT_FOUND}
+};
 
-const int validCommandsCount = sizeof(validCommands) / sizeof(validCommands[0]);
-
-// function to check if the user input is a valid command
-int isValidCommand(char *input) {
-    // extract the command from the input (first word)
-    char command[DEFAULT_BUFLEN];
-    sscanf(input, "%s", command);
-
-    // check if the extracted command is in the list of valid commands
-    for (int i = 0; i < validCommandsCount; i++) {
-        if (strcmp(command, validCommands[i]) == 0) {
-            return 1; // command is valid
-        }
-    }
-
-    return 0; // command is not valid
-}
+const int commandsCount = sizeof(commands) / sizeof(commands[0]);
 
 int main() {
     char userInput[DEFAULT_BUFLEN]; // user input buffer
