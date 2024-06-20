@@ -1,7 +1,9 @@
 #ifndef COMMAND_PARSER_H
 #define COMMAND_PARSER_H
 
-#include "client.h" // include client header file
+#include "commands.h" // commands header file
+
+#define DEFAULT_BUFLEN 1024 // default buffer length
 
 // function prototypes
 const Command *getCommand(char *input);

@@ -4,6 +4,7 @@
 #include <winsock2.h> // windows socket library
 #include <windows.h> // windows library
 #include <stdio.h>
+#include "commands.h" // commands header file
 
 // link with winsock library
 #pragma comment(lib, "ws2_32.lib")

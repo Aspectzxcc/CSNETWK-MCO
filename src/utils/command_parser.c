@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "../../headers/command_parser.h"
 
 const Command commands[] = {
