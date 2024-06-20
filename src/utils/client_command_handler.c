@@ -8,12 +8,12 @@
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
 // function to execute the identified command with given parameters
-int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const Command *command, char **parameters, char *message) {
+int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
     // execute command based on its type
-    if (strcmp(command->command, COMMAND_JOIN) == 0) {
+    if (strcmp(command, COMMAND_JOIN) == 0) {
         initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
         sendMessageToServer(sock, message);
-    } else if (strcmp(command->command, COMMAND_LEAVE) == 0) {
+    } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         sendMessageToServer(sock, message);
         return 1; // indicate disconnection
     } else {
