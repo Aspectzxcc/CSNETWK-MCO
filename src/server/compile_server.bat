@@ -5,5 +5,5 @@ if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b %ERRORLEVEL%
 )
-echo Compilation successful. Executable created: client.exe
+echo Compilation successful. Executable created: server.exe
 pause
