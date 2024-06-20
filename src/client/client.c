@@ -1,4 +1,4 @@
-#include "client.h"
+#include "../../headers/client.h"
 
 const Command commands[] = {
     {COMMAND_JOIN, 2}, // /join <server_ip_add> <port>

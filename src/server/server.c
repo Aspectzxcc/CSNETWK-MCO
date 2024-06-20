@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../../headers/server.h"
 
 // function to handle client connections
 DWORD WINAPI client_handler(void* data) {
