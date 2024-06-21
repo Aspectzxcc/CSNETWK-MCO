@@ -9,6 +9,11 @@
 
 // executes the specified command with the provided parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
+    // check if not connected and the command is not join so that messages cannot be sent
+    if (strcmp(command,COMMAND_JOIN) != 0 && !connectionStatus) {
+        return 0;
+    }
+
     // determine and execute the command based on its identifier
     if (strcmp(command, COMMAND_JOIN) == 0) {
         // for join command, initialize socket connection and send message
@@ -16,9 +21,6 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // if the client is not connected and tries to leave, return 0
-        if (!connectionStatus) {
-            return 0;
-        }
         sendMessageToServer(sock, message);
         return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
