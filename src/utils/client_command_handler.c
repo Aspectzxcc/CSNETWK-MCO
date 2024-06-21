@@ -15,19 +15,57 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
-        // for leave command, just send the message to server
+        // if the client is not connected and tries to leave, return 0
+        if (*sock == 0) {
+            return 0; 
+        }
         sendMessageToServer(sock, message);
         return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
         sendFileToServer(sock, parameters[0]);
+    } else if (strcmp(command, COMMAND_GET) == 0) 
+    {
+        // for get command, send the message to the server
+        sendMessageToServer(sock, message);
+        receiveFileFromServer(sock, parameters[0]);
     } else {
-        // for any other command, just send the message to server
+        // for other commands, just send the message to the server
         sendMessageToServer(sock, message);
     }
     // future commands can be added here
     return 0; // indicate no disconnection by default
+}
+
+void handleServerResponse(SOCKET *sock, const char *command, int disconnect) {
+    char serverReply[DEFAULT_BUFLEN]; // server reply buffer
+    int replyLength; // size of received data
+
+    if (strcmp(command, COMMAND_LEAVE) == 0) {
+        if (disconnect) {
+            printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
+        } else {
+            fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
+        }
+        return;
+    }
+
+    if (strcmp(command, COMMAND_GET) == 0) {
+        return;
+    }
+
+    replyLength = recv(*sock, serverReply, DEFAULT_BUFLEN, 0);
+
+    if (replyLength == SOCKET_ERROR) {
+        fprintf(stderr, "recv failed with error code : %d", WSAGetLastError());
+    } else if (replyLength == 0) {
+        printf("Server closed the connection\n");
+    } else {
+        // null-terminate the received data before printing
+        serverReply[replyLength] = '\0';
+        printf("%s\n", serverReply);
+    }
 }
 
 // initializes a socket connection using the provided ip address and port
@@ -122,4 +160,51 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     }
 
     fclose(file);
+}
+
+void receiveFileFromServer(SOCKET *sock, const char *filename) {
+    char filePath[256] = "files/";
+    strncat(filePath, filename, sizeof(filePath) - strlen(filePath) - 1);
+
+    // Open the file for writing in binary mode
+    FILE *file = fopen(filePath, "wb");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file for writing.\n");
+        return;
+    }
+
+    // Receive the file size
+    long fileSizeNetOrder;
+    if (recv(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) <= 0) {
+        fprintf(stderr, "Failed to receive file size.\n");
+        fclose(file);
+        return;
+    }
+    long fileSize = ntohl(fileSizeNetOrder); // Convert from network byte order to host byte order
+
+    // Receive the file data
+    char buffer[DEFAULT_BUFLEN];
+    int bytesReceived;
+    long totalBytesReceived = 0;
+    while (totalBytesReceived < fileSize) {
+        bytesReceived = recv(*sock, buffer, sizeof(buffer), 0);
+        if (bytesReceived > 0) {
+            fwrite(buffer, 1, bytesReceived, file);
+            totalBytesReceived += bytesReceived;
+        } else if (bytesReceived == 0) {
+            printf("Connection closed by server.\n");
+            break;
+        } else {
+            fprintf(stderr, "recv failed with error.\n");
+            break;
+        }
+    }
+
+    fclose(file); // Close the file
+
+    if (totalBytesReceived != fileSize) {
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+    } else {
+        printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename);
+    }
 }

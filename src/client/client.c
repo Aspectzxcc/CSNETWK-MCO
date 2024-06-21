@@ -43,17 +43,8 @@ int main() {
         // execute the command and pass in the socket, Winsock data, server address, command, and parameters
         breakLoop = executeCommand(&client, &wsaData, &server, command->command, parameters, userInput);
 
-        replyLength = recv(client, serverReply, DEFAULT_BUFLEN, 0);
-
-        if (replyLength == SOCKET_ERROR) {
-            break; // exit loop if receiving fails
-        } else if (replyLength == 0) {
-            break; // exit loop if server closed the connection
-        } else {
-            // null-terminate the received data before printing
-            serverReply[replyLength] = '\0';
-            printf("%s\n", serverReply);
-        }
+        // handle server response
+        handleServerResponse(&client, command->command, breakLoop);
 
         if (breakLoop) {
             break;

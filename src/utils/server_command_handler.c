@@ -75,8 +75,6 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
 
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         printf("Client disconnected\n"); // log client disconnection
-        closesocket(clientSocket); // close the client socket
-
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // handle REGISTER command
         if (parameters[0] != NULL) {
@@ -91,6 +89,11 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // handle STORE command
         uploadFileFromClient(clientSocket, *clientAlias, parameters[0]); // upload file from client and send confirmation
+
+    } else if (strcmp(command, COMMAND_GET) == 0) {
+        // handle GET command
+        sendFileToClient(clientSocket, parameters[0]); // send file to client
+
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // handle DIR command
         char directoryListing[] = "File1.txt\nFile2.txt\nFile3.txt"; // example directory listing
@@ -169,4 +172,35 @@ void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const ch
     }
 
     send(clientSocket, response, strlen(response), 0);
+}
+
+void sendFileToClient(SOCKET clientSocket, const char *filename) {
+    char filePath[256] = "files/"; // Base directory for files
+    strcat(filePath, filename); // Append filename to path
+
+    // Open the file for reading in binary mode
+    FILE *file = fopen(filePath, "rb");
+    if (file == NULL) {
+        fprintf(stderr, ERROR_FILE_NOT_FOUND_SERVER "\n");
+        return;
+    }
+
+    // Get the file size
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    fseek(file, 0, SEEK_SET); // Reset file pointer to the beginning of the file
+
+    // Send the file size first
+    long fileSizeNetOrder = htonl(fileSize); // Convert to network byte order
+    send(clientSocket, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0);
+
+    // Send the file data
+    char buffer[DEFAULT_BUFLEN];
+    int bytesRead;
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+        send(clientSocket, buffer, bytesRead, 0);
+    }
+
+    fclose(file); // Close the file
+    printf("File %s sent to client.\n", filename);
 }
