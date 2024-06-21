@@ -10,7 +10,7 @@
 // executes the specified command with the provided parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
     // check if not connected and the command is not join so that messages cannot be sent
-    if (strcmp(command,COMMAND_JOIN) != 0 && !connectionStatus) {
+    if ((strcmp(command,COMMAND_JOIN) != 0 || strcmp(command, COMMAND_HELP) != 0) && !connectionStatus) {
         return 0;
     }
 
