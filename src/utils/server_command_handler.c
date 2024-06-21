@@ -106,6 +106,11 @@ void handleRegisterAlias(SOCKET clientSocket, char *alias) {
     // Check if alias is not null and add it to the clientAliases array
     if (alias != NULL && strlen(alias) > 0) {
         clientAliases[clientAliasCount++] = alias;
+    } else {
+        char response[DEFAULT_BUFLEN];
+        sprintf(response, ERROR_REGISTRATION_FAILED, alias);
+        send(clientSocket, response, strlen(response), 0);
+        return;
     }
 
     // Check if the alias is already registered
