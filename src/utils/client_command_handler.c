@@ -16,6 +16,8 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         sendMessageToServer(sock, message);
         return 1; // indicate disconnection
+    } else if (strcmp(command, COMMAND_STORE) == 0) {
+        sendFileToServer(sock, parameters[0], message);
     } else {
         sendMessageToServer(sock, message);
     }
@@ -72,4 +74,39 @@ void sendMessageToServer(SOCKET *sock, char *message) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         return;
     }
+}
+
+// Function to send a file to the server
+int sendFileToServer(SOCKET *sock, const char *filename, char *message) {
+    FILE *file;
+    char filePath[256] = "files/"; // Assuming files are stored in a subdirectory named 'files'
+    strcat(filePath, filename); // Append the filename to the path
+
+    // Open the file
+    file = fopen(filePath, "rb"); // Open in binary mode to handle all types of files
+    if (file == NULL) {
+        printf("Error: File not found.\n");
+        return -1; // File not found
+    }
+
+    // Get the file size
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    // Send the message (command) to the server without filename and fileSize
+    char buffer[DEFAULT_BUFLEN];
+    sprintf(buffer, "%s", message); // copy message to buffer
+    send(*sock, buffer, strlen(buffer), 0);
+
+    // Read and send the file in chunks
+    size_t bytesRead;
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
+        send(*sock, buffer, bytesRead, 0);
+    }
+
+    // Close the file
+    fclose(file);
+
+    return 0; // Success
 }
