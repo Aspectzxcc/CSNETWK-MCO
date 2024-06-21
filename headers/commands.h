@@ -21,7 +21,7 @@
 #define ERROR_CONNECTION_FAILED "Error: Connection to the Server has failed! Please check IP Address and Port Number."
 #define ERROR_DISCONNECT_FAILED "Error: Disconnection failed. Please connect to the server first."
 #define ERROR_REGISTRATION_FAILED "Error: Registration failed. Handle or alias already exists."
-#define ERROR_FILE_NOT_FOUND "Error: File not found."
+#define ERROR_FILE_NOT_FOUND_CLIENT "Error: File not found."
 #define ERROR_FILE_NOT_FOUND_SERVER "Error: File not found in the server."
 #define ERROR_COMMAND_NOT_FOUND "Error: Command not found."
 #define ERROR_INVALID_PARAMETERS "Error: Command parameters do not match or is not allowed."

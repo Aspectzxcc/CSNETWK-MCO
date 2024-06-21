@@ -1,8 +1,8 @@
 #ifndef SERVER_COMMAND_HANDLER_H
 #define SERVER_COMMAND_HANDLER_H
 
-#include "commands.h" // commands header file
 #include <windows.h> // windows library for threading
+#include "commands.h" // commands header file
 
 // Function prototypes
 DWORD WINAPI client_handler(void* data);
