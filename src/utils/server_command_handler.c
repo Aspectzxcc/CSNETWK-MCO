@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "../../headers/server_command_handler.h"
 
 // function to handle client connections
@@ -39,7 +40,7 @@ DWORD WINAPI client_handler(void* data) {
             break; // exit loop if client disconnected
         } else {
             clientMessage[bytesRead] = '\0'; // null-terminate the received message
-            printf("Message received from client: %s\n", clientMessage); // print received message
+            printf("Message received from client: %s\n\n", clientMessage); // print received message
 
             const Command *command = getCommand(clientMessage); // get command from message
 
@@ -71,9 +72,11 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
     // handle JOIN command
     if (strcmp(command, COMMAND_JOIN) == 0) {
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0); // send success message
+
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         printf("Client disconnected\n"); // log client disconnection
         closesocket(clientSocket); // close the client socket
+
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // handle REGISTER command
         if (parameters[0] != NULL) {
@@ -84,18 +87,86 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
         char response[DEFAULT_BUFLEN];
         sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, *clientAlias); // prepare success message
         send(clientSocket, response, strlen(response), 0); // send success message
+
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // handle STORE command
-        char response[DEFAULT_BUFLEN]; 
-        sprintf(response, MESSAGE_SUCCESSFUL_FILE_UPLOAD, parameters[0], parameters[1], parameters[2]); // prepare success message
-        send(clientSocket, response, strlen(response), 0); // send success message
+        uploadFileFromClient(clientSocket, *clientAlias, parameters[0]); // upload file from client and send confirmation
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // handle DIR command
         char directoryListing[] = "File1.txt\nFile2.txt\nFile3.txt"; // example directory listing
         char response[DEFAULT_BUFLEN];
         sprintf(response, MESSAGE_SUCCESSFUL_DIR_LIST, directoryListing); // prepare success message
         send(clientSocket, response, strlen(response), 0); // send success message
+
     } else {
         send(clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0); // send error message if command not found
     }
+}
+
+void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const char *filename) {
+    char filePath[256] = "files/"; // Base directory for files
+    strcat(filePath, filename); // Append filename to path
+
+    // Open the file for writing in binary mode
+    FILE *file = fopen(filePath, "wb");
+    if (file == NULL) {
+        fprintf(stderr, "Error opening file for writing.\n");
+        return;
+    }
+
+    // Receive the file size first
+    long fileSizeNetOrder;
+    int bytesReceived = recv(clientSocket, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0);
+    if (bytesReceived <= 0) {
+        fprintf(stderr, "Failed to receive file size.\n");
+        fclose(file);
+        return;
+    }
+    long fileSize = ntohl(fileSizeNetOrder); // Convert from network byte order to host byte order
+    printf("Expected file size: %ld bytes.\n", fileSize);
+
+    char buffer[DEFAULT_BUFLEN];
+    long totalBytesReceived = 0; // Track the total bytes received to compare with expected file size
+
+    // Receive file data from client and write to file
+    while (totalBytesReceived < fileSize) {
+        bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesReceived > 0) {
+            fwrite(buffer, 1, bytesReceived, file);
+            totalBytesReceived += bytesReceived;
+            printf("Received %d bytes\n", bytesReceived);
+        } else if (bytesReceived == 0) {
+            printf("Connection closed by client.\n");
+            break;
+        } else {
+            fprintf(stderr, "recv failed with error: %d\n", WSAGetLastError());
+            break;
+        }
+    }
+
+    // Close the file
+    fclose(file);
+
+    // Check if the entire file was received
+    if (totalBytesReceived == fileSize) {
+        printf("File %s received and saved.\n", filename);
+    } else {
+        printf("File %s received partially. Expected %ld bytes but got %ld bytes.\n", filename, fileSize, totalBytesReceived);
+    }
+
+    // Prepare and send the confirmation message
+    char response[DEFAULT_BUFLEN];
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char timeStr[20]; // For timestamp
+    strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    // Check if client alias is not null and add it to the response
+    if (clientAlias != NULL && strlen(clientAlias) > 0) {
+        sprintf(response, "%s<%s>: Uploaded %s\n", clientAlias, timeStr, filename);
+    } else {
+        sprintf(response, "<%s>: Uploaded %s\n", timeStr, filename);
+    }
+
+    send(clientSocket, response, strlen(response), 0);
 }

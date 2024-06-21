@@ -20,7 +20,8 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
-        sendFileToServer(sock, parameters[0], message);
+        sendMessageToServer(sock, message);
+        sendFileToServer(sock, parameters[0]);
     } else {
         // for any other command, just send the message to server
         sendMessageToServer(sock, message);
@@ -85,41 +86,40 @@ void sendMessageToServer(SOCKET *sock, char *message) {
 }
 
 // sends a file to the server
-void sendFileToServer(SOCKET *sock, const char *filename, char *message) {
+void sendFileToServer(SOCKET *sock, const char *filename) {
     FILE *file;
-    char filePath[256] = "files/"; // base directory for files
-    strcat(filePath, filename); // append filename to path
+    char filePath[256] = "files/";
+    strncat(filePath, filename, sizeof(filePath) - strlen(filePath) - 1);
 
-    // open the file
-    file = fopen(filePath, "rb"); // open in binary mode
+    file = fopen(filePath, "rb");
     if (file == NULL) {
         fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n");
         return;
     }
 
-    // determine file size
+    // Determine the file size
     fseek(file, 0, SEEK_END);
     long fileSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    // send the command message to the server
-    char buffer[DEFAULT_BUFLEN];
-    sprintf(buffer, "%s", message); // copy message into buffer
-    int bytesSent = send(*sock, buffer, strlen(buffer), 0);
-
-    // check for sending errors
-    if (bytesSent == SOCKET_ERROR) {
+    // Convert fileSize to network byte order and send it
+    long fileSizeNetOrder = htonl(fileSize);
+    if (send(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) == SOCKET_ERROR) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         fclose(file);
         return;
     }
 
-    // read and send the file in chunks
-    size_t bytesRead;
+    char buffer[DEFAULT_BUFLEN];
+    int bytesRead;
+    
+    // Send the file data
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-        send(*sock, buffer, bytesRead, 0);
+        if (send(*sock, buffer, bytesRead, 0) == SOCKET_ERROR) {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+            break;
+        }
     }
 
-    // close the file after sending
     fclose(file);
 }
