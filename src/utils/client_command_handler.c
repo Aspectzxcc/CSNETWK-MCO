@@ -77,7 +77,7 @@ void sendMessageToServer(SOCKET *sock, char *message) {
 }
 
 // Function to send a file to the server
-int sendFileToServer(SOCKET *sock, const char *filename, char *message) {
+void sendFileToServer(SOCKET *sock, const char *filename, char *message) {
     FILE *file;
     char filePath[256] = "files/"; // Assuming files are stored in a subdirectory named 'files'
     strcat(filePath, filename); // Append the filename to the path
@@ -85,8 +85,8 @@ int sendFileToServer(SOCKET *sock, const char *filename, char *message) {
     // Open the file
     file = fopen(filePath, "rb"); // Open in binary mode to handle all types of files
     if (file == NULL) {
-        printf("Error: File not found.\n");
-        return -1; // File not found
+        sprintf(stderr, ERROR_FILE_NOT_FOUND "\n");
+        return;
     }
 
     // Get the file size
@@ -107,6 +107,4 @@ int sendFileToServer(SOCKET *sock, const char *filename, char *message) {
 
     // Close the file
     fclose(file);
-
-    return 0; // Success
 }
