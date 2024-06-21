@@ -97,7 +97,13 @@ void sendFileToServer(SOCKET *sock, const char *filename, char *message) {
     // Send the message (command) to the server without filename and fileSize
     char buffer[DEFAULT_BUFLEN];
     sprintf(buffer, "%s", message); // copy message to buffer
-    send(*sock, buffer, strlen(buffer), 0);
+    int bytesSent = send(*sock, buffer, strlen(buffer), 0);
+
+    if (bytesSent == SOCKET_ERROR) {
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        fclose(file);
+        return;
+    }
 
     // Read and send the file in chunks
     size_t bytesRead;
