@@ -27,9 +27,9 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // if the client is not connected and tries to leave, return 0
+        sendMessageToServer(sock, message);
         closesocket(*sock); // close the socket
         connectionStatus = 0; // set connection status flag to disconnected
-        sendMessageToServer(sock, message);
         printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
         return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
@@ -69,7 +69,7 @@ void handleServerResponse(SOCKET *sock, const char *command) {
     int replyLength; // size of received data
 
     // do not require a server reply
-    if (strcmp(command, COMMAND_HELP) == 0) {
+    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0) {
         return;
     }
 
