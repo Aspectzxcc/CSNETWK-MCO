@@ -16,17 +16,19 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // if the client is not connected and tries to leave, return 0
-        if (*sock == 0) {
-            return 0; 
+        if (!connectionStatus) {
+            return 0;
         }
         sendMessageToServer(sock, message);
         return 1; // indicate client wishes to disconnect
+    } else if (strcmp(command, COMMAND_REGISTER) == 0) {
+        // for register command, send the message to the server
+        sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
         sendFileToServer(sock, parameters[0]);
-    } else if (strcmp(command, COMMAND_GET) == 0) 
-    {
+    } else if (strcmp(command, COMMAND_GET) == 0) {
         // for get command, send the message to the server
         sendMessageToServer(sock, message);
         receiveFileFromServer(sock, parameters[0]);
@@ -58,6 +60,10 @@ void handleServerResponse(SOCKET *sock, const char *command, int disconnect) {
     }
 
     if (strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_HELP) == 0) {
+        return;
+    }
+
+    if (!connectionStatus) {
         return;
     }
 
@@ -109,6 +115,8 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
         WSACleanup();
         *sock = INVALID_SOCKET;
     }
+
+    connectionStatus = 1; // set connection status flag to connected
 }
 
 // sends a message to the server

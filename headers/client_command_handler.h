@@ -1,6 +1,8 @@
 #ifndef COMMAND_PARSER_H
 #define COMMAND_PARSER_H
 
+extern int connectionStatus; // connection status flag
+
 // function prototypes
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message);
 void handleServerResponse(SOCKET *sock, const char *command, int disconnect);

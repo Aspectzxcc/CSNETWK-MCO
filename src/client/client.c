@@ -1,5 +1,7 @@
 #include "../../headers/client.h"
 
+int connectionStatus = 0; // connection status flag
+
 int main() {
     const Command *command; // command structure
     char **parameters; // command parameters
