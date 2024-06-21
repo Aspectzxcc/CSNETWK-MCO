@@ -69,7 +69,10 @@ DWORD WINAPI client_handler(void* data) {
 }
 
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias) {
-    if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && **clientAlias == '\0') {
+    printf("clientAlias: %s\n", *clientAlias);
+
+    if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && *clientAlias[0] == '\0') {
+        printf("Client not registered\n");
         send(clientSocket, ERROR_REGISTRATION_FAILED, strlen(ERROR_REGISTRATION_FAILED), 0); // send error message if client not registered
         return;
     }
@@ -206,7 +209,7 @@ void sendFileToClient(SOCKET clientSocket, const char *filename) {
     // Open the file for reading in binary mode
     FILE *file = fopen(filePath, "rb");
     if (file == NULL) {
-        fprintf(stderr, ERROR_FILE_NOT_FOUND_SERVER "\n");
+        send(clientSocket, ERROR_FILE_NOT_FOUND_SERVER, strlen(ERROR_FILE_NOT_FOUND_SERVER), 0);
         return;
     }
 

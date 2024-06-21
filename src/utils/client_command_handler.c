@@ -68,8 +68,8 @@ void handleServerResponse(SOCKET *sock, const char *command) {
     char serverReply[DEFAULT_BUFLEN]; // server reply buffer
     int replyLength; // size of received data
 
-    // these commands do not require a server reply
-    if (strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_HELP) == 0) {
+    // do not require a server reply
+    if (strcmp(command, COMMAND_HELP) == 0) {
         return;
     }
 
