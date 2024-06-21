@@ -85,7 +85,7 @@ void sendFileToServer(SOCKET *sock, const char *filename, char *message) {
     // Open the file
     file = fopen(filePath, "rb"); // Open in binary mode to handle all types of files
     if (file == NULL) {
-        sprintf(stderr, ERROR_FILE_NOT_FOUND "\n");
+        fprintf(stderr, ERROR_FILE_NOT_FOUND "\n");
         return;
     }
 
