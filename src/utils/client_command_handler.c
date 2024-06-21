@@ -7,40 +7,44 @@
 
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
-// function to execute the identified command with given parameters
+// executes the specified command with the provided parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
-    // execute command based on its type
+    // determine and execute the command based on its identifier
     if (strcmp(command, COMMAND_JOIN) == 0) {
+        // for join command, initialize socket connection and send message
         initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
+        // for leave command, just send the message to server
         sendMessageToServer(sock, message);
-        return 1; // indicate disconnection
+        return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_STORE) == 0) {
+        // for store command, send a file to the server
         sendFileToServer(sock, parameters[0], message);
     } else {
+        // for any other command, just send the message to server
         sendMessageToServer(sock, message);
     }
-    // additional command checks can be implemented here
-    return 0; // no disconnection
+    // future commands can be added here
+    return 0; // indicate no disconnection by default
 }
 
-// function to initialize socket connection based on provided ip and port
+// initializes a socket connection using the provided ip address and port
 void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port) {
-    // close the socket if it is already open
+    // if socket is already open, close it first
     if (*sock != INVALID_SOCKET) {
         closesocket(*sock);
         WSACleanup();
     }
 
-    // start winsock api
+    // initialize winsock
     if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
         fprintf(stderr, "failed to initialize winsock. error code : %d", WSAGetLastError());
         *sock = INVALID_SOCKET;
         return;
     }
 
-    // create socket
+    // create the socket
     *sock = socket(AF_INET, SOCK_STREAM, 0);
     if (*sock == INVALID_SOCKET) {
         fprintf(stderr, "could not create socket : %d", WSAGetLastError());
@@ -48,7 +52,7 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
         return;
     }
 
-    // setup server address structure
+    // set up the server address structure
     server->sin_family = AF_INET;
     server->sin_addr.s_addr = inet_addr(ip);
     server->sin_port = htons(port);
@@ -62,55 +66,60 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
     }
 }
 
+// sends a message to the server
 void sendMessageToServer(SOCKET *sock, char *message) {
+    // check if socket is valid and message is not null
     if (*sock == INVALID_SOCKET || message == NULL) {
         return;
     }
 
-    int messageLength = strlen(message); // Get the length of the message
-    int bytesSent = send(*sock, message, messageLength, 0); // Send the message
+    // send the message to the server
+    int messageLength = strlen(message); // calculate message length
+    int bytesSent = send(*sock, message, messageLength, 0); // send the message
 
+    // check for sending errors
     if (bytesSent == SOCKET_ERROR) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         return;
     }
 }
 
-// Function to send a file to the server
+// sends a file to the server
 void sendFileToServer(SOCKET *sock, const char *filename, char *message) {
     FILE *file;
-    char filePath[256] = "files/"; // Assuming files are stored in a subdirectory named 'files'
-    strcat(filePath, filename); // Append the filename to the path
+    char filePath[256] = "files/"; // base directory for files
+    strcat(filePath, filename); // append filename to path
 
-    // Open the file
-    file = fopen(filePath, "rb"); // Open in binary mode to handle all types of files
+    // open the file
+    file = fopen(filePath, "rb"); // open in binary mode
     if (file == NULL) {
         fprintf(stderr, ERROR_FILE_NOT_FOUND "\n");
         return;
     }
 
-    // Get the file size
+    // determine file size
     fseek(file, 0, SEEK_END);
     long fileSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    // Send the message (command) to the server without filename and fileSize
+    // send the command message to the server
     char buffer[DEFAULT_BUFLEN];
-    sprintf(buffer, "%s", message); // copy message to buffer
+    sprintf(buffer, "%s", message); // copy message into buffer
     int bytesSent = send(*sock, buffer, strlen(buffer), 0);
 
+    // check for sending errors
     if (bytesSent == SOCKET_ERROR) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         fclose(file);
         return;
     }
 
-    // Read and send the file in chunks
+    // read and send the file in chunks
     size_t bytesRead;
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
         send(*sock, buffer, bytesRead, 0);
     }
 
-    // Close the file
+    // close the file after sending
     fclose(file);
 }
