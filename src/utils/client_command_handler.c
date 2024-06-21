@@ -9,8 +9,14 @@
 
 // executes the specified command with the provided parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
-    // check if not connected and the command is not join so that messages cannot be sent
+    // check if not connected and the command is not join and help so that messages cannot be sent
     if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && !connectionStatus) {
+        // log error if not connected
+        if (strcmp(command, COMMAND_LEAVE) == 0) {
+            fprintf(stderr, ERROR_DISCONNECT_FAILED "\n"); // log error if not connected
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // log error if not connected
+        }
         return 0;
     }
 
@@ -21,7 +27,10 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // if the client is not connected and tries to leave, return 0
+        closesocket(*sock); // close the socket
+        connectionStatus = 0; // set connection status flag to disconnected
         sendMessageToServer(sock, message);
+        printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
         return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // for register command, send the message to the server
@@ -48,19 +57,11 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     return 0; // indicate no disconnection by default
 }   
 
-void handleServerResponse(SOCKET *sock, const char *command, int disconnect) {
+void handleServerResponse(SOCKET *sock, const char *command) {
     char serverReply[DEFAULT_BUFLEN]; // server reply buffer
     int replyLength; // size of received data
 
-    if (strcmp(command, COMMAND_LEAVE) == 0) {
-        if (disconnect) {
-            printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
-        } else {
-            fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
-        }
-        return;
-    }
-
+    // these commands do not require a server reply
     if (strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_HELP) == 0) {
         return;
     }
@@ -112,7 +113,6 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
 
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)server, sizeof(*server)) < 0) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         closesocket(*sock);
         WSACleanup();
         *sock = INVALID_SOCKET;
