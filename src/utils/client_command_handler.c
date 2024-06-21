@@ -38,10 +38,17 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
+        if (!registrationStatus) {
+            return 0;
+        }
         sendFileToServer(sock, parameters[0]);
     } else if (strcmp(command, COMMAND_GET) == 0) {
         // for get command, send the message to the server
         sendMessageToServer(sock, message);
+        if (!registrationStatus) {
+            return 0;
+        }
+        
         receiveFileFromServer(sock, parameters[0]);
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // for other commands, just send the message to the server
@@ -77,6 +84,14 @@ void handleServerResponse(SOCKET *sock, const char *command) {
     } else if (replyLength == 0) {
         return;
     } else {
+        if (strcmp(command, COMMAND_REGISTER) == 0) {
+            if (strcmp(serverReply, MESSAGE_SUCCESSFUL_REGISTRATION) == 0) {
+                registrationStatus = 1;
+            } else {
+                registrationStatus = 0;
+            }
+        }
+
         // null-terminate the received data before printing
         serverReply[replyLength] = '\0';
         printf("%s\n", serverReply);

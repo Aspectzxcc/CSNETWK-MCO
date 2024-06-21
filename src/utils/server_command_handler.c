@@ -40,7 +40,7 @@ DWORD WINAPI client_handler(void* data) {
             break; // exit loop if client disconnected
         } else {
             clientMessage[bytesRead] = '\0'; // null-terminate the received message
-            printf("Message received from client: %s\n\n", clientMessage); // print received message
+            printf("Message: %s\n\n", clientMessage); // print received message
 
             const Command *command = getCommand(clientMessage); // get command from message
 
@@ -69,12 +69,18 @@ DWORD WINAPI client_handler(void* data) {
 }
 
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias) {
+    if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && **clientAlias == '\0') {
+        send(clientSocket, ERROR_REGISTRATION_FAILED, strlen(ERROR_REGISTRATION_FAILED), 0); // send error message if client not registered
+        return;
+    }
+
     // handle JOIN command
     if (strcmp(command, COMMAND_JOIN) == 0) {
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0); // send success message
 
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         printf(*clientAlias ? "Client %s disconnected\n" : "Client disconnected\n", *clientAlias); // print client disconnection message
+
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // handle REGISTER command
         handleRegisterAlias(clientSocket, parameters[0]); // register client alias
@@ -102,6 +108,18 @@ void handleRegisterAlias(SOCKET clientSocket, char *alias) {
         clientAliases[clientAliasCount++] = alias;
     }
 
+    // Check if the alias is already registered
+    if (clientAliasCount > 0) {
+        for (int i = 0;i < clientAliasCount; i++) {
+            if (strcmp(clientAliases[i], alias) == 0) {
+                char response[DEFAULT_BUFLEN];
+                sprintf(response, ERROR_REGISTRATION_FAILED, alias);
+                send(clientSocket, response, strlen(response), 0);
+                return;
+            }
+        }
+    }
+    
     // Prepare and send the confirmation message
     char response[DEFAULT_BUFLEN];
     sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, alias);

@@ -2,6 +2,7 @@
 #define COMMAND_PARSER_H
 
 extern int connectionStatus; // connection status flag
+extern int registrationStatus; // registration status flag
 
 // function prototypes
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message);
