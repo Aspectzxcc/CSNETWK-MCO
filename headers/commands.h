@@ -10,6 +10,12 @@
 #define COMMAND_GET "/get"
 #define COMMAND_HELP "/?"
 
+// commands with help messages
+#define COMMAND_JOIN_PARAMETERS "<server_ip_add> <port>"
+#define COMMAND_REGISTER_PARAMETERS "<handle>"
+#define COMMAND_STORE_PARAMETERS "<filename>"
+#define COMMAND_GET_PARAMETERS "<filename>"
+
 // define message success responses
 #define MESSAGE_SUCCESSFUL_CONNECTION "Connection to the File Exchange Server is successful!"
 #define MESSAGE_SUCCESSFUL_DISCONNECTION "Connection closed. Thank you!"
@@ -40,6 +46,7 @@ extern const Command commands[];
 extern const int commandsCount;
 
 // function prototypes
+void printCommands();
 const Command *getCommand(char *input);
 char **parseCommandParameters(const Command *command, char *input);
 

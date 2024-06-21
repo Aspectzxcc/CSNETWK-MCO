@@ -7,8 +7,10 @@
 // Function prototypes
 DWORD WINAPI client_handler(void* data);
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias);
+void handleRegisterAlias(SOCKET clientSocket, char *clientAlias);
 void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const char *filename);
 void sendFileToClient(SOCKET clientSocket, const char *filename);
+void sendDirectoryFileList(SOCKET clientSocket);
 
 #define MAX_CLIENTS 10 // maximum number of clients that can connect to the server
 #define MAX_ALIAS_LENGTH 20 // maximum length of the client alias

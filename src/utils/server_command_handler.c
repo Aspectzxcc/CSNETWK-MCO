@@ -74,17 +74,10 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
         send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0); // send success message
 
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
-        printf("Client disconnected\n"); // log client disconnection
+        printf(*clientAlias ? "Client %s disconnected\n" : "Client disconnected\n", *clientAlias); // print client disconnection message
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // handle REGISTER command
-        if (parameters[0] != NULL) {
-            *clientAlias = parameters[0]; // set client alias
-            clientAliases[clientAliasCount++] = parameters[0]; // store client alias
-        }
-        
-        char response[DEFAULT_BUFLEN];
-        sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, *clientAlias); // prepare success message
-        send(clientSocket, response, strlen(response), 0); // send success message
+        handleRegisterAlias(clientSocket, parameters[0]); // register client alias
 
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // handle STORE command
@@ -96,14 +89,23 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
 
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // handle DIR command
-        char directoryListing[] = "File1.txt\nFile2.txt\nFile3.txt"; // example directory listing
-        char response[DEFAULT_BUFLEN];
-        sprintf(response, MESSAGE_SUCCESSFUL_DIR_LIST, directoryListing); // prepare success message
-        send(clientSocket, response, strlen(response), 0); // send success message
-
+        sendDirectoryFileList(clientSocket); // list files in directory
     } else {
+        // command not found
         send(clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0); // send error message if command not found
     }
+}
+
+void handleRegisterAlias(SOCKET clientSocket, char *alias) {
+    // Check if alias is not null and add it to the clientAliases array
+    if (alias != NULL && strlen(alias) > 0) {
+        clientAliases[clientAliasCount++] = alias;
+    }
+
+    // Prepare and send the confirmation message
+    char response[DEFAULT_BUFLEN];
+    sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, alias);
+    send(clientSocket, response, strlen(response), 0);
 }
 
 void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const char *filename) {
@@ -203,4 +205,29 @@ void sendFileToClient(SOCKET clientSocket, const char *filename) {
 
     fclose(file); // Close the file
     printf("File %s sent to client.\n", filename);
+}
+
+void sendDirectoryFileList(SOCKET clientSocket) {
+    WIN32_FIND_DATA findFileData;
+    HANDLE hFind = FindFirstFile("./files/*", &findFileData); // Adjust the path as needed
+
+    if (hFind == INVALID_HANDLE_VALUE) {
+        printf("FindFirstFile failed (%d)\n", GetLastError());
+        return;
+    } 
+
+    // Buffer to store the directory listing
+    char directoryListing[1024] = "Server Directory\n";
+    do {
+        // Skip directories, only list files
+        if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            strcat(directoryListing, findFileData.cFileName);
+            strcat(directoryListing, "\n");
+        }
+    } while (FindNextFile(hFind, &findFileData) != 0);
+
+    FindClose(hFind);
+
+    // Send the directory listing to the client
+    send(clientSocket, directoryListing, strlen(directoryListing), 0);
 }

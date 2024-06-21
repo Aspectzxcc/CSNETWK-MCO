@@ -15,6 +15,23 @@ const Command commands[] = {
 
 const int commandsCount = sizeof(commands) / sizeof(commands[0]); // number of commands
 
+void printCommands() {
+    printf("Available commands:\n");
+    for (int i = 0; i < commandsCount; i++) {
+        if (commands[i].command == COMMAND_JOIN) {
+            printf("%s %s\n", commands[i].command, COMMAND_JOIN_PARAMETERS);
+        } else if (commands[i].command == COMMAND_REGISTER) {
+            printf("%s %s\n", commands[i].command, COMMAND_REGISTER_PARAMETERS);
+        } else if (commands[i].command == COMMAND_STORE) {
+            printf("%s %s\n", commands[i].command, COMMAND_STORE_PARAMETERS);
+        } else if (commands[i].command == COMMAND_GET) {
+            printf("%s %s\n", commands[i].command, COMMAND_GET_PARAMETERS);
+        } else {
+            printf("%s\n", commands[i].command);
+        }
+    }
+}
+
 // function to identify the command struct based on user input
 const Command *getCommand(char *input) {
     char command[DEFAULT_BUFLEN]; // buffer to hold the extracted command

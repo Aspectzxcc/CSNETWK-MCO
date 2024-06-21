@@ -30,13 +30,19 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         // for get command, send the message to the server
         sendMessageToServer(sock, message);
         receiveFileFromServer(sock, parameters[0]);
-    } else {
+    } else if (strcmp(command, COMMAND_DIR) == 0) {
         // for other commands, just send the message to the server
         sendMessageToServer(sock, message);
+    } else if (strcmp(command, COMMAND_HELP) == 0) {
+        // for help command, print the available commands
+        printCommands();
+    } else {
+        // command not found
+        fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
     }
     // future commands can be added here
     return 0; // indicate no disconnection by default
-}
+}   
 
 void handleServerResponse(SOCKET *sock, const char *command, int disconnect) {
     char serverReply[DEFAULT_BUFLEN]; // server reply buffer
@@ -51,16 +57,16 @@ void handleServerResponse(SOCKET *sock, const char *command, int disconnect) {
         return;
     }
 
-    if (strcmp(command, COMMAND_GET) == 0) {
+    if (strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_HELP) == 0) {
         return;
     }
 
     replyLength = recv(*sock, serverReply, DEFAULT_BUFLEN, 0);
 
     if (replyLength == SOCKET_ERROR) {
-        fprintf(stderr, "recv failed with error code : %d", WSAGetLastError());
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
     } else if (replyLength == 0) {
-        printf("Server closed the connection\n");
+        return;
     } else {
         // null-terminate the received data before printing
         serverReply[replyLength] = '\0';
@@ -176,7 +182,7 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
     // Receive the file size
     long fileSizeNetOrder;
     if (recv(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) <= 0) {
-        fprintf(stderr, "Failed to receive file size.\n");
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         fclose(file);
         return;
     }
@@ -192,10 +198,9 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
             fwrite(buffer, 1, bytesReceived, file);
             totalBytesReceived += bytesReceived;
         } else if (bytesReceived == 0) {
-            printf("Connection closed by server.\n");
             break;
         } else {
-            fprintf(stderr, "recv failed with error.\n");
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
             break;
         }
     }
