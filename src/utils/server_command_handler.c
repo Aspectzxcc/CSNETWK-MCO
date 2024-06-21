@@ -69,8 +69,6 @@ DWORD WINAPI client_handler(void* data) {
 }
 
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias) {
-    printf("clientAlias: %s\n", *clientAlias);
-
     if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && *clientAlias[0] == '\0') {
         printf("Client not registered\n");
         send(clientSocket, ERROR_REGISTRATION_FAILED, strlen(ERROR_REGISTRATION_FAILED), 0); // send error message if client not registered
@@ -106,6 +104,20 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
 }
 
 void handleRegisterAlias(SOCKET clientSocket, char *alias) {
+    // Check if the alias is already registered
+    if (clientAliasCount > 0) {
+        for (int i = 0; i < clientAliasCount; i++) {
+            printf("Comparing %s with %s\n", clientAliases[i], alias);
+            if (strcmp(clientAliases[i], alias) == 0) {
+                char response[DEFAULT_BUFLEN];
+                printf("Client alias %s already registered.\n", clientAliases[i]);
+                sprintf(response, ERROR_REGISTRATION_FAILED, alias);
+                send(clientSocket, response, strlen(response), 0);
+                return;
+            }
+        }
+    }
+
     // Check if alias is not null and add it to the clientAliases array
     if (alias != NULL && strlen(alias) > 0) {
         clientAliases[clientAliasCount++] = alias;
@@ -116,18 +128,6 @@ void handleRegisterAlias(SOCKET clientSocket, char *alias) {
         return;
     }
 
-    // Check if the alias is already registered
-    if (clientAliasCount > 0) {
-        for (int i = 0;i < clientAliasCount; i++) {
-            if (strcmp(clientAliases[i], alias) == 0) {
-                char response[DEFAULT_BUFLEN];
-                sprintf(response, ERROR_REGISTRATION_FAILED, alias);
-                send(clientSocket, response, strlen(response), 0);
-                return;
-            }
-        }
-    }
-    
     // Prepare and send the confirmation message
     char response[DEFAULT_BUFLEN];
     sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, alias);
