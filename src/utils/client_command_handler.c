@@ -38,14 +38,14 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
-        if (REGISTRATION_NOT_REGISTERED) {
+        if (registrationStatus == REGISTRATION_NOT_REGISTERED) {
             return 0;
         }
         sendFileToServer(sock, parameters[0]);
     } else if (strcmp(command, COMMAND_GET) == 0) {
         // for get command, send the message to the server
         sendMessageToServer(sock, message);
-        if (REGISTRATION_NOT_REGISTERED) {
+        if (registrationStatus == REGISTRATION_NOT_REGISTERED) {
             return 0;
         }
         
@@ -86,9 +86,9 @@ void handleServerResponse(SOCKET *sock, const char *command) {
     } else {
         if (strcmp(command, COMMAND_REGISTER) == 0) {
             if (strcmp(serverReply, MESSAGE_SUCCESSFUL_REGISTRATION) == 0) {
-                registrationStatus = 1;
+                registrationStatus = REGISTRATION_REGISTERED;
             } else {
-                registrationStatus = 0;
+                registrationStatus = REGISTRATION_NOT_REGISTERED;
             }
         }
 
