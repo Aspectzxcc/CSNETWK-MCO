@@ -28,14 +28,7 @@ int main() {
             fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
             continue;
         }
-
-        parameters = malloc(command->parameterCount * sizeof(char *));
-
-        if (parameters == NULL) {
-            fprintf(stderr, "Failed to allocate memory for parameters\n");
-            continue; 
-        }
-
+        
         parameters = parseCommandParameters(command, userInput);
 
         if (parameters == NULL) {
