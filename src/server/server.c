@@ -1,8 +1,8 @@
 #include "../../headers/server.h"
 
 // array to hold client aliases
-char clientAliases[MAX_CLIENTS][MAX_ALIAS_LENGTH]; 
-int clientAliasCount = 0;
+Client clients[MAX_CLIENTS];
+int clientCount = 0;
 
 int main() {
     WSADATA wsaData; // holds Winsock data
@@ -31,16 +31,29 @@ int main() {
 
     // accept a connection from a client
     while((clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c)) != INVALID_SOCKET) {
-        puts("connection accepted");
+        puts("Connection accepted");
 
-        // create a thread to handle the client
-        HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clientSocket, 0, NULL);
-        if (thread == NULL) {
-            // if thread creation fails, print the error
-            printf("CreateThread failed with error code : %d", GetLastError());
+        if (clientCount < MAX_CLIENTS) {
+            // Add the client to the clients array
+            clients[clientCount].clientSocket = clientSocket;
+
+            // Create a thread to handle the client, using the current clientCount index
+            HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);
+            if (thread == NULL) {
+                // If thread creation fails, print the error
+                printf("CreateThread failed with error code: %d", GetLastError());
+            } else {
+                // Close the thread handle as it's not needed anymore
+                CloseHandle(thread);
+            }
+
+            // Increment clientCount after successfully creating the thread
+            clientCount++;
         } else {
-            // close the thread handle as it's not needed anymore
-            CloseHandle(thread);
+            // If the maximum number of clients is reached, print an error message
+            printf("Maximum number of clients reached. Connection rejected.\n");
+            closesocket(clientSocket);
+            continue;
         }
     }
 

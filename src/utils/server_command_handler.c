@@ -5,28 +5,21 @@
 
 // function to handle client connections
 DWORD WINAPI client_handler(void* data) {
-    SOCKET clientSocket = *(SOCKET*)data; // cast data pointer to SOCKET type
-    char *clientAlias;
+    Client* client = (Client*)data; // cast the data to a Client pointer
     
-    // allocate memory for the client alias
-    clientAlias = malloc(MAX_ALIAS_LENGTH * sizeof(char)); // allocate memory for client alias
-    if (clientAlias == NULL) {
-        fprintf(stderr, "Memory allocation for clientAlias failed\n"); // log error if allocation fails
-        closesocket(clientSocket); // close the socket if memory allocation fails
-        return 1; // return error code
-    }
-    clientAlias[0] = '\0'; // initialize client alias with empty string
+    // initialize client alias with empty string
+    client->clientAlias[0] = '\0';
 
     char clientMessage[DEFAULT_BUFLEN]; // buffer to store client messages
     int messageLength = DEFAULT_BUFLEN; // set message length to default buffer length
 
     // continuously receive messages from the client
     while (1) {
-        int bytesRead = recv(clientSocket, clientMessage, messageLength, 0); // read data from socket
+        int bytesRead = recv(client->clientSocket, clientMessage, messageLength, 0); // read data from socket
 
         // check if client alias is not null and print it
-        if (clientAlias != NULL) {
-            printf("Client: %s\n", clientAlias);
+        if (client->clientAlias[0] != '\0') {
+            printf("Client: %s\n", client->clientAlias);
         } else {
             printf("Client: \n");
         }
@@ -58,83 +51,82 @@ DWORD WINAPI client_handler(void* data) {
                 continue; // skip to next iteration on error
             }
 
-            handleCommand(clientSocket, command->command, parameters, &clientAlias); // handle the command
+            handleCommand(client, command->command, parameters); // handle the command
         }
     }
 
     // cleanup before exiting the thread
-    closesocket(clientSocket); // close the client socket
-    free(clientAlias); // free allocated memory for client alias
+    closesocket(client->clientSocket); // close the client socket
+    free(client); // free allocated memory for client alias
     return 0; // return success code
 }
 
-void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias) {
-    if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && *clientAlias[0] == '\0') {
+void handleCommand(Client *client, const char *command, char **parameters) {
+    if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && client->clientAlias[0] == '\0') {
         printf("Client not registered\n");
-        send(clientSocket, ERROR_REGISTRATION_FAILED, strlen(ERROR_REGISTRATION_FAILED), 0); // send error message if client not registered
+        send(client->clientSocket, ERROR_REGISTRATION_FAILED, strlen(ERROR_REGISTRATION_FAILED), 0); // send error message if client not registered
         return;
     }
 
     // handle JOIN command
     if (strcmp(command, COMMAND_JOIN) == 0) {
-        send(clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0); // send success message
+        send(client->clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0); // send success message
 
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
-        printf(*clientAlias ? "Client %s disconnected\n" : "Client disconnected\n", *clientAlias); // print client disconnection message
+        printf(client->clientAlias ? "Client %s disconnected\n" : "Client disconnected\n", client->clientAlias); // print client disconnection message
 
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // handle REGISTER command
-        handleRegisterAlias(clientSocket, parameters[0], clientAlias); // register client alias
+        handleRegisterAlias(client, parameters[0]); // register client alias
 
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // handle STORE command
-        uploadFileFromClient(clientSocket, *clientAlias, parameters[0]); // upload file from client and send confirmation
+        uploadFileFromClient(client, parameters[0]); // upload file from client and send confirmation
 
     } else if (strcmp(command, COMMAND_GET) == 0) {
         // handle GET command
-        sendFileToClient(clientSocket, parameters[0]); // send file to client
+        sendFileToClient(client->clientSocket, parameters[0]); // send file to client
 
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // handle DIR command
-        sendDirectoryFileList(clientSocket); // list files in directory
+        sendDirectoryFileList(client->clientSocket); // list files in directory
     } else {
         // command not found
-        send(clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0); // send error message if command not found
+        send(client->clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0); // send error message if command not found
     }
 }
 
-void handleRegisterAlias(SOCKET clientSocket, char *alias, char **clientAlias) {
+void handleRegisterAlias(Client *client, char *alias) {
     // Check if the alias is already registered
-    if (clientAliasCount > 0) {
-        for (int i = 0; i < clientAliasCount; i++) {
-            if (strcmp(clientAliases[i], alias) == 0) {
+    if (clientCount > 0) {
+        for (int i = 0; i < clientCount; i++) {
+            if (strcmp(clients[i].clientAlias, alias) == 0) {
                 char response[DEFAULT_BUFLEN];
-                printf("Client alias %s already registered.\n", clientAliases[i]);
+                printf("Client alias %s already registered.\n", clients[i].clientAlias);
                 sprintf(response, ERROR_REGISTRATION_FAILED, alias);
-                send(clientSocket, response, strlen(response), 0);
+                send(client->clientSocket, response, strlen(response), 0);
                 return;
             }
         }
     }
 
-    // Check if alias is not null and add it to the clientAliases array
+    // Check if alias is not null and add it to the client
     if (alias != NULL && strlen(alias) > 0) {
-        *clientAlias = alias;
-        strcpy(clientAliases[clientAliasCount++], alias);
+        strcpy(client->clientAlias, alias);
     } else {
         char response[DEFAULT_BUFLEN];
         sprintf(response, ERROR_REGISTRATION_FAILED, alias);
-        send(clientSocket, response, strlen(response), 0);
+        send(client->clientSocket, response, strlen(response), 0);
         return;
     }
 
     // Prepare and send the confirmation message
     char response[DEFAULT_BUFLEN];
     sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, alias);
-    send(clientSocket, response, strlen(response), 0);
+    send(client->clientSocket, response, strlen(response), 0);
 }
 
-void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const char *filename) {
+void uploadFileFromClient(Client *client, char *filename) {
     char filePath[256] = "files/"; // Base directory for files
     strcat(filePath, filename); // Append filename to path
 
@@ -147,7 +139,7 @@ void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const ch
 
     // Receive the file size first
     long fileSizeNetOrder;
-    int bytesReceived = recv(clientSocket, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0);
+    int bytesReceived = recv(client->clientSocket, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0);
     if (bytesReceived <= 0) {
         fprintf(stderr, "Failed to receive file size.\n");
         fclose(file);
@@ -161,7 +153,7 @@ void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const ch
 
     // Receive file data from client and write to file
     while (totalBytesReceived < fileSize) {
-        bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        bytesReceived = recv(client->clientSocket, buffer, sizeof(buffer), 0);
         if (bytesReceived > 0) {
             fwrite(buffer, 1, bytesReceived, file);
             totalBytesReceived += bytesReceived;
@@ -193,13 +185,13 @@ void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const ch
     strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
 
     // Check if client alias is not null and add it to the response
-    if (clientAlias != NULL && strlen(clientAlias) > 0) {
-        sprintf(response, "%s<%s>: Uploaded %s\n", clientAlias, timeStr, filename);
+    if (client->clientAlias[0] != '\0' && strlen(client->clientAlias) > 0) {
+        sprintf(response, "%s<%s>: Uploaded %s\n", client->clientAlias, timeStr, filename);
     } else {
         sprintf(response, "<%s>: Uploaded %s\n", timeStr, filename);
     }
 
-    send(clientSocket, response, strlen(response), 0);
+    send(client->clientSocket, response, strlen(response), 0);
 }
 
 void sendFileToClient(SOCKET clientSocket, const char *filename) {

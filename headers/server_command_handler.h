@@ -4,18 +4,25 @@
 #include <windows.h> // windows library for threading
 #include "commands.h" // commands header file
 
-// Function prototypes
-DWORD WINAPI client_handler(void* data);
-void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias);
-void handleRegisterAlias(SOCKET clientSocket, char *alias, char **clientAlias);
-void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const char *filename);
-void sendFileToClient(SOCKET clientSocket, const char *filename);
-void sendDirectoryFileList(SOCKET clientSocket);
-
 #define MAX_CLIENTS 10 // maximum number of clients that can connect to the server
 #define MAX_ALIAS_LENGTH 20 // maximum length of the client alias
 
-extern char clientAliases[MAX_CLIENTS][MAX_ALIAS_LENGTH];
-extern int clientAliasCount;
+typedef struct Client {
+    SOCKET clientSocket; // Socket associated with the client
+    char clientAlias[MAX_ALIAS_LENGTH]; // Alias of the client
+} Client;
+
+extern Client clients[MAX_CLIENTS]; // Array to hold client information
+extern int clientCount; // Number of clients connected to the server
+
+// Function prototypes
+DWORD WINAPI client_handler(void* data);
+void handleCommand(Client *client, const char *command, char **parameters);
+void handleRegisterAlias(Client *client, char *alias);
+void uploadFileFromClient(Client *client, char *filename);
+void sendFileToClient(SOCKET clientSocket, const char *filename);
+void sendDirectoryFileList(SOCKET clientSocket);
+
+
 
 #endif // SERVER_COMMAND_HANDLER_H

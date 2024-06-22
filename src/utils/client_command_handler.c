@@ -39,7 +39,6 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
         if (registrationStatus == REGISTRATION_NOT_REGISTERED) {
-            printf("You must register before storing a file.\n");
             return 0;
         }
         sendFileToServer(sock, parameters[0]);
@@ -71,7 +70,7 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
     int replyLength; // size of received data
 
     // do not require a server reply
-    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0) {
+    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 || strcmp(command, COMMAND_GET) == 0) {
         return;
     }
 
@@ -95,9 +94,7 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
 
             if (strcmp(serverReply, registrationSuccessMessage) == 0) {
                 registrationStatus = REGISTRATION_REGISTERED;
-            } else {
-                registrationStatus = REGISTRATION_NOT_REGISTERED;
-            }
+            } 
         }
         printf("%s\n", serverReply);
     }
