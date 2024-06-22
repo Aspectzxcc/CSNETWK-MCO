@@ -7,7 +7,7 @@
 // Function prototypes
 DWORD WINAPI client_handler(void* data);
 void handleCommand(SOCKET clientSocket, const char *command, char **parameters, char **clientAlias);
-void handleRegisterAlias(SOCKET clientSocket, char *clientAlias);
+void handleRegisterAlias(SOCKET clientSocket, char *alias, char **clientAlias);
 void uploadFileFromClient(SOCKET clientSocket, const char *clientAlias, const char *filename);
 void sendFileToClient(SOCKET clientSocket, const char *filename);
 void sendDirectoryFileList(SOCKET clientSocket);

@@ -43,6 +43,8 @@ int main() {
             continue;
         }
 
+        connectionStatus = checkConnectionStatus(client); // check the connection status
+
         // execute the command and pass in the socket, Winsock data, server address, command, and parameters
         breakLoop = executeCommand(&client, &wsaData, &server, command->command, parameters, userInput);
 

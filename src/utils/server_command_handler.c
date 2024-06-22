@@ -84,7 +84,7 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
 
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // handle REGISTER command
-        handleRegisterAlias(clientSocket, parameters[0]); // register client alias
+        handleRegisterAlias(clientSocket, parameters[0], clientAlias); // register client alias
 
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // handle STORE command
@@ -103,7 +103,7 @@ void handleCommand(SOCKET clientSocket, const char *command, char **parameters, 
     }
 }
 
-void handleRegisterAlias(SOCKET clientSocket, char *alias) {
+void handleRegisterAlias(SOCKET clientSocket, char *alias, char **clientAlias) {
     // Check if the alias is already registered
     if (clientAliasCount > 0) {
         for (int i = 0; i < clientAliasCount; i++) {
@@ -120,6 +120,7 @@ void handleRegisterAlias(SOCKET clientSocket, char *alias) {
 
     // Check if alias is not null and add it to the clientAliases array
     if (alias != NULL && strlen(alias) > 0) {
+        *clientAlias = alias;
         clientAliases[clientAliasCount++] = alias;
     } else {
         char response[DEFAULT_BUFLEN];

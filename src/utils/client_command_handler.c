@@ -10,7 +10,7 @@
 // executes the specified command with the provided parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
     // check if not connected and the command is not join and help so that messages cannot be sent
-    if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && DISCONNECTED) {
+    if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && connectionStatus == DISCONNECTED) {
         // log error if not connected
         if (strcmp(command, COMMAND_LEAVE) == 0) {
             fprintf(stderr, ERROR_DISCONNECT_FAILED "\n"); // log error if not connected
@@ -73,7 +73,7 @@ void handleServerResponse(SOCKET *sock, const char *command) {
         return;
     }
 
-    if (!connectionStatus) {
+    if (connectionStatus == DISCONNECTED) {
         return;
     }
 
@@ -134,6 +134,40 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
     }
 
     connectionStatus = CONNECTED; // set connection status flag to connected
+}
+
+int checkConnectionStatus(SOCKET sockfd) {
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(sockfd, &readfds);
+
+    struct timeval tv;
+    tv.tv_sec = 0;  // 0 seconds
+    tv.tv_usec = 0; // 0 microseconds
+
+    // Use select to check socket status without waiting
+    int selectResult = select(0, &readfds, NULL, NULL, &tv);
+
+    if (selectResult > 0) {
+        // Socket is ready for reading
+        char buffer[1];
+        int recvResult = recv(sockfd, buffer, 1, MSG_PEEK);
+
+        if (recvResult > 0) {
+            // Data is available; the connection is alive
+            return CONNECTED; // Connection is alive
+        } else {
+            // The connection has been gracefully closed or an error occurred
+            return DISCONNECTED; // Disconnected or error
+        }
+    } else if (selectResult == 0) {
+        // The select call timed out, the socket is not ready for reading
+        // This does not necessarily mean the connection is down
+        return CONNECTED; // Assume connection is alive
+    } else {
+        // An error occurred with select
+        return DISCONNECTED; // Disconnected or error
+    }
 }
 
 // sends a message to the server
