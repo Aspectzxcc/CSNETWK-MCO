@@ -57,7 +57,6 @@ DWORD WINAPI client_handler(void* data) {
 
     // cleanup before exiting the thread
     closesocket(client->clientSocket); // close the client socket
-    free(client); // free allocated memory for client alias
     return 0; // return success code
 }
 
@@ -186,9 +185,9 @@ void uploadFileFromClient(Client *client, char *filename) {
 
     // Check if client alias is not null and add it to the response
     if (client->clientAlias[0] != '\0' && strlen(client->clientAlias) > 0) {
-        sprintf(response, "%s<%s>: Uploaded %s\n", client->clientAlias, timeStr, filename);
+        sprintf(response, "%s<%s>: Uploaded %s", client->clientAlias, timeStr, filename);
     } else {
-        sprintf(response, "<%s>: Uploaded %s\n", timeStr, filename);
+        sprintf(response, "<%s>: Uploaded %s", timeStr, filename);
     }
 
     send(client->clientSocket, response, strlen(response), 0);

@@ -20,6 +20,12 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         return 0;
     }
 
+    // check if not registered and the command is get or store so that files cannot be sent or received
+    if ((strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0) && registrationStatus == REGISTRATION_NOT_REGISTERED) {
+        fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
+        return 0;
+    }
+
     // determine and execute the command based on its identifier
     if (strcmp(command, COMMAND_JOIN) == 0) {
         // for join command, initialize socket connection and send message
@@ -38,17 +44,10 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
-        if (registrationStatus == REGISTRATION_NOT_REGISTERED) {
-            return 0;
-        }
         sendFileToServer(sock, parameters[0]);
     } else if (strcmp(command, COMMAND_GET) == 0) {
         // for get command, send the message to the server
         sendMessageToServer(sock, message);
-        if (registrationStatus == REGISTRATION_NOT_REGISTERED) {
-            return 0;
-        }
-        
         receiveFileFromServer(sock, parameters[0]);
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // for other commands, just send the message to the server
@@ -71,6 +70,10 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
 
     // do not require a server reply
     if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 || strcmp(command, COMMAND_GET) == 0) {
+        return;
+    }
+
+    if (strcmp(command, COMMAND_STORE) == 0 && registrationStatus == REGISTRATION_NOT_REGISTERED) {
         return;
     }
 
