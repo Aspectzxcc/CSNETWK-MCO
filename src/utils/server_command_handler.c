@@ -107,7 +107,6 @@ void handleRegisterAlias(SOCKET clientSocket, char *alias, char **clientAlias) {
     // Check if the alias is already registered
     if (clientAliasCount > 0) {
         for (int i = 0; i < clientAliasCount; i++) {
-            printf("Comparing %s with %s\n", clientAliases[i], alias);
             if (strcmp(clientAliases[i], alias) == 0) {
                 char response[DEFAULT_BUFLEN];
                 printf("Client alias %s already registered.\n", clientAliases[i]);
@@ -121,7 +120,7 @@ void handleRegisterAlias(SOCKET clientSocket, char *alias, char **clientAlias) {
     // Check if alias is not null and add it to the clientAliases array
     if (alias != NULL && strlen(alias) > 0) {
         *clientAlias = alias;
-        clientAliases[clientAliasCount++] = alias;
+        strcpy(clientAliases[clientAliasCount++], alias);
     } else {
         char response[DEFAULT_BUFLEN];
         sprintf(response, ERROR_REGISTRATION_FAILED, alias);

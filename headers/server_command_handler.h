@@ -15,7 +15,7 @@ void sendDirectoryFileList(SOCKET clientSocket);
 #define MAX_CLIENTS 10 // maximum number of clients that can connect to the server
 #define MAX_ALIAS_LENGTH 20 // maximum length of the client alias
 
-extern char* clientAliases[MAX_CLIENTS];
+extern char clientAliases[MAX_CLIENTS][MAX_ALIAS_LENGTH];
 extern int clientAliasCount;
 
 #endif // SERVER_COMMAND_HANDLER_H

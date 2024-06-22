@@ -39,6 +39,7 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
         if (registrationStatus == REGISTRATION_NOT_REGISTERED) {
+            printf("You must register before storing a file.\n");
             return 0;
         }
         sendFileToServer(sock, parameters[0]);

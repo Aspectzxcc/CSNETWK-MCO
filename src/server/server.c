@@ -1,7 +1,7 @@
 #include "../../headers/server.h"
 
 // array to hold client aliases
-char* clientAliases[MAX_CLIENTS]; 
+char clientAliases[MAX_CLIENTS][MAX_ALIAS_LENGTH]; 
 int clientAliasCount = 0;
 
 int main() {
