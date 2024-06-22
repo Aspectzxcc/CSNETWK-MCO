@@ -68,12 +68,8 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
     char registrationSuccessMessage[DEFAULT_BUFLEN]; // registration message format
     int replyLength; // size of received data
 
-    // do not require a server reply
-    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 || strcmp(command, COMMAND_GET) == 0) {
-        return;
-    }
-
-    if (strcmp(command, COMMAND_STORE) == 0 && registrationStatus == REGISTRATION_NOT_REGISTERED) {
+    // do not require a server reply or handles their own messages
+    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 || strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0) {
         return;
     }
 
@@ -202,6 +198,16 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     file = fopen(filePath, "rb");
     if (file == NULL) {
         fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n");
+        if(send(*sock, ERROR_FILE_NOT_FOUND_CLIENT, strlen(ERROR_FILE_NOT_FOUND_CLIENT), 0) == SOCKET_ERROR) {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        }
+        return;
+    }
+
+    const char* confirmationMessage = "Sending file";
+    if (send(*sock, confirmationMessage, strlen(confirmationMessage), 0) == SOCKET_ERROR) {
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        fclose(file);
         return;
     }
 
@@ -229,12 +235,37 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
         }
     }
 
+    char successMessage[DEFAULT_BUFLEN];
+    int recvResult = recv(*sock, successMessage, sizeof(successMessage), 0);
+    if (recvResult <= 0) {
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+    } else {
+        successMessage[recvResult] = '\0'; // Null-terminate the received message
+        printf("%s\n", successMessage);
+    }
+
     fclose(file);
 }
 
 void receiveFileFromServer(SOCKET *sock, const char *filename) {
     char filePath[256] = "files/";
     strncat(filePath, filename, sizeof(filePath) - strlen(filePath) - 1);
+
+    // Receive initial message from server to check for errors or file size
+    char serverReply[DEFAULT_BUFLEN];
+    int msgLen = recv(*sock, serverReply, DEFAULT_BUFLEN, 0); // Leave space for null terminator
+    if (msgLen <= 0) {
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        return;
+    } else {
+        serverReply[msgLen] = '\0'; // Null-terminate the received message
+    }
+
+    // Check if the received message is an error message
+    if (strcmp(serverReply, ERROR_FILE_NOT_FOUND_SERVER) == 0) {
+        printf("%s\n", serverReply);
+        return;
+    }
 
     // Open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb");

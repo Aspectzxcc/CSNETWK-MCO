@@ -129,6 +129,23 @@ void uploadFileFromClient(Client *client, char *filename) {
     char filePath[256] = "files/"; // Base directory for files
     strcat(filePath, filename); // Append filename to path
 
+    // Receive a confirmation message from the client before proceeding
+    char confirmationMessage[DEFAULT_BUFLEN];
+    int confirmationBytesReceived = recv(client->clientSocket, confirmationMessage, sizeof(confirmationMessage), 0);
+    if (confirmationBytesReceived <= 0) {
+        fprintf(stderr, "Failed to receive confirmation message.\n");
+        return;
+    }
+
+    // Null-terminate the received message (assuming it's text-based)
+    confirmationMessage[confirmationBytesReceived] = '\0';
+
+    // Check if the confirmation message indicates a file not found error
+    if (strcmp(confirmationMessage, ERROR_FILE_NOT_FOUND_CLIENT) == 0) {
+        fprintf(stderr, "Client reported file not found. Aborting upload.\n");
+        return;
+    }
+
     // Open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb");
     if (file == NULL) {
@@ -204,6 +221,10 @@ void sendFileToClient(SOCKET clientSocket, const char *filename) {
         return;
     }
 
+    // send confirmation message to confirm file transfer else send error message
+    const char confirmationMessage[DEFAULT_BUFLEN] = "Starting file transfer";
+    send(clientSocket, confirmationMessage, strlen(confirmationMessage), 0);
+
     // Get the file size
     fseek(file, 0, SEEK_END);
     long fileSize = ftell(file);
@@ -222,6 +243,7 @@ void sendFileToClient(SOCKET clientSocket, const char *filename) {
 
     fclose(file); // Close the file
     printf("File %s sent to client.\n", filename);
+    
 }
 
 void sendDirectoryFileList(SOCKET clientSocket) {
