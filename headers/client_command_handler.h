@@ -17,7 +17,7 @@ extern RegistrationStatus registrationStatus;
 
 // function prototypes
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message);
-void handleServerResponse(SOCKET *sock, const char *command);
+void handleServerResponse(SOCKET *sock, const char *command, char **parameters);
 void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port);
 int checkConnectionStatus(SOCKET sock);
 void sendMessageToServer(SOCKET *sock, char *message);

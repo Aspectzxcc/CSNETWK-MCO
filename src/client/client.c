@@ -49,7 +49,7 @@ int main() {
         breakLoop = executeCommand(&client, &wsaData, &server, command->command, parameters, userInput);
 
         // handle server response
-        handleServerResponse(&client, command->command);
+        handleServerResponse(&client, command->command, parameters);
 
         if (breakLoop) {
             break;

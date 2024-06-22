@@ -65,8 +65,9 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     return 0; // indicate no disconnection by default
 }   
 
-void handleServerResponse(SOCKET *sock, const char *command) {
+void handleServerResponse(SOCKET *sock, const char *command, char **parameters) {
     char serverReply[DEFAULT_BUFLEN]; // server reply buffer
+    char registrationSuccessMessage[DEFAULT_BUFLEN]; // registration message format
     int replyLength; // size of received data
 
     // do not require a server reply
@@ -85,16 +86,21 @@ void handleServerResponse(SOCKET *sock, const char *command) {
     } else if (replyLength == 0) {
         return;
     } else {
+        // null-terminate the received data
+        serverReply[replyLength] = '\0';
+        
         if (strcmp(command, COMMAND_REGISTER) == 0) {
-            if (strcmp(serverReply, MESSAGE_SUCCESSFUL_REGISTRATION) == 0) {
+            // format the registration success message with the user's handle
+            sprintf(registrationSuccessMessage, MESSAGE_SUCCESSFUL_REGISTRATION, parameters[0]);
+
+            printf("%s\n", registrationSuccessMessage);
+
+            if (strcmp(serverReply, registrationSuccessMessage) == 0) {
                 registrationStatus = REGISTRATION_REGISTERED;
             } else {
                 registrationStatus = REGISTRATION_NOT_REGISTERED;
             }
         }
-
-        // null-terminate the received data before printing
-        serverReply[replyLength] = '\0';
         printf("%s\n", serverReply);
     }
 }
