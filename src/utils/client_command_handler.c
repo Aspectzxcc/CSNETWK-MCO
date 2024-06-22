@@ -198,14 +198,15 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     file = fopen(filePath, "rb");
     if (file == NULL) {
         fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n");
-        if(send(*sock, ERROR_FILE_NOT_FOUND_CLIENT, strlen(ERROR_FILE_NOT_FOUND_CLIENT), 0) == SOCKET_ERROR) {
+        long errorCode = htonl(0); // Indicate file not found with 0
+        if(send(*sock, (char*)&errorCode, sizeof(errorCode), 0) == SOCKET_ERROR) {
             fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         }
         return;
     }
 
-    const char* confirmationMessage = "Sending file";
-    if (send(*sock, confirmationMessage, strlen(confirmationMessage), 0) == SOCKET_ERROR) {
+    long confirmationCode = htonl(1);
+    if (send(*sock, (char*)&confirmationCode, sizeof(confirmationCode), 0) == SOCKET_ERROR) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         fclose(file);
         return;

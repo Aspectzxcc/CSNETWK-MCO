@@ -130,18 +130,14 @@ void uploadFileFromClient(Client *client, char *filename) {
     strcat(filePath, filename); // Append filename to path
 
     // Receive a confirmation message from the client before proceeding
-    char confirmationMessage[DEFAULT_BUFLEN];
-    int confirmationBytesReceived = recv(client->clientSocket, confirmationMessage, sizeof(confirmationMessage), 0);
+    long confirmationCode;
+    int confirmationBytesReceived = recv(client->clientSocket, (char*)&confirmationCode, sizeof(confirmationCode), 0);
     if (confirmationBytesReceived <= 0) {
         fprintf(stderr, "Failed to receive confirmation message.\n");
         return;
     }
 
-    // Null-terminate the received message (assuming it's text-based)
-    confirmationMessage[confirmationBytesReceived] = '\0';
-
-    // Check if the confirmation message indicates a file not found error
-    if (strcmp(confirmationMessage, ERROR_FILE_NOT_FOUND_CLIENT) == 0) {
+    if (confirmationCode == 0) {
         fprintf(stderr, "Client reported file not found. Aborting upload.\n");
         return;
     }
