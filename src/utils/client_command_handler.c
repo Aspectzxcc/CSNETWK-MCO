@@ -93,8 +93,6 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
             // format the registration success message with the user's handle
             sprintf(registrationSuccessMessage, MESSAGE_SUCCESSFUL_REGISTRATION, parameters[0]);
 
-            printf("%s\n", registrationSuccessMessage);
-
             if (strcmp(serverReply, registrationSuccessMessage) == 0) {
                 registrationStatus = REGISTRATION_REGISTERED;
             } else {
