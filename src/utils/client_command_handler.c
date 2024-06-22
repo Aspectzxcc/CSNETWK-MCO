@@ -10,7 +10,7 @@
 // executes the specified command with the provided parameters
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
     // check if not connected and the command is not join and help so that messages cannot be sent
-    if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && !connectionStatus) {
+    if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && DISCONNECTED) {
         // log error if not connected
         if (strcmp(command, COMMAND_LEAVE) == 0) {
             fprintf(stderr, ERROR_DISCONNECT_FAILED "\n"); // log error if not connected
@@ -29,7 +29,7 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
         // if the client is not connected and tries to leave, return 0
         sendMessageToServer(sock, message);
         closesocket(*sock); // close the socket
-        connectionStatus = 0; // set connection status flag to disconnected
+        connectionStatus = DISCONNECTED; // set connection status flag to disconnected
         printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
         return 1; // indicate client wishes to disconnect
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
@@ -38,14 +38,14 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // for store command, send a file to the server
         sendMessageToServer(sock, message);
-        if (!registrationStatus) {
+        if (REGISTRATION_NOT_REGISTERED) {
             return 0;
         }
         sendFileToServer(sock, parameters[0]);
     } else if (strcmp(command, COMMAND_GET) == 0) {
         // for get command, send the message to the server
         sendMessageToServer(sock, message);
-        if (!registrationStatus) {
+        if (REGISTRATION_NOT_REGISTERED) {
             return 0;
         }
         
@@ -133,7 +133,7 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
         *sock = INVALID_SOCKET;
     }
 
-    connectionStatus = 1; // set connection status flag to connected
+    connectionStatus = CONNECTED; // set connection status flag to connected
 }
 
 // sends a message to the server

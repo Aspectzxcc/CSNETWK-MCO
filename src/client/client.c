@@ -1,7 +1,7 @@
 #include "../../headers/client.h"
 
-int connectionStatus = 0; // connection status flag
-int registrationStatus = 0; // registration status flag
+ConnectionStatus connectionStatus = DISCONNECTED; // connection status flag
+RegistrationStatus registrationStatus = REGISTRATION_NOT_REGISTERED; // registration status flag
 
 int main() {
     const Command *command; // command structure

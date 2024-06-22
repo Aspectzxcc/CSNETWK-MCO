@@ -1,8 +1,19 @@
 #ifndef COMMAND_PARSER_H
 #define COMMAND_PARSER_H
 
-extern int connectionStatus; // connection status flag
-extern int registrationStatus; // registration status flag
+typedef enum {
+    DISCONNECTED,
+    CONNECTED
+} ConnectionStatus;
+
+typedef enum {
+    REGISTRATION_NOT_REGISTERED,
+    REGISTRATION_REGISTERED
+} RegistrationStatus;
+
+
+extern ConnectionStatus connectionStatus;
+extern RegistrationStatus registrationStatus;
 
 // function prototypes
 int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message);
