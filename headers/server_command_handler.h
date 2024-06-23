@@ -22,7 +22,6 @@ void handleRegisterAlias(Client *client, char *alias);
 void uploadFileFromClient(Client *client, char *filename);
 void sendFileToClient(SOCKET clientSocket, const char *filename);
 void sendDirectoryFileList(SOCKET clientSocket);
-
-
+void broadcastMessage(Client *client, char *message);
 
 #endif // SERVER_COMMAND_HANDLER_H

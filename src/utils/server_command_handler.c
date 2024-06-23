@@ -86,6 +86,13 @@ void handleCommand(Client *client, const char *command, char **parameters) {
 
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         sendDirectoryFileList(client->clientSocket); // list files in directory
+
+    } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
+        broadcastMessage(client, parameters[0]); // broadcast message to all clients
+
+    } else if (strcmp(command, COMMAND_UNICAST) == 0) {
+        // unicastMessage(client, parameters[0], parameters[1]); // unicast message to specific client
+
     } else {
         send(client->clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0); // send error message for unknown command
     }
@@ -261,4 +268,27 @@ void sendDirectoryFileList(SOCKET clientSocket) {
 
     // send the directory listing to the client
     send(clientSocket, directoryListing, strlen(directoryListing), 0);
+}
+
+void broadcastMessage(Client *client, char *message) {
+    int bytesSent;
+    for (int i = 0; i < clientCount; i++) {
+        if (clients[i].clientSocket != client->clientSocket) {
+            bytesSent = send(clients[i].clientSocket, message, strlen(message), 0);
+
+            if (bytesSent == SOCKET_ERROR) {
+                fprintf(stderr, "broadcast message failed to client %d\n", i);
+            } else {
+                printf("broadcast message sent to client %s\n", clients[i].clientAlias);
+            }
+        }
+    }
+
+    bytesSent = send(client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, strlen(MESSAGE_SUCCESSFUL_BROADCAST), 0);
+
+    if (bytesSent == SOCKET_ERROR) {
+        fprintf(stderr, "broadcast message failed for client %s\n", client->clientAlias);
+    } else {
+        printf("broadcast message by client %s successful\n", client->clientAlias);
+    } 
 }
