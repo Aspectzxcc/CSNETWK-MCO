@@ -38,7 +38,21 @@ int main() {
             // add the new client to the array of clients
             clients[clientCount].clientSocket = clientSocket;
 
+            // take the client address
+            memcpy(&clients[clientCount].clientAddress, &client, sizeof(SOCKADDR_IN));
+            clients[clientCount].clientAddress.sin_port = htons(8888);
+
+            char portBuffer[sizeof(u_short)];
+            int bytesRead = recv(clientSocket, portBuffer, sizeof(u_short), 0);
+
+            if (bytesRead > 0) {
+                u_short port;
+                memcpy(&port, portBuffer, sizeof(u_short));
+                clients[clientCount].clientAddress.sin_port = htons(port);
+            }
+
             sendMessage(&clients[clientCount].clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, -1);
+            initUdpSenderSocket(&clients[clientCount].senderSocket);
 
             // create a new thread to handle the client
             HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);

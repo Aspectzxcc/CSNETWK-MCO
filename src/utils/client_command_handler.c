@@ -54,6 +54,7 @@ int executeCommand(const char *command, char **parameters, char *message) {
         printCommands();
     } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
         // send a broadcast message to the server.
+        handleBroadcastCommand(&client.clientSocket, message);
     } else if (strcmp(command, COMMAND_UNICAST) == 0) {
         // send a unicast message to the server.
     } else {
@@ -67,6 +68,7 @@ int executeCommand(const char *command, char **parameters, char *message) {
 void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     // set up the server address structure
     SOCKADDR_IN server;
+    SOCKADDR_IN receiver;
 
     if (*sock != INVALID_SOCKET) {
         closesocket(*sock); // close the socket if it is already open
@@ -84,6 +86,15 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     server.sin_addr.s_addr = inet_addr(ip); // set ip address
     server.sin_port = htons(port); // set port, converting to network byte order
 
+    initUdpReceiverSocket(&client.receiverSocket, &receiver, ip); // initialize the UDP receiver socket
+    udpThread = CreateThread(NULL, 0, listenForMessages, (void*)&client.receiverSocket, 0, NULL); // create a thread to listen for messages
+
+    if (udpThread == NULL) {
+        // if thread creation fails, print an error message
+        printf("CreateThread failed with error code: %d", GetLastError());
+        WSACleanup();
+    } 
+
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message
@@ -92,6 +103,9 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
         *sock = INVALID_SOCKET; // set socket to invalid
         return;
     }
+
+    u_short portNetOrder = htons(receiver.sin_port); // convert port to network byte order
+    sendMessage(sock, (char*)&portNetOrder, sizeof(portNetOrder)); // send the UDP port to the server
 
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
@@ -106,6 +120,7 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 void disconnectFromServer(SOCKET *sock) {
     sendMessage(sock, COMMAND_LEAVE, -1);
     closesocket(*sock); // close the socket
+    CloseHandle(udpThread); // close the UDP listener thread
     client.connectionStatus = DISCONNECTED; // set connection status to disconnected
 }
 
@@ -239,4 +254,43 @@ void getServerDirectory(SOCKET *sock) {
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
     
     printf("%s\n", serverReply); // print directory listing
+}
+
+DWORD WINAPI listenForMessages(void *data) {
+    SOCKET receiverSocket = *(SOCKET*)data;
+    char recvBuffer[DEFAULT_BUFLEN];
+    int recvBufferLen = DEFAULT_BUFLEN;
+    SOCKADDR_IN senderAddr;
+    int senderAddrSize = sizeof(senderAddr);
+
+    while (1) {
+        memset(recvBuffer, 0, recvBufferLen); // Clear the buffer
+        int bytesReceived = recvfrom(receiverSocket, recvBuffer, recvBufferLen, 0, (SOCKADDR*)&senderAddr, &senderAddrSize);
+        if (bytesReceived > 0) {
+            // Successfully received a message
+            recvBuffer[bytesReceived] = '\0'; // Null-terminate the buffer
+            printf("recieved message: %s\n", recvBuffer);
+            // Process the received message here
+        } else if (bytesReceived == SOCKET_ERROR) {
+            int error = WSAGetLastError();
+            if (error != WSAEWOULDBLOCK) {
+                // An error occurred, not just the non-blocking mode causing no data to be ready
+                fprintf(stderr, "recvfrom failed with error code: %d\n", error);
+                break; // Exit the loop on error
+            }
+        }
+        // Implement a mechanism to gracefully exit the loop if needed
+    }
+
+    closesocket(receiverSocket); // Close the socket when done
+    return 0; // Return value is required for functions of type DWORD WINAPI
+}
+
+void handleBroadcastCommand(SOCKET *sock, const char *message) {
+    sendMessage(sock, message, -1);
+
+    char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
+    strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
+
+    printf("%s\n", serverReply); // print server reply
 }

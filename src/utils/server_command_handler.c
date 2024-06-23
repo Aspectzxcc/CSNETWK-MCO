@@ -258,7 +258,6 @@ void sendDirectoryFileList(SOCKET *clientSocket) {
 }
 
 void broadcastMessage(Client *client, char *message) {
-    int bytesSent;
     char formattedMessage[DEFAULT_BUFLEN]; // Assuming DEFAULT_BUFLEN is defined and large enough
     time_t now = time(NULL);
     struct tm *tm_info = localtime(&now);
@@ -274,12 +273,17 @@ void broadcastMessage(Client *client, char *message) {
 
     for (int i = 0; i < clientCount; i++) {
         if (clients[i].clientSocket != client->clientSocket) {
-            sendMessage(&clients[i].clientSocket, formattedMessage, strlen(formattedMessage));
-
-            printf("broadcast message sent to client %s\n", clients[i].clientAlias);
+            // Use senderSocket for UDP broadcasting
+            int sendResult = sendto(clients[i].senderSocket, formattedMessage, strlen(formattedMessage), 0, 
+                                    (struct sockaddr *)&clients[i].clientAddress, sizeof(clients[i].clientAddress));
+            if (sendResult == SOCKET_ERROR) {
+                printf("Failed to send message to client %s, error: %d\n", clients[i].clientAlias, WSAGetLastError());
+            } else {
+                printf("Broadcast message sent to client %s\n", clients[i].clientAlias);
+            }
         }
     }
 
-    // Send confirmation back to the sender
-    sendMessage(&client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, strlen(MESSAGE_SUCCESSFUL_BROADCAST));
+    // Send confirmation message to the client that sent the broadcast
+    sendMessage(&client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, -1);
 }

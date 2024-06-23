@@ -13,11 +13,13 @@ typedef enum {
 
 typedef struct Client {
     SOCKET clientSocket;
+    SOCKET receiverSocket;
     ConnectionStatus connectionStatus;
     RegistrationStatus registrationStatus;
 } Client;
 
 extern Client client;
+extern HANDLE udpThread;
 
 // function prototypes
 int executeCommand(const char *command, char **parameters, char *message);
@@ -27,5 +29,7 @@ void registerAlias(SOCKET *sock, const char *alias);
 void sendFileToServer(SOCKET *sock, const char *filename);
 void receiveFileFromServer(SOCKET *sock, const char *filename);
 void getServerDirectory(SOCKET *sock);
+DWORD WINAPI listenForMessages(void *data);
+void handleBroadcastCommand(SOCKET *sock, const char *message);
 
 #endif // COMMAND_HANDLER_H

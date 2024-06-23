@@ -81,3 +81,67 @@ int commandRequiresRegistration(const char *command) {
     return strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_DIR) == 0
     || strcmp(command, COMMAND_BROADCAST) == 0 || strcmp(command, COMMAND_UNICAST) == 0;
 }
+
+void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const char *ip) {
+    *sock = socket(AF_INET, SOCK_DGRAM, 0); // Create a UDP socket
+
+    receiverAddress->sin_family = AF_INET; // Use IPv4 addresses
+    receiverAddress->sin_addr.s_addr = inet_addr(ip); // Set the receiver IP address
+    receiverAddress->sin_port = htons(0); // Use any available port
+    
+    // set the socket to non-blocking mode
+    u_long mode = 1;
+    if (ioctlsocket(*sock, FIONBIO, &mode) == SOCKET_ERROR) {
+        fprintf(stderr, "Receiver ioctlsocket failed with error code : %d\n", WSAGetLastError()); // Print error message
+        closesocket(*sock); // Close the socket
+        WSACleanup(); // Clean up Winsock
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+
+    // set the socket to broadcast mode
+    int broadcast = 1;
+    if (setsockopt(*sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR) {
+        fprintf(stderr, "Receiver setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
+        closesocket(*sock); // Close the socket
+        WSACleanup(); // Clean up Winsock
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+
+    // set the socket to reuse the address
+    int reuse = 1;
+    if (setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == SOCKET_ERROR) {
+        fprintf(stderr, "Receiver setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
+        closesocket(*sock); // Close the socket
+        WSACleanup(); // Clean up Winsock
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+
+    if (bind(*sock, (struct sockaddr *)receiverAddress, sizeof(*receiverAddress)) == SOCKET_ERROR) {
+    fprintf(stderr, "Receiver Bind failed with error code : %d\n", WSAGetLastError());
+    closesocket(*sock);
+    WSACleanup();
+    *sock = INVALID_SOCKET;
+    }
+}
+
+void initUdpSenderSocket(SOCKET *sock) {
+    *sock = socket(AF_INET, SOCK_DGRAM, 0); // Create a UDP socket
+
+    // set the socket to broadcast mode
+    int broadcast = 1;
+    if (setsockopt(*sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR) {
+        fprintf(stderr, "Sender setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
+        closesocket(*sock); // Close the socket
+        WSACleanup(); // Clean up Winsock
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+
+    // set the socket to reuse the address
+    int reuse = 1;
+    if (setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == SOCKET_ERROR) {
+        fprintf(stderr, "Sender setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
+        closesocket(*sock); // Close the socket
+        WSACleanup(); // Clean up Winsock
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+}

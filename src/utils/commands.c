@@ -74,36 +74,81 @@ char **parseCommandParameters(const Command *command, char *input) {
         return NULL;
     }
 
-    // tokenizes input to extract parameters
-    char *token = strtok(inputCopy, " ");
-    int index = 0;
-    while (token != NULL && index < command->parameterCount) {
-        token = strtok(NULL, " "); // gets the next parameter
-        if (token != NULL) {
-            parameters[index] = strdup(token); // duplicates parameter
-            if (parameters[index] == NULL) {
-                fprintf(stderr, "memory allocation failed for parameter %d\n", index);
-                // frees allocated memory before returning error
-                for (int i = 0; i < index; i++) {
-                    free(parameters[i]);
-                }
+    // Check if the command is 'broadcast' or 'unicast'
+    if (strcmp(command->command, COMMAND_BROADCAST) == 0) {
+        // For broadcast, everything after the command is considered a single parameter
+        char *message = strchr(inputCopy, ' ');
+        if (message != NULL) {
+            message++; // Move past the space to get the message
+            parameters[0] = strdup(message);
+            if (parameters[0] == NULL) {
+                fprintf(stderr, "memory allocation failed for message\n");
                 free(parameters);
                 free(inputCopy);
                 return NULL;
             }
-            index++;
+        } else {
+            // No message found after the command
+            free(parameters);
+            free(inputCopy);
+            return NULL;
         }
-    }
+    } else if (strcmp(command->command, COMMAND_UNICAST) == 0) {
+        // For unicast, the first parameter is the handle or alias, and everything after is the message
+        char *handle = strtok(NULL, " "); // Use strtok to get the first parameter after the command
+        if (handle != NULL) {
+            parameters[0] = strdup(handle);
+            if (parameters[0] == NULL) {
+                fprintf(stderr, "memory allocation failed for handle\n");
+                free(parameters);
+                free(inputCopy);
+                return NULL;
+            }
+            // Now, treat the rest of the input as the message
+            char *message = inputCopy + (handle - inputCopy) + strlen(handle) + 1; // Calculate position
+            parameters[1] = strdup(message);
+            if (parameters[1] == NULL) {
+                fprintf(stderr, "memory allocation failed for message\n");
+                free(parameters[0]);
+                free(parameters);
+                free(inputCopy);
+                return NULL;
+            }
+        } else {
+            // No handle found after the command
+            free(parameters);
+            free(inputCopy);
+            return NULL;
+        }
+    } else {
+        // Existing logic for tokenizing input and extracting parameters
+        char *token = strtok(inputCopy, " ");
+        int index = 0;
+        while (token != NULL && index < command->parameterCount) {
+            token = strtok(NULL, " ");
+            if (token != NULL) {
+                parameters[index] = strdup(token);
+                if (parameters[index] == NULL) {
+                    fprintf(stderr, "memory allocation failed for parameter %d\n", index);
+                    for (int i = 0; i < index; i++) {
+                        free(parameters[i]);
+                    }
+                    free(parameters);
+                    free(inputCopy);
+                    return NULL;
+                }
+                index++;
+            }
+        }
 
-    // checks if the number of parameters matches the expected count
-    if (index != command->parameterCount) {
-        // frees allocated memory before returning null
-        for (int i = 0; i < index; i++) {
-            free(parameters[i]);
+        if (index != command->parameterCount) {
+            for (int i = 0; i < index; i++) {
+                free(parameters[i]);
+            }
+            free(parameters);
+            free(inputCopy);
+            return NULL;
         }
-        free(parameters);
-        free(inputCopy);
-        return NULL;
     }
 
     free(inputCopy); // frees the input copy after use

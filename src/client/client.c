@@ -1,7 +1,8 @@
 #include "../../headers/client.h"
 
 // client structure to hold client socket and status information
-Client client = {INVALID_SOCKET, DISCONNECTED, REGISTRATION_NOT_REGISTERED};
+Client client = {INVALID_SOCKET, INVALID_SOCKET, DISCONNECTED, REGISTRATION_NOT_REGISTERED};
+HANDLE udpThread; // thread handle for UDP communication
 
 int main() {
     WSADATA wsaData; // structure for Winsock data

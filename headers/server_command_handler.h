@@ -9,7 +9,8 @@
 
 typedef struct Client {
     SOCKET clientSocket; // Socket associated with the client
-    SOCKET receiverSocket; // Socket used for receiving broadcast and unicast messages
+    SOCKET senderSocket; // Socket used for sending broadcast and unicast messages to the client
+    SOCKADDR_IN clientAddress; // Address of the client socket
     char clientAlias[MAX_ALIAS_LENGTH]; // Alias of the client
 } Client;
 
