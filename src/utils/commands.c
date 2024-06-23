@@ -11,7 +11,9 @@ const Command commands[] = {
     {COMMAND_STORE, 1}, // /store <filename>
     {COMMAND_DIR, 0}, // /dir
     {COMMAND_GET, 1}, // /get <filename>
-    {COMMAND_HELP, 0} // /?
+    {COMMAND_HELP, 0}, // /?
+    {COMMAND_BROADCAST, 1}, // /broadcast <message>
+    {COMMAND_UNICAST, 2} // /unicast <handle> <message>
 };
 
 // commands count

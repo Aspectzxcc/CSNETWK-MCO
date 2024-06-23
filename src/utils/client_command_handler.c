@@ -21,7 +21,9 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     }
 
     // check if the client is not registered and tries to execute commands that require registration.
-    if ((strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0) && registrationStatus == REGISTRATION_NOT_REGISTERED) {
+    if ((strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0 
+    || strcmp(command, COMMAND_BROADCAST) == 0 || strcmp(command, COMMAND_UNICAST) == 0) 
+    && registrationStatus == REGISTRATION_NOT_REGISTERED) {
         fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
         return 0;
     }
@@ -55,6 +57,12 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     } else if (strcmp(command, COMMAND_HELP) == 0) {
         // print available commands.
         printCommands();
+    } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
+        // send a broadcast message to the server.
+        sendMessageToServer(sock, message);
+    } else if (strcmp(command, COMMAND_UNICAST) == 0) {
+        // send a unicast message to the server.
+        sendMessageToServer(sock, message);
     } else {
         // handle unknown command.
         fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
