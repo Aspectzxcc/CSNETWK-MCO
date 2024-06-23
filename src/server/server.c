@@ -38,6 +38,16 @@ int main() {
             // add the new client to the array of clients
             clients[clientCount].clientSocket = clientSocket;
 
+            // Create a UDP socket for the client
+            SOCKET receiverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+            if (receiverSocket == INVALID_SOCKET) {
+                printf("Failed to create UDP socket for client with error code: %d\n", WSAGetLastError());
+                break;
+            } else {
+                // Store the UDP socket in the client structure
+                clients[clientCount].receiverSocket = receiverSocket;
+            }
+
             // create a new thread to handle the client
             HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);
             if (thread == NULL) {

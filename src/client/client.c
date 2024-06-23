@@ -16,6 +16,8 @@ int main() {
 
     char serverReply[DEFAULT_BUFLEN]; // buffer for server replies
     int replyLength; // length of the reply received from the server
+    u_long mode; // variable to store the mode for setting the socket to non-blocking
+    int broadcastPermission; // variable to store the permission for enabling broadcast on the socket
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -31,17 +33,37 @@ int main() {
         return 1;
     }
 
-    // Create the receiver socket for broadcast and unicast messages
-    receiver = socket(AF_INET, SOCK_STREAM, 0);
+    // set the mode to non-blocking
+    mode = 1;
+
+    // set the client socket to be non-blocking
+    if (ioctlsocket(client, FIONBIO, &mode) != NO_ERROR) {
+        fprintf(stderr, "Failed to set client socket to non-blocking mode. Error code: %d", WSAGetLastError());
+        return 1;
+    }
+
+    // Create the UDP receiver socket for broadcast and unicast messages
+    receiver = socket(AF_INET, SOCK_DGRAM, 0); // SOCK_DGRAM for UDP
     if (receiver == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        fprintf(stderr, "Could not create UDP receiver socket : %d", WSAGetLastError());
         WSACleanup();
         return 1;
     }
 
-    // set the receiver to be non-blocking
-    u_long mode = 1;
-    ioctlsocket(receiver, FIONBIO, &mode);
+    // allow broadcast messages to be sent on the socket
+    broadcastPermission = 1;
+    if (setsockopt(receiver, SOL_SOCKET, SO_BROADCAST, (char *)&broadcastPermission, sizeof(broadcastPermission)) < 0) {
+        fprintf(stderr, "Could not enable broadcast on socket: %d\n", WSAGetLastError());
+        closesocket(client);
+        WSACleanup();
+        return 1;
+    }
+
+    // set the receiver socket to be non-blocking
+    if (ioctlsocket(receiver, FIONBIO, &mode) != NO_ERROR) {
+        fprintf(stderr, "Failed to set UDP receiver socket to non-blocking mode. Error code: %d", WSAGetLastError());
+        return 1;
+    }
 
     // main loop for command input and processing
     while (1) {
