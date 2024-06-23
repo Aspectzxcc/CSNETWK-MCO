@@ -8,7 +8,7 @@
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
 // executes the specified command with the provided parameters.
-int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
+int executeCommand(SOCKET *sock, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
     // check if the client is not connected and the command requires a connection.
     if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && connectionStatus == DISCONNECTED) {
         // log error if trying to execute a command without being connected.
@@ -31,7 +31,7 @@ int executeCommand(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const ch
     // execute the command based on its identifier.
     if (strcmp(command, COMMAND_JOIN) == 0) {
         // initialize socket connection and send join message.
-        initSocketConnection(sock, wsaData, server, parameters[0], atoi(parameters[1]));
+        initSocketConnection(sock, server, parameters[0], atoi(parameters[1]));
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // send leave message and close the socket.
@@ -118,28 +118,7 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
 }
 
 // initializes a socket connection using the provided ip address and port
-void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, const char *ip, int port) {
-    // if socket is already open, close it first
-    if (*sock != INVALID_SOCKET) {
-        closesocket(*sock); // close the existing socket
-        WSACleanup(); // clean up Winsock
-    }
-
-    // initialize winsock
-    if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
-        fprintf(stderr, "failed to initialize winsock. error code : %d", WSAGetLastError()); // print error message
-        *sock = INVALID_SOCKET; // set socket to invalid
-        return;
-    }
-
-    // create the socket
-    *sock = socket(AF_INET, SOCK_STREAM, 0); // create a TCP socket
-    if (*sock == INVALID_SOCKET) {
-        fprintf(stderr, "could not create socket : %d", WSAGetLastError()); // print error message
-        WSACleanup(); // clean up Winsock
-        return;
-    }
-
+void initSocketConnection(SOCKET *sock, SOCKADDR_IN *server, const char *ip, int port) {
     // set up the server address structure
     server->sin_family = AF_INET; // set address family to internet
     server->sin_addr.s_addr = inet_addr(ip); // set ip address
@@ -147,9 +126,11 @@ void initSocketConnection(SOCKET *sock, WSADATA *wsaData, SOCKADDR_IN *server, c
 
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)server, sizeof(*server)) < 0) {
+        fprintf(stderr, "Could not connect to server : %d", WSAGetLastError()); // print error message
         closesocket(*sock); // close socket on failure
         WSACleanup(); // clean up Winsock
         *sock = INVALID_SOCKET; // set socket to invalid
+        return;
     }
 
     connectionStatus = CONNECTED; // set connection status flag to connected

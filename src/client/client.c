@@ -17,6 +17,20 @@ int main() {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server replies
     int replyLength; // length of the reply received from the server
 
+    // Initialize Winsock
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        fprintf(stderr, "Failed to initialize Winsock. Error code : %d", WSAGetLastError());
+        return 1;
+    }
+
+    // Create the socket
+    client = socket(AF_INET, SOCK_STREAM, 0);
+    if (client == INVALID_SOCKET) {
+        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        WSACleanup();
+        return 1;
+    }
+
     // main loop for command input and processing
     while (1) {
         fgets(userInput, sizeof(userInput), stdin); // read user input from stdin
@@ -41,7 +55,7 @@ int main() {
         connectionStatus = checkConnectionStatus(client); // check current connection status
 
         // execute the command with provided parameters
-        breakLoop = executeCommand(&client, &wsaData, &server, command->command, parameters, userInput);
+        breakLoop = executeCommand(&client, &server, command->command, parameters, userInput);
 
         // process server response to the executed command
         handleServerResponse(&client, command->command, parameters);
