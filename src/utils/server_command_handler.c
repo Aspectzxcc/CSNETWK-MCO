@@ -2,6 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include "../../headers/server_command_handler.h"
+#include "../../headers/helpers.h"
 
 // function to handle client connections
 DWORD WINAPI client_handler(void* data) {
@@ -62,17 +63,15 @@ DWORD WINAPI client_handler(void* data) {
 
 void handleCommand(Client *client, const char *command, char **parameters) {
     // check if client is registered for specific commands
-    if ((strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_DIR) == 0) && client->clientAlias[0] == '\0') {
+    if (commandRequiresRegistration(command) && client->clientAlias[0] == '\0') {
         printf("Client not registered\n");
         send(client->clientSocket, ERROR_REGISTRATION_FAILED, strlen(ERROR_REGISTRATION_FAILED), 0); // send error message for unregistered client
         return;
     }
 
     // handle specific commands
-    if (strcmp(command, COMMAND_JOIN) == 0) {
-        send(client->clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, strlen(MESSAGE_SUCCESSFUL_CONNECTION), 0); // send success message for join command
 
-    } else if (strcmp(command, COMMAND_LEAVE) == 0) {
+    if (strcmp(command, COMMAND_LEAVE) == 0) {
         printf(client->clientAlias ? "Client %s disconnected\n" : "Client disconnected\n", client->clientAlias); // log client disconnection
 
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
@@ -82,10 +81,10 @@ void handleCommand(Client *client, const char *command, char **parameters) {
         uploadFileFromClient(client, parameters[0]); // upload file from client
 
     } else if (strcmp(command, COMMAND_GET) == 0) {
-        sendFileToClient(client->clientSocket, parameters[0]); // send file to client
+        sendFileToClient(&client->clientSocket, parameters[0]); // send file to client
 
     } else if (strcmp(command, COMMAND_DIR) == 0) {
-        sendDirectoryFileList(client->clientSocket); // list files in directory
+        sendDirectoryFileList(&client->clientSocket); // list files in directory
 
     } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
         broadcastMessage(client, parameters[0]); // broadcast message to all clients
@@ -94,7 +93,7 @@ void handleCommand(Client *client, const char *command, char **parameters) {
         // unicastMessage(client, parameters[0], parameters[1]); // unicast message to specific client
 
     } else {
-        send(client->clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND), 0); // send error message for unknown command
+        sendMessage(&client->clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND)); // send error message for unknown command
     }
 }
 
@@ -106,7 +105,7 @@ void handleRegisterAlias(Client *client, char *alias) {
                 char response[DEFAULT_BUFLEN];
                 printf("Client alias %s already registered.\n", clients[i].clientAlias);
                 sprintf(response, ERROR_REGISTRATION_FAILED, alias);
-                send(client->clientSocket, response, strlen(response), 0);
+                sendMessage(&client->clientSocket, response, strlen(response));
                 return;
             }
         }
@@ -119,20 +118,20 @@ void handleRegisterAlias(Client *client, char *alias) {
     } else {
         char response[DEFAULT_BUFLEN];
         sprintf(response, ERROR_REGISTRATION_FAILED, alias);
-        send(client->clientSocket, response, strlen(response), 0);
+        sendMessage(&client->clientSocket, response, strlen(response));
         return;
     }
 
     // send confirmation message for successful registration
     char response[DEFAULT_BUFLEN];
     sprintf(response, MESSAGE_SUCCESSFUL_REGISTRATION, alias);
-    send(client->clientSocket, response, strlen(response), 0);
+    sendMessage(&client->clientSocket, response, strlen(response));
 }
 
 void uploadFileFromClient(Client *client, char *filename) {
     char filePath[256] = "files/"; // base directory for files
     strcat(filePath, filename); // append filename to path
-    
+
     // open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb");
     if (file == NULL) {
@@ -194,23 +193,23 @@ void uploadFileFromClient(Client *client, char *filename) {
         sprintf(response, "<%s>: uploaded %s", timeStr, filename);
     }
 
-    send(client->clientSocket, response, strlen(response), 0);
+    sendMessage(&client->clientSocket, response, strlen(response));
 }
 
-void sendFileToClient(SOCKET clientSocket, const char *filename) {
+void sendFileToClient(SOCKET *clientSocket, const char *filename) {
     char filePath[256] = "files/"; // base directory for files
     strcat(filePath, filename); // append filename to path
 
     // open the file for reading in binary mode
     FILE *file = fopen(filePath, "rb");
     if (file == NULL) {
-        send(clientSocket, ERROR_FILE_NOT_FOUND_SERVER, strlen(ERROR_FILE_NOT_FOUND_SERVER), 0);
+        sendMessage(clientSocket, ERROR_FILE_NOT_FOUND_CLIENT, -1);
         return;
     }
 
     // send confirmation message to confirm file transfer else send error message
     const char confirmationMessage[DEFAULT_BUFLEN] = "starting file transfer";
-    send(clientSocket, confirmationMessage, strlen(confirmationMessage), 0);
+    sendMessage(clientSocket, confirmationMessage, -1);
 
     // get the file size
     fseek(file, 0, SEEK_END);
@@ -219,13 +218,13 @@ void sendFileToClient(SOCKET clientSocket, const char *filename) {
 
     // send the file size first
     long fileSizeNetOrder = htonl(fileSize); // convert to network byte order
-    send(clientSocket, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0);
+    sendMessage(clientSocket, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder));
 
     // send the file data
     char buffer[DEFAULT_BUFLEN];
     int bytesRead;
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-        send(clientSocket, buffer, bytesRead, 0);
+        send(*clientSocket, buffer, bytesRead, 0);
     }
 
     fclose(file); // close the file
@@ -233,7 +232,7 @@ void sendFileToClient(SOCKET clientSocket, const char *filename) {
     
 }
 
-void sendDirectoryFileList(SOCKET clientSocket) {
+void sendDirectoryFileList(SOCKET *clientSocket) {
     WIN32_FIND_DATA findFileData;
     HANDLE hFind = FindFirstFile("./files/*", &findFileData); // adjust the path as needed
 
@@ -255,7 +254,7 @@ void sendDirectoryFileList(SOCKET clientSocket) {
     FindClose(hFind);
 
     // send the directory listing to the client
-    send(clientSocket, directoryListing, strlen(directoryListing), 0);
+    sendMessage(clientSocket, directoryListing, strlen(directoryListing));
 }
 
 void broadcastMessage(Client *client, char *message) {
@@ -275,22 +274,12 @@ void broadcastMessage(Client *client, char *message) {
 
     for (int i = 0; i < clientCount; i++) {
         if (clients[i].clientSocket != client->clientSocket) {
-            bytesSent = send(clients[i].clientSocket, formattedMessage, strlen(formattedMessage), 0);
+            sendMessage(&clients[i].clientSocket, formattedMessage, strlen(formattedMessage));
 
-            if (bytesSent == SOCKET_ERROR) {
-                fprintf(stderr, "broadcast message failed to client %d\n", i);
-            } else {
-                printf("broadcast message sent to client %s\n", clients[i].clientAlias);
-            }
+            printf("broadcast message sent to client %s\n", clients[i].clientAlias);
         }
     }
 
     // Send confirmation back to the sender
-    bytesSent = send(client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, strlen(MESSAGE_SUCCESSFUL_BROADCAST), 0);
-
-    if (bytesSent == SOCKET_ERROR) {
-        fprintf(stderr, "broadcast message failed for client %s\n", client->clientAlias);
-    } else {
-        printf("broadcast message by client %s successful\n", client->clientAlias);
-    }
+    sendMessage(&client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, strlen(MESSAGE_SUCCESSFUL_BROADCAST));
 }

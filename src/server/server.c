@@ -1,5 +1,4 @@
 #include "../../headers/server.h"
-#include "../../headers/helpers.h"
 
 // array to store client information
 Client clients[MAX_CLIENTS];

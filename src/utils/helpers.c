@@ -17,7 +17,7 @@ void sendMessage(SOCKET *sock, const char *message, int length) {
         WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     } else if (sendResult == 0) {
-        fprintf(stderr, "Connection closed by server\n"); // Print error message
+        fprintf(stderr, "Connection closed\n"); // Print error message
     }
 }
 
@@ -28,7 +28,7 @@ char *receiveResponse(SOCKET *sock, char *buffer, int bufferLength) {
         buffer[recvResult] = '\0'; // null-terminate the buffer
         return buffer; // return the buffer
     } else if (recvResult == 0) {
-        fprintf(stderr, "Connection closed by server\n"); // print error message
+        fprintf(stderr, "Connection closed\n"); // print error message
         return NULL; // return NULL
     } else {
         fprintf(stderr, "Receive failed : %d", WSAGetLastError()); // print error message
@@ -78,6 +78,6 @@ int commandRequiresConnection(const char *command) {
 }
 
 int commandRequiresRegistration(const char *command) {
-    return strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0 
+    return strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_DIR) == 0
     || strcmp(command, COMMAND_BROADCAST) == 0 || strcmp(command, COMMAND_UNICAST) == 0;
 }
