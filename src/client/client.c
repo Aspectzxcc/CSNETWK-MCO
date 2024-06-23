@@ -11,13 +11,10 @@ int main() {
     int breakLoop; // flag to control the main loop
 
     WSADATA wsaData; // structure for Winsock data
-    SOCKET client, receiver; // socket descriptor for the client and receiver that is used for broadcast and unicast receiving
-    SOCKADDR_IN server; // structure holding server address information
+    SOCKET client; // socket descriptor for the client and receiver that is used for broadcast and unicast receiving
 
     char serverReply[DEFAULT_BUFLEN]; // buffer for server replies
     int replyLength; // length of the reply received from the server
-    u_long mode; // variable to store the mode for setting the socket to non-blocking
-    int broadcastPermission; // variable to store the permission for enabling broadcast on the socket
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -30,38 +27,6 @@ int main() {
     if (client == INVALID_SOCKET) {
         fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
         WSACleanup();
-        return 1;
-    }
-
-    // set the mode to non-blocking
-    mode = 1;
-
-    // set the client socket to be non-blocking
-    if (ioctlsocket(client, FIONBIO, &mode) != NO_ERROR) {
-        fprintf(stderr, "Failed to set client socket to non-blocking mode. Error code: %d", WSAGetLastError());
-        return 1;
-    }
-
-    // Create the UDP receiver socket for broadcast and unicast messages
-    receiver = socket(AF_INET, SOCK_DGRAM, 0); // SOCK_DGRAM for UDP
-    if (receiver == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create UDP receiver socket : %d", WSAGetLastError());
-        WSACleanup();
-        return 1;
-    }
-
-    // allow broadcast messages to be sent on the socket
-    broadcastPermission = 1;
-    if (setsockopt(receiver, SOL_SOCKET, SO_BROADCAST, (char *)&broadcastPermission, sizeof(broadcastPermission)) < 0) {
-        fprintf(stderr, "Could not enable broadcast on socket: %d\n", WSAGetLastError());
-        closesocket(client);
-        WSACleanup();
-        return 1;
-    }
-
-    // set the receiver socket to be non-blocking
-    if (ioctlsocket(receiver, FIONBIO, &mode) != NO_ERROR) {
-        fprintf(stderr, "Failed to set UDP receiver socket to non-blocking mode. Error code: %d", WSAGetLastError());
         return 1;
     }
 
@@ -89,7 +54,7 @@ int main() {
         connectionStatus = checkConnectionStatus(client); // check current connection status
 
         // execute the command with provided parameters
-        breakLoop = executeCommand(&client, &server, command->command, parameters, userInput);
+        breakLoop = executeCommand(&client, command->command, parameters, userInput);
 
         // process server response to the executed command
         handleServerResponse(&client, command->command, parameters);

@@ -8,7 +8,7 @@
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
 // executes the specified command with the provided parameters.
-int executeCommand(SOCKET *sock, SOCKADDR_IN *server, const char *command, char **parameters, char *message) {
+int executeCommand(SOCKET *sock, const char *command, char **parameters, char *message) {
     // check if the client is not connected and the command requires a connection.
     if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && connectionStatus == DISCONNECTED) {
         // log error if trying to execute a command without being connected.
@@ -31,7 +31,7 @@ int executeCommand(SOCKET *sock, SOCKADDR_IN *server, const char *command, char 
     // execute the command based on its identifier.
     if (strcmp(command, COMMAND_JOIN) == 0) {
         // initialize socket connection and send join message.
-        initSocketConnection(sock, server, parameters[0], atoi(parameters[1]));
+        initSocketConnection(sock, parameters[0], atoi(parameters[1]));
         sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // send leave message and close the socket.
@@ -118,14 +118,16 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
 }
 
 // initializes a socket connection using the provided ip address and port
-void initSocketConnection(SOCKET *sock, SOCKADDR_IN *server, const char *ip, int port) {
+void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     // set up the server address structure
-    server->sin_family = AF_INET; // set address family to internet
-    server->sin_addr.s_addr = inet_addr(ip); // set ip address
-    server->sin_port = htons(port); // set port, converting to network byte order
+    SOCKADDR_IN server;
+
+    server.sin_family = AF_INET; // set address family to internet
+    server.sin_addr.s_addr = inet_addr(ip); // set ip address
+    server.sin_port = htons(port); // set port, converting to network byte order
 
     // attempt to connect to the server
-    if (connect(*sock, (struct sockaddr *)server, sizeof(*server)) < 0) {
+    if (connect(*sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
         fprintf(stderr, "Could not connect to server : %d", WSAGetLastError()); // print error message
         closesocket(*sock); // close socket on failure
         WSACleanup(); // clean up Winsock
