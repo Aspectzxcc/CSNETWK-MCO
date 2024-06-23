@@ -1,4 +1,5 @@
 #include "../../headers/server.h"
+#include "../../headers/helpers.h"
 
 // array to store client information
 Client clients[MAX_CLIENTS];
@@ -37,6 +38,8 @@ int main() {
         if (clientCount < MAX_CLIENTS) {
             // add the new client to the array of clients
             clients[clientCount].clientSocket = clientSocket;
+
+            sendMessage(&clients[clientCount].clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, -1);
 
             // create a new thread to handle the client
             HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);

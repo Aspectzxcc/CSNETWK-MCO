@@ -26,7 +26,7 @@ DWORD WINAPI client_handler(void* data) {
 
         // handle errors from recv function
         if (bytesRead == SOCKET_ERROR) {
-            fprintf(stderr, "recv failed with error code : %d", WSAGetLastError()); // log recv error
+            fprintf(stderr, "recv failed in client_handler : %d\n", WSAGetLastError()); // log recv error
             break; // exit the loop on error
         } else if (bytesRead == 0) {
             printf("Client disconnected\n"); // log client disconnection
@@ -115,6 +115,7 @@ void handleRegisterAlias(Client *client, char *alias) {
     // validate alias and add it to the client
     if (alias != NULL && strlen(alias) > 0) {
         strcpy(client->clientAlias, alias);
+        printf("Client registered with alias %s\n", client->clientAlias);
     } else {
         char response[DEFAULT_BUFLEN];
         sprintf(response, ERROR_REGISTRATION_FAILED, alias);
@@ -131,20 +132,7 @@ void handleRegisterAlias(Client *client, char *alias) {
 void uploadFileFromClient(Client *client, char *filename) {
     char filePath[256] = "files/"; // base directory for files
     strcat(filePath, filename); // append filename to path
-
-    // receive a confirmation message from the client before proceeding
-    long confirmationCode;
-    int confirmationBytesReceived = recv(client->clientSocket, (char*)&confirmationCode, sizeof(confirmationCode), 0);
-    if (confirmationBytesReceived <= 0) {
-        fprintf(stderr, "failed to receive confirmation message.\n");
-        return;
-    }
-
-    if (confirmationCode == 0) {
-        fprintf(stderr, "client reported file not found. aborting upload.\n");
-        return;
-    }
-
+    
     // open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb");
     if (file == NULL) {
@@ -177,7 +165,7 @@ void uploadFileFromClient(Client *client, char *filename) {
             printf("connection closed by client.\n");
             break;
         } else {
-            fprintf(stderr, "recv failed with error: %d\n", WSAGetLastError());
+            fprintf(stderr, "recv failed in uploadFileFromClient: %d\n", WSAGetLastError());
             break;
         }
     }
@@ -255,7 +243,7 @@ void sendDirectoryFileList(SOCKET clientSocket) {
     } 
 
     // buffer to store the directory listing
-    char directoryListing[1024] = "server directory\n";
+    char directoryListing[1024] = "Server directory\n";
     do {
         // skip directories, only list files
         if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {

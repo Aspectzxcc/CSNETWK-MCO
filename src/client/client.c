@@ -1,32 +1,20 @@
 #include "../../headers/client.h"
 
-// global flags for connection and registration status
-ConnectionStatus connectionStatus = DISCONNECTED; 
-RegistrationStatus registrationStatus = REGISTRATION_NOT_REGISTERED; 
+// client structure to hold client socket and status information
+Client client = {INVALID_SOCKET, DISCONNECTED, REGISTRATION_NOT_REGISTERED};
 
 int main() {
+    WSADATA wsaData; // structure for Winsock data
     const Command *command; // holds the command structure after parsing user input
     char **parameters; // holds parameters for the command
     char userInput[DEFAULT_BUFLEN]; // buffer for storing user input
     int breakLoop; // flag to control the main loop
-
-    WSADATA wsaData; // structure for Winsock data
-    SOCKET client; // socket descriptor for the client and receiver that is used for broadcast and unicast receiving
-
     char serverReply[DEFAULT_BUFLEN]; // buffer for server replies
     int replyLength; // length of the reply received from the server
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         fprintf(stderr, "Failed to initialize Winsock. Error code : %d", WSAGetLastError());
-        return 1;
-    }
-
-    // Create the socket
-    client = socket(AF_INET, SOCK_STREAM, 0);
-    if (client == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
-        WSACleanup();
         return 1;
     }
 
@@ -51,13 +39,8 @@ int main() {
             continue;
         }
 
-        connectionStatus = checkConnectionStatus(client); // check current connection status
-
         // execute the command with provided parameters
-        breakLoop = executeCommand(&client, command->command, parameters, userInput);
-
-        // process server response to the executed command
-        handleServerResponse(&client, command->command, parameters);
+        breakLoop = executeCommand(command->command, parameters, userInput);
 
         // if breakLoop is true, exit the loop
         if (breakLoop) {
@@ -67,7 +50,7 @@ int main() {
 
     // cleanup operations
     WSACleanup(); // clean up Winsock
-    closesocket(client); // close the client socket
+    closesocket(client.clientSocket); // close the client socket
 
     // free allocated memory for parameters
     for (int i = 0; i < command->parameterCount; i++) {

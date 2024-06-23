@@ -11,17 +11,21 @@ typedef enum {
     REGISTRATION_REGISTERED
 } RegistrationStatus;
 
+typedef struct Client {
+    SOCKET clientSocket;
+    ConnectionStatus connectionStatus;
+    RegistrationStatus registrationStatus;
+} Client;
 
-extern ConnectionStatus connectionStatus;
-extern RegistrationStatus registrationStatus;
+extern Client client;
 
 // function prototypes
-int executeCommand(SOCKET *sock, const char *command, char **parameters, char *message);
-void handleServerResponse(SOCKET *sock, const char *command, char **parameters);
+int executeCommand(const char *command, char **parameters, char *message);
 void initSocketConnection(SOCKET *sock, const char *ip, int port);
-int checkConnectionStatus(SOCKET sock);
-void sendMessageToServer(SOCKET *sock, char *message);
+void disconnectFromServer(SOCKET *sock);
+void registerAlias(SOCKET *sock, const char *alias);
 void sendFileToServer(SOCKET *sock, const char *filename);
 void receiveFileFromServer(SOCKET *sock, const char *filename);
+void getServerDirectory(SOCKET *sock);
 
 #endif // COMMAND_HANDLER_H

@@ -4,13 +4,16 @@
 #include <string.h>
 #include "../../headers/commands.h"
 #include "../../headers/client_command_handler.h"
+#include "../../headers/helpers.h"
 
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
 // executes the specified command with the provided parameters.
-int executeCommand(SOCKET *sock, const char *command, char **parameters, char *message) {
+int executeCommand(const char *command, char **parameters, char *message) {
+    client.connectionStatus = checkConnectionStatus(client.clientSocket); // check current connection status
+
     // check if the client is not connected and the command requires a connection.
-    if ((strcmp(command,COMMAND_JOIN) != 0 && strcmp(command, COMMAND_HELP) != 0) && connectionStatus == DISCONNECTED) {
+    if (commandRequiresConnection(command) && client.connectionStatus == DISCONNECTED) {
         // log error if trying to execute a command without being connected.
         if (strcmp(command, COMMAND_LEAVE) == 0) {
             fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
@@ -21,9 +24,7 @@ int executeCommand(SOCKET *sock, const char *command, char **parameters, char *m
     }
 
     // check if the client is not registered and tries to execute commands that require registration.
-    if ((strcmp(command, COMMAND_GET) == 0 || strcmp(command, COMMAND_STORE) == 0 
-    || strcmp(command, COMMAND_BROADCAST) == 0 || strcmp(command, COMMAND_UNICAST) == 0) 
-    && registrationStatus == REGISTRATION_NOT_REGISTERED) {
+    if (commandRequiresRegistration(command) && client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
         fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
         return 0;
     }
@@ -31,38 +32,30 @@ int executeCommand(SOCKET *sock, const char *command, char **parameters, char *m
     // execute the command based on its identifier.
     if (strcmp(command, COMMAND_JOIN) == 0) {
         // initialize socket connection and send join message.
-        initSocketConnection(sock, parameters[0], atoi(parameters[1]));
-        sendMessageToServer(sock, message);
+        initSocketConnection(&client.clientSocket, parameters[0], atoi(parameters[1]));
     } else if (strcmp(command, COMMAND_LEAVE) == 0) {
         // send leave message and close the socket.
-        sendMessageToServer(sock, message);
-        closesocket(*sock);
-        connectionStatus = DISCONNECTED;
-        printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
+        disconnectFromServer(&client.clientSocket);
         return 1; // indicate disconnection to the main loop.
     } else if (strcmp(command, COMMAND_REGISTER) == 0) {
         // send registration message to the server.
-        sendMessageToServer(sock, message);
+        registerAlias(&client.clientSocket, parameters[0]);
     } else if (strcmp(command, COMMAND_STORE) == 0) {
         // send a file to the server.
-        sendMessageToServer(sock, message);
-        sendFileToServer(sock, parameters[0]);
+        sendFileToServer(&client.clientSocket, parameters[0]);
     } else if (strcmp(command, COMMAND_GET) == 0) {
         // request a file from the server.
-        sendMessageToServer(sock, message);
-        receiveFileFromServer(sock, parameters[0]);
+        receiveFileFromServer(&client.clientSocket, parameters[0]);
     } else if (strcmp(command, COMMAND_DIR) == 0) {
         // send a directory listing request to the server.
-        sendMessageToServer(sock, message);
+        getServerDirectory(&client.clientSocket);
     } else if (strcmp(command, COMMAND_HELP) == 0) {
         // print available commands.
         printCommands();
     } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
         // send a broadcast message to the server.
-        sendMessageToServer(sock, message);
     } else if (strcmp(command, COMMAND_UNICAST) == 0) {
         // send a unicast message to the server.
-        sendMessageToServer(sock, message);
     } else {
         // handle unknown command.
         fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
@@ -70,57 +63,22 @@ int executeCommand(SOCKET *sock, const char *command, char **parameters, char *m
     return 0; // indicate no disconnection to the main loop.
 }   
 
-// handles the server's response to a command
-void handleServerResponse(SOCKET *sock, const char *command, char **parameters) {
-    char serverReply[DEFAULT_BUFLEN]; // buffer for server's reply.
-    char registrationSuccessMessage[DEFAULT_BUFLEN]; // format for registration success message.
-    int replyLength; // length of the received data.
-
-    // skip handling for commands that do not expect a server reply.
-    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 
-    || strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0) {
-        return;
-    }
-
-    if ((strcmp(command, COMMAND_BROADCAST) == 0 || strcmp(command, COMMAND_UNICAST) == 0) 
-    && registrationStatus == REGISTRATION_NOT_REGISTERED) {
-        return;
-    }
-
-    // do not handle if disconnected.
-    if (connectionStatus == DISCONNECTED) {
-        return;
-    }
-
-    // receive the server's reply.
-    replyLength = recv(*sock, serverReply, DEFAULT_BUFLEN, 0);
-
-    // handle possible errors in receiving.
-    if (replyLength == SOCKET_ERROR) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
-    } else if (replyLength == 0) {
-        // no data received.
-        return;
-    } else {
-        // null-terminate the received data and process it.
-        serverReply[replyLength] = '\0';
-        
-        if (strcmp(command, COMMAND_REGISTER) == 0) {
-            // check if registration was successful.
-            sprintf(registrationSuccessMessage, MESSAGE_SUCCESSFUL_REGISTRATION, parameters[0]);
-            if (strcmp(serverReply, registrationSuccessMessage) == 0) {
-                registrationStatus = REGISTRATION_REGISTERED;
-            } 
-        }
-        // print the server's reply.
-        printf("%s\n", serverReply);
-    }
-}
-
 // initializes a socket connection using the provided ip address and port
 void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     // set up the server address structure
     SOCKADDR_IN server;
+
+    if (*sock != INVALID_SOCKET) {
+        closesocket(*sock); // close the socket if it is already open
+        WSACleanup(); // clean up Winsock
+    }
+
+    *sock = socket(AF_INET, SOCK_STREAM, 0); // create a TCP socket for the client
+
+    if (*sock == INVALID_SOCKET) {
+        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        return;
+    }
 
     server.sin_family = AF_INET; // set address family to internet
     server.sin_addr.s_addr = inet_addr(ip); // set ip address
@@ -128,66 +86,45 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
-        fprintf(stderr, "Could not connect to server : %d", WSAGetLastError()); // print error message
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message
         closesocket(*sock); // close socket on failure
         WSACleanup(); // clean up Winsock
         *sock = INVALID_SOCKET; // set socket to invalid
         return;
     }
 
-    connectionStatus = CONNECTED; // set connection status flag to connected
+    char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
+    strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
+
+    if (strcmp(serverReply, MESSAGE_SUCCESSFUL_CONNECTION) == 0) {
+        printf(MESSAGE_SUCCESSFUL_CONNECTION "\n"); // print success message
+    }
+
+    client.connectionStatus = CONNECTED; // set connection status flag to connected
 }
 
-int checkConnectionStatus(SOCKET sockfd) {
-    fd_set readfds; // file descriptor set for select
-    FD_ZERO(&readfds); // clear the set
-    FD_SET(sockfd, &readfds); // add socket to the set
-
-    struct timeval tv; // timeout structure
-    tv.tv_sec = 0;  // 0 seconds
-    tv.tv_usec = 0; // 0 microseconds
-
-    // use select to check socket status without waiting
-    int selectResult = select(0, &readfds, NULL, NULL, &tv);
-
-    if (selectResult > 0) {
-        // socket is ready for reading
-        char buffer[1]; // buffer for peeking data
-        int recvResult = recv(sockfd, buffer, 1, MSG_PEEK); // peek at the data
-
-        if (recvResult > 0) {
-            // data is available; the connection is alive
-            return CONNECTED; // connection is alive
-        } else {
-            // the connection has been gracefully closed or an error occurred
-            return DISCONNECTED; // disconnected or error
-        }
-    } else if (selectResult == 0) {
-        // the select call timed out, the socket is not ready for reading
-        // this does not necessarily mean the connection is down
-        return CONNECTED; // assume connection is alive
-    } else {
-        // an error occurred with select
-        return DISCONNECTED; // disconnected or error
-    }
+void disconnectFromServer(SOCKET *sock) {
+    sendMessage(sock, COMMAND_LEAVE, -1);
+    closesocket(*sock); // close the socket
+    client.connectionStatus = DISCONNECTED; // set connection status to disconnected
 }
 
-// sends a message to the server
-void sendMessageToServer(SOCKET *sock, char *message) {
-    // check if socket is valid and message is not null
-    if (*sock == INVALID_SOCKET || message == NULL) {
-        return; // do nothing if socket is invalid or message is null
+void registerAlias(SOCKET *sock, const char *alias) {
+    char registrationMessage[DEFAULT_BUFLEN]; // buffer for registration message
+    sprintf(registrationMessage, "%s %s", COMMAND_REGISTER, alias); // format registration message
+    sendMessage(sock, registrationMessage, -1); // send registration message
+
+    char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
+    strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
+
+    char successMessage[DEFAULT_BUFLEN]; // buffer for success message
+    sprintf(successMessage, MESSAGE_SUCCESSFUL_REGISTRATION, alias); // format success message
+
+    if (strcmp(serverReply, successMessage) == 0) {
+        client.registrationStatus = REGISTRATION_REGISTERED; // set registration status to registered
     }
 
-    // send the message to the server
-    int messageLength = strlen(message); // calculate message length
-    int bytesSent = send(*sock, message, messageLength, 0); // send the message
-
-    // check for sending errors
-    if (bytesSent == SOCKET_ERROR) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message
-        return;
-    }
+    printf("%s\n", serverReply); // print server reply
 }
 
 // sends a file to the server
@@ -198,20 +135,13 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
 
     file = fopen(filePath, "rb"); // open file in binary read mode
     if (file == NULL) {
-        fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message if file not found
-        long errorCode = htonl(0); // indicate file not found with 0
-        if(send(*sock, (char*)&errorCode, sizeof(errorCode), 0) == SOCKET_ERROR) {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
-        }
+        fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
         return;
     }
 
-    long confirmationCode = htonl(1); // indicate file found with 1
-    if (send(*sock, (char*)&confirmationCode, sizeof(confirmationCode), 0) == SOCKET_ERROR) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
-        fclose(file); // close file
-        return;
-    }
+    char fileSendRequest[DEFAULT_BUFLEN]; // buffer for file send request
+    sprintf(fileSendRequest, "%s %s", COMMAND_STORE, filename); // format file send request
+    sendMessage(sock, fileSendRequest, -1); // send file send request
 
     // determine the file size
     fseek(file, 0, SEEK_END); // move to end of file
@@ -219,12 +149,8 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     fseek(file, 0, SEEK_SET); // move back to start of file
 
     // convert fileSize to network byte order and send it
-    long fileSizeNetOrder = htonl(fileSize); // convert to network byte order
-    if (send(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) == SOCKET_ERROR) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
-        fclose(file); // close file
-        return;
-    }
+    long fileSizeNetOrder = htonl(fileSize); // Convert to network byte order
+    sendMessage(sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder));
 
     char buffer[DEFAULT_BUFLEN]; // buffer for file data
     int bytesRead; // bytes read from file
@@ -237,14 +163,10 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
         }
     }
 
-    char successMessage[DEFAULT_BUFLEN]; // buffer for success message
-    int recvResult = recv(*sock, successMessage, sizeof(successMessage), 0); // receive success message
-    if (recvResult <= 0) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
-    } else {
-        successMessage[recvResult] = '\0'; // null-terminate the received message
-        printf("%s\n", successMessage); // print success message
-    }
+    char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
+    strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
+
+    printf("%s\n", serverReply); // print server reply
 
     fclose(file); // close the file
 }
@@ -253,15 +175,13 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
     char filePath[256] = "files/"; // base file path
     strncat(filePath, filename, sizeof(filePath) - strlen(filePath) - 1); // append filename to path
 
+    char fileRequest[DEFAULT_BUFLEN]; // buffer for file request
+    sprintf(fileRequest, "%s %s", COMMAND_GET, filename); // format file request
+    sendMessage(sock, fileRequest, -1); // send file request
+
     // receive initial message from server to check for errors or file size
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
-    int msgLen = recv(*sock, serverReply, DEFAULT_BUFLEN, 0); // leave space for null terminator
-    if (msgLen <= 0) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
-        return;
-    } else {
-        serverReply[msgLen] = '\0'; // null-terminate the received message
-    }
+    strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
     // check if the received message is an error message
     if (strcmp(serverReply, ERROR_FILE_NOT_FOUND_SERVER) == 0) {
@@ -283,6 +203,7 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
         fclose(file); // close file
         return;
     }
+
     long fileSize = ntohl(fileSizeNetOrder); // convert from network byte order to host byte order
 
     // receive the file data
@@ -309,4 +230,13 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
     } else {
         printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
     }
+}
+
+void getServerDirectory(SOCKET *sock) {
+    sendMessage(sock, COMMAND_DIR, -1); // send directory listing request
+    
+    char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
+    strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
+    
+    printf("%s\n", serverReply); // print directory listing
 }
