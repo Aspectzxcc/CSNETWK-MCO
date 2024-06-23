@@ -30,6 +30,12 @@ void printCommands() {
             printf("%s %s\n", commands[i].command, COMMAND_STORE_PARAMETERS);
         } else if (commands[i].command == COMMAND_GET) {
             printf("%s %s\n", commands[i].command, COMMAND_GET_PARAMETERS);
+        } else if (commands[i].command == COMMAND_BROADCAST) 
+        {
+            printf("%s %s\n", commands[i].command, COMMAND_BROADCAST_PARAMETERS);
+        } else if (commands[i].command == COMMAND_UNICAST) 
+        {
+            printf("%s %s\n", commands[i].command, COMMAND_UNICAST_PARAMETERS);
         } else {
             printf("%s\n", commands[i].command);
         }
