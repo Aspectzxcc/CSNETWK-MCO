@@ -1,68 +1,69 @@
 #include "../../headers/server.h"
 
-// array to hold client aliases
+// array to store client information
 Client clients[MAX_CLIENTS];
-int clientCount = 0;
+int clientCount = 0; // counter for the number of connected clients
 
 int main() {
-    WSADATA wsaData; // holds Winsock data
-    SOCKET serverSocket, clientSocket; // server and client socket descriptors
-    SOCKADDR_IN server, client; // server and client address structures
-    int c; // size of the address structure
+    WSADATA wsaData; // structure to hold Windows Sockets API data
+    SOCKET serverSocket, clientSocket; // descriptors for server and client sockets
+    SOCKADDR_IN server, client; // structures for server and client addresses
+    int c; // variable to store the size of the address structure
 
-    // initialize Winsock
+    // initialize the Windows Sockets API
     WSAStartup(MAKEWORD(2,2), &wsaData);
 
-    // create a socket for the server
+    // create a TCP socket for the server
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // configure server address structure
-    server.sin_family = AF_INET; // internet protocol v4 addresses
-    server.sin_addr.s_addr = INADDR_ANY; // accept connections to all the IPs of the machine
-    server.sin_port = htons(12345); // port number
+    // set up the server address structure
+    server.sin_family = AF_INET; // use IPv4 addresses
+    server.sin_addr.s_addr = INADDR_ANY; // accept connections on any IP address of the server
+    server.sin_port = htons(12345); // set the server port number
 
-    // bind the socket to the server address
+    // bind the server socket to the specified IP address and port
     bind(serverSocket, (struct sockaddr *)&server, sizeof(server));
 
-    // listen for incoming connections
+    // start listening for incoming connections
     listen(serverSocket, 3);
 
     c = sizeof(SOCKADDR_IN);
 
-    // accept a connection from a client
+    // loop to accept incoming connections
     while((clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c)) != INVALID_SOCKET) {
         puts("Connection accepted");
 
+        // check if the maximum number of clients has not been reached
         if (clientCount < MAX_CLIENTS) {
-            // Add the client to the clients array
+            // add the new client to the array of clients
             clients[clientCount].clientSocket = clientSocket;
 
-            // Create a thread to handle the client, using the current clientCount index
+            // create a new thread to handle the client
             HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);
             if (thread == NULL) {
-                // If thread creation fails, print the error
+                // if thread creation fails, print an error message
                 printf("CreateThread failed with error code: %d", GetLastError());
             } else {
-                // Close the thread handle as it's not needed anymore
+                // close the thread handle as it is not needed anymore
                 CloseHandle(thread);
             }
 
-            // Increment clientCount after successfully creating the thread
+            // increment the client count
             clientCount++;
         } else {
-            // If the maximum number of clients is reached, print an error message
+            // if the maximum number of clients has been reached, reject the connection
             printf("Maximum number of clients reached. Connection rejected.\n");
             closesocket(clientSocket);
             continue;
         }
     }
 
-    // if accepting a client fails, print the error
+    // if accepting a client fails, print an error message
     if (clientSocket == INVALID_SOCKET) {
         printf("accept failed with error code : %d", WSAGetLastError());
     }
 
-    // cleanup: close the server socket and deinitialize Winsock
+    // perform cleanup: close the server socket and deinitialize the Windows Sockets API
     closesocket(serverSocket);
     WSACleanup();
 

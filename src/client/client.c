@@ -1,64 +1,67 @@
 #include "../../headers/client.h"
 
-ConnectionStatus connectionStatus = DISCONNECTED; // connection status flag
-RegistrationStatus registrationStatus = REGISTRATION_NOT_REGISTERED; // registration status flag
+// global flags for connection and registration status
+ConnectionStatus connectionStatus = DISCONNECTED; 
+RegistrationStatus registrationStatus = REGISTRATION_NOT_REGISTERED; 
 
 int main() {
-    const Command *command; // command structure
-    char **parameters; // command parameters
-    char userInput[DEFAULT_BUFLEN]; // user input buffer
-    int breakLoop; // flag to break the loop
+    const Command *command; // holds the command structure after parsing user input
+    char **parameters; // holds parameters for the command
+    char userInput[DEFAULT_BUFLEN]; // buffer for storing user input
+    int breakLoop; // flag to control the main loop
 
-    WSADATA wsaData; // holds Winsock data
-    SOCKET client; // client socket descriptor
-    SOCKADDR_IN server; // server address structure
+    WSADATA wsaData; // structure for Winsock data
+    SOCKET client; // socket descriptor for the client
+    SOCKADDR_IN server; // structure holding server address information
 
-    char serverReply[DEFAULT_BUFLEN]; // server reply buffer
-    int replyLength; // size of received data
+    char serverReply[DEFAULT_BUFLEN]; // buffer for server replies
+    int replyLength; // length of the reply received from the server
 
-    // unlimited loop to get user input
+    // main loop for command input and processing
     while (1) {
-        fgets(userInput, sizeof(userInput), stdin); // get user input
-        userInput[strcspn(userInput, "\n")] = 0; // remove newline character
+        fgets(userInput, sizeof(userInput), stdin); // read user input from stdin
+        userInput[strcspn(userInput, "\n")] = 0; // remove newline character from input
 
-        command = getCommand(userInput); // get the command from the user input
+        command = getCommand(userInput); // parse the command from user input
 
-        // check if the command is valid
+        // if command is not recognized, print error and continue
         if (command == NULL) {
             fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
             continue;
         }
         
-        parameters = parseCommandParameters(command, userInput);
+        parameters = parseCommandParameters(command, userInput); // parse parameters for the command
 
+        // if parameters are invalid, print error and continue
         if (parameters == NULL) {
             fprintf(stderr, ERROR_INVALID_PARAMETERS "\n");
             continue;
         }
 
-        connectionStatus = checkConnectionStatus(client); // check the connection status
+        connectionStatus = checkConnectionStatus(client); // check current connection status
 
-        // execute the command and pass in the socket, Winsock data, server address, command, and parameters
+        // execute the command with provided parameters
         breakLoop = executeCommand(&client, &wsaData, &server, command->command, parameters, userInput);
 
-        // handle server response
+        // process server response to the executed command
         handleServerResponse(&client, command->command, parameters);
 
+        // if breakLoop is true, exit the loop
         if (breakLoop) {
             break;
         }
     }
 
-    // cleanup
-    WSACleanup(); // cleanup Winsock
-    closesocket(client); // close the socket
+    // cleanup operations
+    WSACleanup(); // clean up Winsock
+    closesocket(client); // close the client socket
 
-    // free allocated memory
+    // free allocated memory for parameters
     for (int i = 0; i < command->parameterCount; i++) {
         free(parameters[i]);
     }
 
-    free(parameters);
+    free(parameters); // free the parameters array
 
     return 0;
 }
