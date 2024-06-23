@@ -11,7 +11,7 @@ int main() {
     int breakLoop; // flag to control the main loop
 
     WSADATA wsaData; // structure for Winsock data
-    SOCKET client; // socket descriptor for the client
+    SOCKET client, receiver; // socket descriptor for the client and receiver that is used for broadcast and unicast receiving
     SOCKADDR_IN server; // structure holding server address information
 
     char serverReply[DEFAULT_BUFLEN]; // buffer for server replies
@@ -30,6 +30,18 @@ int main() {
         WSACleanup();
         return 1;
     }
+
+    // Create the receiver socket for broadcast and unicast messages
+    receiver = socket(AF_INET, SOCK_STREAM, 0);
+    if (receiver == INVALID_SOCKET) {
+        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        WSACleanup();
+        return 1;
+    }
+
+    // set the receiver to be non-blocking
+    u_long mode = 1;
+    ioctlsocket(receiver, FIONBIO, &mode);
 
     // main loop for command input and processing
     while (1) {
