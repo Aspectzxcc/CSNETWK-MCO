@@ -20,6 +20,9 @@
 #define COMMAND_BROADCAST_PARAMETERS "<message>"
 #define COMMAND_UNICAST_PARAMETERS "<handle> <message>"
 
+// broadcast and unicast message format
+#define SEND_MESSAGE_FORMAT "%s<%s>: %s" // handle, timestamp, message
+
 // define message success responses
 #define MESSAGE_SUCCESSFUL_CONNECTION "Connection to the File Exchange Server is successful!"
 #define MESSAGE_SUCCESSFUL_DISCONNECTION "Connection closed. Thank you!"

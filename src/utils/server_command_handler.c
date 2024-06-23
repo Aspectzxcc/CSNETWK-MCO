@@ -272,9 +272,22 @@ void sendDirectoryFileList(SOCKET clientSocket) {
 
 void broadcastMessage(Client *client, char *message) {
     int bytesSent;
+    char formattedMessage[DEFAULT_BUFLEN]; // Assuming DEFAULT_BUFLEN is defined and large enough
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char timeStr[20]; // for timestamp
+    strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    // Format the message with the client's alias, timestamp, and the original message
+    if (client->clientAlias[0] != '\0' && strlen(client->clientAlias) > 0) {
+        sprintf(formattedMessage, SEND_MESSAGE_FORMAT, client->clientAlias, timeStr, message);
+    } else {
+        sprintf(formattedMessage, "<%s>: %s", timeStr, message); // Handle case where client alias might be empty
+    }
+
     for (int i = 0; i < clientCount; i++) {
         if (clients[i].clientSocket != client->clientSocket) {
-            bytesSent = send(clients[i].clientSocket, message, strlen(message), 0);
+            bytesSent = send(clients[i].clientSocket, formattedMessage, strlen(formattedMessage), 0);
 
             if (bytesSent == SOCKET_ERROR) {
                 fprintf(stderr, "broadcast message failed to client %d\n", i);
@@ -284,11 +297,12 @@ void broadcastMessage(Client *client, char *message) {
         }
     }
 
+    // Send confirmation back to the sender
     bytesSent = send(client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, strlen(MESSAGE_SUCCESSFUL_BROADCAST), 0);
 
     if (bytesSent == SOCKET_ERROR) {
         fprintf(stderr, "broadcast message failed for client %s\n", client->clientAlias);
     } else {
         printf("broadcast message by client %s successful\n", client->clientAlias);
-    } 
+    }
 }
