@@ -77,7 +77,13 @@ void handleServerResponse(SOCKET *sock, const char *command, char **parameters) 
     int replyLength; // length of the received data.
 
     // skip handling for commands that do not expect a server reply.
-    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 || strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0) {
+    if (strcmp(command, COMMAND_LEAVE) == 0 || strcmp(command, COMMAND_HELP) == 0 
+    || strcmp(command, COMMAND_STORE) == 0 || strcmp(command, COMMAND_GET) == 0) {
+        return;
+    }
+
+    if ((strcmp(command, COMMAND_BROADCAST) == 0 || strcmp(command, COMMAND_UNICAST) == 0) 
+    && registrationStatus == REGISTRATION_NOT_REGISTERED) {
         return;
     }
 
