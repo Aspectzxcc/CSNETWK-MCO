@@ -1,116 +1,135 @@
-#include <windows.h>
+#include <stdio.h>
+#include "../../headers/gui_test.h"
 
-// function prototype for the callback function that processes messages for the main window
-LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
+// declare global variables to store handles to the console window, text box, and button
+HWND hwndTextBox, hwndButton, hwndHeader;
 
-// global variables to store handles to the text box and button controls
-HWND hwndTextBox, hwndButton;
+// CreateWindowW documentation
+// HWND CreateWindowW(
+//   [in, optional]  lpClassName, // class name of the window
+//   [in, optional]  lpWindowName, // window name in the title bar
+//   [in]            dwStyle, // window styles
+//   [in]            x, // x-coordinate of the window
+//   [in]            y, // y-coordinate of the window
+//   [in]            nWidth, // width of the window
+//   [in]            nHeight, // height of the window
+//   [in, optional]  hWndParent, // handle to the parent window
+//   [in, optional]  hMenu, // handle to the menu
+//   [in, optional]  hInstance, // handle to the instance of the module
+//   [in, optional]  lpParam // additional parameters
+// );
 
-// CreateWindowW(
-//         L"TestWindowClass", // Class name: Specifies the window class name. This class must have been registered with RegisterClassW.
-//         L"File Exchange System", // Window name: Text that appears in the title bar of the window.
-//         WS_OVERLAPPEDWINDOW | WS_VISIBLE, // Style: Specifies the style of the window being created. WS_OVERLAPPEDWINDOW 
-//          creates an overlapped window with a title bar, a window menu, a border, and a minimize/maximize box. WS_VISIBLE makes the window visible.
-//         100, // X position: The initial horizontal position of the window. 
-//         100, // Y position: The initial vertical position of the window.
-//         500, // Width: The width of the window.
-//         500, // Height: The height of the window.
-//         NULL, // Parent window handle: If this parameter is NULL, the window has no parent.
-//         NULL, // Menu handle: If this parameter is NULL, the window is created without a menu.
-//         hInst, // Instance handle: A handle to the instance of the module to be associated with the window.
-//         NULL // Additional application data: Pointer to a value to be passed to the window through the CREATESTRUCT structure passed in the lParam parameter of the WM_CREATE message.
-//     );
-
-// entry point for a Windows application
+// main entry point for a windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
-    // structure to define various properties of the window class
-    WNDCLASSW wc = {0};
+    WNDCLASSW wc = {0}; // initialize a window class structure to zero
 
-    // background color for the window
-    wc.hbrBackground = (HBRUSH)COLOR_BACKGROUND;
-    // cursor used in the window
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    // instance handle for the application
-    wc.hInstance = hInst;
-    // class name for the window class
-    wc.lpszClassName = L"TestWindowClass";
-    // pointer to the window procedure function for handling messages for windows of this class
-    wc.lpfnWndProc = WindowProcedure;
+    wc.hbrBackground = (HBRUSH)COLOR_BACKGROUND; // set the background color for the window
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW); // set the cursor for the window to the default arrow
+    wc.hInstance = hInst; // set the instance handle for the window class
+    wc.lpszClassName = L"TestWindowClass"; // set the class name for the window class
+    wc.lpfnWndProc = WindowProcedure; // set the window procedure function for the window class
 
-    // register the window class
-    if (!RegisterClassW(&wc))
+    if (!RegisterClassW(&wc)) // register the window class with the operating system
         return -1; // if registration fails, exit the application
 
     // create the main application window
     CreateWindowW(
-        L"TestWindowClass", L"File Exchange System", 
+        L"TestWindowClass", 
+        L"File Exchange System", 
         WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
-        100, 100, 500, 500, 
-        NULL, NULL, hInst, NULL);
+        CENTERED_X, CENTERED_Y, WINDOW_WIDTH, WINDOW_HEIGHT, 
+        NULL, 
+        NULL, 
+        hInst,
+        NULL);
 
-    // message loop for the application
-    MSG msg = {0};
-    while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg); // translates virtual-key messages into character messages
-        DispatchMessage(&msg); // dispatches a message to a window procedure
+    MSG msg = {0}; // initialize a message structure to zero
+    while (GetMessage(&msg, NULL, 0, 0)) { // start the message loop
+        TranslateMessage(&msg); // translate virtual-key messages into character messages
+        DispatchMessage(&msg); // dispatch the message to the window procedure
     }
 
     return 0; // exit the application
 }
 
-// Create a text box control
-// Parameters:
-// - L"EDIT": Specifies the class name for a standard Windows edit control. This creates an edit box where users can input text.
-// - L"": The default text to be displayed in the text box. This should be replaced with appropriate placeholder text relevant to the application's context.
-// - WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER: Window styles. WS_CHILD makes the control a child window. WS_VISIBLE makes it visible upon creation. WS_BORDER gives it a border. ES_AUTOHSCROLL allows horizontal scrolling. ES_CENTER centers the text.
-// - 150, 200: The starting x and y positions of the text box within the parent window, in pixels.
-// - 200, 20: The width and height of the text box, in pixels.
-// - hWnd: Handle to the parent window.
-// - (HMENU)1: The control's identifier.
-// - NULL: Points to the window creation data. Not used here, so it is NULL.
-// - NULL: Handle to the instance of the module to be associated with the window. Not used here, so it is NULL.
-
-// Create a button control
-// Parameters:
-// - L"BUTTON": Specifies the class name for a standard Windows button control. This creates a clickable button.
-// - L"Join": The text to be displayed on the button.
-// - WS_CHILD | WS_VISIBLE: Window styles. WS_CHILD makes the control a child window. WS_VISIBLE makes it visible upon creation.
-// - 200, 230: The starting x and y positions of the button within the parent window, in pixels.
-// - 100, 30: The width and height of the button, in pixels.
-// - hWnd: Handle to the parent window.
-// - (HMENU)2: The control's identifier.
-// - NULL: Points to the window creation data. Not used here, so it is NULL.
-// - NULL: Handle to the instance of the module to be associated with the window. Not used here, so it is NULL.
-
 // window procedure function that processes messages for the main window
+// HWND hWnd: handle to the window
+// UINT msg: message identifier
+// WPARAM wp: additional message information
+// LPARAM lp: additional message information
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
-        case WM_CREATE: // message sent when a window is being created
-            // create a text box control
-            hwndTextBox = CreateWindowW(
-                L"EDIT", L"", 
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER, 
-                150, 200, 200, 20, 
-                hWnd, (HMENU)1, NULL, NULL);
+        case WM_CREATE: // handle window creation
+            hwndHeader = CreateWindowW(
+                L"STATIC", // Predefined class; Static control
+                L"File Exchange System", // Button text 
+                WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE, // Styles; Visible, Child, Centered text, Centered image
+                0, // x position; Start from the left edge
+                10, // y position; A little down from the top edge
+                WINDOW_WIDTH, // Make it as wide as the window
+                40, // Height
+                hWnd, // Parent window
+                (HMENU)0, // No menu.
+                NULL, // No instance override
+                NULL); // No additional parameters
 
-            // create a button control
+            // Create a larger font
+            HFONT hFont = CreateFontW(
+                24, // nHeight
+                0, // nWidth
+                0, // nEscapement
+                0, // nOrientation
+                FW_BOLD, // nWeight
+                FALSE, // bItalic
+                FALSE, // bUnderline
+                0, // cStrikeOut
+                ANSI_CHARSET, // nCharSet
+                OUT_DEFAULT_PRECIS, // nOutPrecision
+                CLIP_DEFAULT_PRECIS, // nClipPrecision
+                DEFAULT_QUALITY, // nQuality
+                DEFAULT_PITCH | FF_SWISS, // nPitchAndFamily
+                L"Arial"); // lpszFacename
+
+            // Set the font for the static control
+            SendMessage(hwndHeader, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+            hwndTextBox = CreateWindowW(
+                L"EDIT", 
+                L"", 
+                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER, 
+                (WINDOW_WIDTH - 400) / 2, // Center horizontally
+                250, // Fixed vertical position
+                400, // Width
+                25, 
+                hWnd, 
+                (HMENU)1, 
+                NULL, 
+                NULL); // create a text box control
+
+            SetFocus(hwndTextBox); // set focus to the text box control
+
             hwndButton = CreateWindowW(
                 L"BUTTON", L"Join", 
                 WS_CHILD | WS_VISIBLE, 
-                200, 230, 100, 30, 
-                hWnd, (HMENU)2, NULL, NULL);
-                
+                (WINDOW_WIDTH - 110) / 2, // Center horizontally
+                290, // Below the text box with some spacing
+                100, // Width
+                30, // Height
+                hWnd, (HMENU)2, NULL, NULL); // create a button control
             break;
-        case WM_COMMAND: // message sent when a control is interacted with
+        case WM_COMMAND: // handle commands, like button clicks
             if (LOWORD(wp) == 2) { // if the "Join" button was clicked
-                wchar_t ipAndPort[256]; // buffer to store the text from the text box
+                wchar_t ipAndPort[256]; // buffer to store text from the text box
                 GetWindowTextW(hwndTextBox, ipAndPort, 256); // get the text from the text box
-                // display the text from the text box in a message box
-                MessageBoxW(NULL, ipAndPort, L"IP and Port", MB_OK);
+
+                // Hide the text box and button and header
+                ShowWindow(hwndTextBox, SW_HIDE);
+                ShowWindow(hwndButton, SW_HIDE);
+                ShowWindow(hwndHeader, SW_HIDE);
             }
             break;
-        case WM_DESTROY: // message sent when a window is being destroyed
-            PostQuitMessage(0); // posts a quit message and returns exit code 0
+        case WM_DESTROY: // handle window destruction
+            PostQuitMessage(0); // post a quit message and return exit code 0
             break;
         default: // default case for unhandled messages
             return DefWindowProc(hWnd, msg, wp, lp); // call the default window procedure

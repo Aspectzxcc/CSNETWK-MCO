@@ -1,4 +1,5 @@
 @echo off
+taskkill /f /im gui.exe 2>nul
 gcc gui_test.c -o gui.exe -mwindows
 if %ERRORLEVEL% NEQ 0 (
     echo Compilation failed.
@@ -6,4 +7,4 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 echo Compilation successful. Executable created: gui.exe
-pause
+start gui.exe
