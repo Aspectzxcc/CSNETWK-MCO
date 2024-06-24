@@ -8,13 +8,15 @@
 #define CENTERED_X 550
 #define CENTERED_Y 200
 
-extern HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
-extern HWND hwndMessageBox, hwndUploadBtn;
+HWND hwndConsoleWindow; 
+HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
+HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 extern HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 // function prototypes
-void CreateGetIpPortWindow(HWND hWnd);
 void CreateConsoleWindow(HWND hWnd);
+void CreateConsoleWindowTopButtons(HWND hWnd);
+void CreateConsoleWindowBottomButtons(HWND hWnd);
 void CreateAliasChangeDialog(HWND hWnd);
 
 // Custom message for dialog procedure

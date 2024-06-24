@@ -4,31 +4,37 @@
 #include "../../../headers/controller.h"
 
 // console window handlers
-HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
-HWND hwndMessageBox, hwndUploadBtn;
+HWND hwndConsoleWindow; 
+HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
+HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 
 // alias change dialog handlers
 HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 void CreateConsoleWindow(HWND hWnd) {
-    int yPos = 35; 
-    int buttonGap = 105;
-
     hwndConsoleWindow = CreateWindowW(
         L"EDIT", NULL,
         WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
         (WINDOW_WIDTH - 700) / 2, // Center horizontally, assuming 600px wide
-        70, // Start a bit below the top edge of the main window
+        80, // Start a bit below the top edge of the main window
         700, // Width
-        350, // Height, making it pretty big but not occupying the entire window
+        400, // Height, making it pretty big but not occupying the entire window
         hWnd, (HMENU)3, NULL, NULL);
 
     // set the font of the console output window to a more console-like font
     SendMessage(hwndConsoleWindow, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), TRUE);
 
-    hwndConsoleBtnDisconnect = CreateWindowW(
+    CreateConsoleWindowTopButtons(hWnd);
+    CreateConsoleWindowBottomButtons(hWnd);
+}
+
+void CreateConsoleWindowTopButtons(HWND hWnd) {
+    int yPos = 35; 
+    int buttonGap = 105;
+
+    hwndConsoleBtnJoin = CreateWindowW(
         L"BUTTON",  // Predefined class; Button
-        L"Disconnect",      // Button text 
+        L"Join",      // Button text 
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
         (WINDOW_WIDTH - 700) / 2,         // x position 
         yPos,         // y position; above the console output window
@@ -38,6 +44,21 @@ void CreateConsoleWindow(HWND hWnd) {
         (HMENU)4,   // Button ID
         NULL,
         NULL);
+
+    hwndConsoleBtnLeave = CreateWindowW(
+        L"BUTTON",  // Predefined class; Button
+        L"Disconnect",      // Button text 
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
+        (WINDOW_WIDTH - 700) / 2 + buttonGap,         // x position 
+        yPos,         // y position; above the console output window
+        100,        // Button width
+        30,         // Button height
+        hWnd,       // Parent window
+        (HMENU)4,   // Button ID
+        NULL,
+        NULL);
+
+    buttonGap += 105;
 
     hwndConsoleBtnHelp = CreateWindowW(
         L"BUTTON",
@@ -79,22 +100,46 @@ void CreateConsoleWindow(HWND hWnd) {
         (HMENU)7,    // Button ID
         NULL,
         NULL);
+}
 
-    hwndMessageBox = CreateWindowW(
-        L"EDIT", NULL,
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL,
-        (WINDOW_WIDTH - 500) / 2 - 100, // Adjusted for a narrower width, centering it
-        450, // Position below the console window
-        550, // Reduced width for the message box
-        30, // Height remains the same
-        hWnd, (HMENU)8, NULL, NULL);
+void CreateConsoleWindowBottomButtons(HWND hWnd) {
+    int yPos = 500; 
+    int buttonGap = 105;
 
-    hwndUploadBtn = CreateWindowW(
+    // Broadcast button creation
+    hwndConsoleBtnBroadcast = CreateWindowW(
+        L"BUTTON",
+        L"Broadcast",
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        (WINDOW_WIDTH - 700) / 2,
+        yPos, // Same y position as the Upload button
+        100, // Button width
+        30,  // Button height
+        hWnd,
+        (HMENU)10, // Unique Button ID
+        NULL,
+        NULL);
+
+    // Unicast button creation
+    hwndConsoleBtnUnicast = CreateWindowW(
+        L"BUTTON",
+        L"Unicast",
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        (WINDOW_WIDTH - 700) / 2 + buttonGap,
+        yPos, // Same y position as the Upload button
+        100, // Button width
+        30,  // Button height
+        hWnd,
+        (HMENU)11, // Unique Button ID
+        NULL,
+        NULL);
+
+    hwndConsoleBtnUpload = CreateWindowW(
         L"BUTTON",  // Button class
         L"Upload ▼",    // No text for a dropdown icon
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles, added BS_SPLITBUTTON for dropdown
         WINDOW_WIDTH - 130,  // Align with the Alias button's x position for consistency
-        450,        // Align with the Message Box's y position for visual consistency
+        yPos,        // Align with the Message Box's y position for visual consistency
         80,  // Button width
         30,          // Button height
         hWnd,        // Parent window
