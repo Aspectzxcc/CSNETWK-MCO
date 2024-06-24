@@ -3,16 +3,11 @@
 
 #include <windows.h>
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
-#define CENTERED_X 550
-#define CENTERED_Y 200
-
 // function prototypes
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK DialogProcedure(HWND, UINT, WPARAM, LPARAM);
-void CreateGetIpPortPanel(HWND hWnd);
-void CreateConsolePanel(HWND hWnd);
-void ShowNameChangeDialog(HWND hWnd);
+void CreateGetIpPortWindow(HWND hWnd);
+void CreateConsoleWindow(HWND hWnd);
+void CreateAliasChangeDialog(HWND hWnd);
 
 #endif // GUI_H
