@@ -269,7 +269,7 @@ DWORD WINAPI listenForMessages(void *data) {
         if (bytesReceived > 0) {
             // Successfully received a message
             recvBuffer[bytesReceived] = '\0'; // Null-terminate the buffer
-            printf("recieved message: %s\n", recvBuffer);
+            printf("%s\n", recvBuffer);
             // Process the received message here
         } else if (bytesReceived == SOCKET_ERROR) {
             int error = WSAGetLastError();
