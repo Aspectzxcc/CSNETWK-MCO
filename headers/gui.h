@@ -1,5 +1,5 @@
-#ifndef GUI_TEST_H
-#define GUI_TEST_H
+#ifndef GUI_H
+#define GUI_H
 
 #include <windows.h>
 
@@ -15,4 +15,4 @@ void CreateGetIpPortPanel(HWND hWnd);
 void CreateConsolePanel(HWND hWnd);
 void ShowNameChangeDialog(HWND hWnd);
 
-#endif // GUI_TEST_H
+#endif // GUI_H

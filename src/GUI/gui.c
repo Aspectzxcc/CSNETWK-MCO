@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../../headers/gui_test.h"
+#include "../../headers/gui.h"
 
 // declare global variables to store handles to the console window, text box, and button
 HWND hwndTextBox, hwndButton, hwndHeader;
