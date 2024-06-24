@@ -88,7 +88,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_CREATE: // message sent when a window is being created
             // create a text box control
             hwndTextBox = CreateWindowW(
-                L"EDIT", L"im gay", 
+                L"EDIT", L"", 
                 WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER, 
                 150, 200, 200, 20, 
                 hWnd, (HMENU)1, NULL, NULL);
