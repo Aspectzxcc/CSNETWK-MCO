@@ -3,68 +3,12 @@
 #include "../../../headers/view.h"
 #include "../../../headers/controller.h"
 
-extern HWND hwndTextBox, hwndButton, hwndHeader;
-extern HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
-extern HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+// console window handlers
+HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
+HWND hwndMessageBox, hwndUploadBtn;
 
-void CreateGetIpPortWindow(HWND hWnd) {
-    hwndHeader = CreateWindowW(
-        L"STATIC", // Predefined class; Static control
-        L"File Exchange System", // Button text 
-        WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE, // Styles; Visible, Child, Centered text, Centered image
-        0, // x position; Start from the left edge
-        10, // y position; A little down from the top edge
-        WINDOW_WIDTH, // Make it as wide as the window
-        40, // Height
-        hWnd, // Parent window
-        (HMENU)0, // No menu.
-        NULL, // No instance override
-        NULL); // No additional parameters
-
-    // Create a larger font
-    HFONT hFont = CreateFontW(
-        24, // nHeight
-        0, // nWidth
-        0, // nEscapement
-        0, // nOrientation
-        FW_BOLD, // nWeight
-        FALSE, // bItalic
-        FALSE, // bUnderline
-        0, // cStrikeOut
-        ANSI_CHARSET, // nCharSet
-        OUT_DEFAULT_PRECIS, // nOutPrecision
-        CLIP_DEFAULT_PRECIS, // nClipPrecision
-        DEFAULT_QUALITY, // nQuality
-        DEFAULT_PITCH | FF_SWISS, // nPitchAndFamily
-        L"Arial"); // lpszFacename
-
-    // Set the font for the static control
-    SendMessage(hwndHeader, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-    hwndTextBox = CreateWindowW(
-        L"EDIT", 
-        L"", 
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER, 
-        (WINDOW_WIDTH - 400) / 2, // Center horizontally
-        250, // Fixed vertical position
-        400, // Width
-        25, 
-        hWnd, 
-        (HMENU)1, 
-        NULL, 
-        NULL); // create a text box control
-
-    SetFocus(hwndTextBox); // set focus to the text box control
-
-    hwndButton = CreateWindowW(
-        L"BUTTON", L"Join", 
-        WS_CHILD | WS_VISIBLE, 
-        (WINDOW_WIDTH - 110) / 2, // Center horizontally
-        290, // Below the text box with some spacing
-        100, // Width
-        30, // Height
-        hWnd, (HMENU)2, NULL, NULL); // create a button control
-}
+// alias change dialog handlers
+HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 void CreateConsoleWindow(HWND hWnd) {
     int yPos = 35; 
@@ -135,6 +79,28 @@ void CreateConsoleWindow(HWND hWnd) {
         (HMENU)7,    // Button ID
         NULL,
         NULL);
+
+    hwndMessageBox = CreateWindowW(
+        L"EDIT", NULL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL,
+        (WINDOW_WIDTH - 500) / 2 - 100, // Adjusted for a narrower width, centering it
+        450, // Position below the console window
+        550, // Reduced width for the message box
+        30, // Height remains the same
+        hWnd, (HMENU)8, NULL, NULL);
+
+    hwndUploadBtn = CreateWindowW(
+        L"BUTTON",  // Button class
+        L"Upload ▼",    // No text for a dropdown icon
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles, added BS_SPLITBUTTON for dropdown
+        WINDOW_WIDTH - 130,  // Align with the Alias button's x position for consistency
+        450,        // Align with the Message Box's y position for visual consistency
+        80,  // Button width
+        30,          // Button height
+        hWnd,        // Parent window
+        (HMENU)9,    // Button ID
+        NULL,
+        NULL);
 }
 
 void CreateAliasChangeDialog(HWND hWnd) {
@@ -142,7 +108,7 @@ void CreateAliasChangeDialog(HWND hWnd) {
     hwndDialog = CreateWindowExW(
         0, L"#32770", NULL, // Use the predefined dialog box class "#32770"
         WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
-        750, 450, 250, 150,
+        800, 450, 250, 150,
         hWnd, NULL, NULL, NULL);
 
     // Create a static text control for "Change Name"
@@ -155,7 +121,7 @@ void CreateAliasChangeDialog(HWND hWnd) {
     // Create a text box inside the dialog
     hwndDialogTextBox = CreateWindowW(
         L"EDIT", L"",
-        WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+        WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
         30, 40, 180, 20,
         hwndDialog, (HMENU)8, NULL, NULL);
 

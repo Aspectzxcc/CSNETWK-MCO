@@ -5,24 +5,9 @@
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
         case WM_CREATE: // handle window creation
-            CreateGetIpPortWindow(hWnd); // create the initial panel with text box and button
+            CreateConsoleWindow(hWnd); // create the initial panel with text box and button
             break;
         case WM_COMMAND: // handle commands, like button clicks
-            if (LOWORD(wp) == 2) { // if the "Join" button was clicked
-                wchar_t ipAndPort[256]; // buffer to store text from the text box
-                GetWindowTextW(hwndTextBox, ipAndPort, 256); // get the text from the text box
-    
-                // Hide the text box and button and header
-                ShowWindow(hwndTextBox, SW_HIDE);
-                ShowWindow(hwndButton, SW_HIDE);
-                ShowWindow(hwndHeader, SW_HIDE);
-            
-                // Create the console buttons
-                CreateConsoleWindow(hWnd);
-
-                SetWindowTextW(hwndConsoleWindow, ipAndPort); // set the text of the console window
-            }
-
             if (LOWORD(wp) == 7) {
                CreateAliasChangeDialog(hWnd); 
             }

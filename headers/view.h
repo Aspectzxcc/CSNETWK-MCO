@@ -8,8 +8,8 @@
 #define CENTERED_X 550
 #define CENTERED_Y 200
 
-extern HWND hwndTextBox, hwndButton, hwndHeader;
 extern HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
+extern HWND hwndMessageBox, hwndUploadBtn;
 extern HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 // function prototypes
