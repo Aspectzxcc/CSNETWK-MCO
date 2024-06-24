@@ -10,5 +10,8 @@
 
 // function prototypes
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK DialogProcedure(HWND, UINT, WPARAM, LPARAM);
+void CreateConsolePanel(HWND hWnd);
+void ShowNameChangeDialog(HWND hWnd);
 
 #endif // GUI_TEST_H
