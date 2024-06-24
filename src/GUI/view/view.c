@@ -170,5 +170,5 @@ void CreateAliasChangeDialog(HWND hWnd) {
     ShowWindow(hwndDialog, SW_SHOW);
     UpdateWindow(hwndDialog);
 
-    SetWindowLongPtr(hwndDialog, GWLP_WNDPROC, (LONG_PTR)DialogProc);
+    SetWindowLongPtr(hwndDialog, GWLP_WNDPROC, (LONG_PTR)DialogProcedure);
 }
