@@ -9,7 +9,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             break;
         case WM_COMMAND: // handle commands, like button clicks
             if (LOWORD(wp) == 7) {
-               CreateAliasChangeDialog(hWnd); 
+               CreateRegisterDialog(hWnd); 
             }
             break;
         case WM_DESTROY: // handle window destruction
@@ -21,7 +21,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     return 0;
 }
 
-LRESULT CALLBACK DialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
         case WM_COMMAND:
             // Step 2: Handle WM_COMMAND message
@@ -31,7 +31,7 @@ LRESULT CALLBACK DialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 GetWindowTextW(hwndDialogTextBox, name, 256);
 
                 // Set the text of the "Name" button to the entered name
-                SetWindowTextW(hwndConsoleBtnAlias, name);
+                SetWindowTextW(hwndConsoleBtnRegister, name);
 
                 // Close the dialog
                 DestroyWindow(hwndDialog);

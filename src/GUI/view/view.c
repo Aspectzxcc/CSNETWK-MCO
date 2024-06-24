@@ -5,7 +5,7 @@
 
 // console window handlers
 HWND hwndConsoleWindow; 
-HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
+HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
 HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 
 // alias change dialog handlers
@@ -88,9 +88,9 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         NULL,
         NULL);
 
-    hwndConsoleBtnAlias = CreateWindowW(
+    hwndConsoleBtnRegister = CreateWindowW(
         L"BUTTON",  // Button class
-        L"Alias",    // Button text
+        L"Register",    // Button text
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
         WINDOW_WIDTH - 150,  // Rightmost position with a 20px margin
         yPos,        // y position
@@ -148,7 +148,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         NULL);
 }
 
-void CreateAliasChangeDialog(HWND hWnd) {
+void CreateRegisterDialog(HWND hWnd) {
     // Create a modeless dialog or a new window with CreateWindowEx
     hwndDialog = CreateWindowExW(
         0, L"#32770", NULL, // Use the predefined dialog box class "#32770"
@@ -181,5 +181,5 @@ void CreateAliasChangeDialog(HWND hWnd) {
     ShowWindow(hwndDialog, SW_SHOW);
     UpdateWindow(hwndDialog);
 
-    SetWindowLongPtr(hwndDialog, GWLP_WNDPROC, (LONG_PTR)DialogProcedure);
+    SetWindowLongPtr(hwndDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
 }

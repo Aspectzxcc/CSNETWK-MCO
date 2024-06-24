@@ -9,7 +9,7 @@
 #define CENTERED_Y 200
 
 HWND hwndConsoleWindow; 
-HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
+HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
 HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 extern HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
@@ -17,7 +17,7 @@ extern HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkBut
 void CreateConsoleWindow(HWND hWnd);
 void CreateConsoleWindowTopButtons(HWND hWnd);
 void CreateConsoleWindowBottomButtons(HWND hWnd);
-void CreateAliasChangeDialog(HWND hWnd);
+void CreateRegisterDialog(HWND hWnd);
 
 // Custom message for dialog procedure
 #define WM_CUSTOM_DIALOG (WM_USER + 1)
