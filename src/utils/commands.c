@@ -59,63 +59,83 @@ const Command *getCommand(char *input) {
 
 // parses and returns parameters from the command input
 char **parseCommandParameters(const Command *command, char *input) {
-    // copies input to avoid modifying the original string
     char *inputCopy = strdup(input);
     if (inputCopy == NULL) {
         fprintf(stderr, "memory allocation failed for input copy\n");
         return NULL;
     }
 
-    // allocates memory for parameters array
     char **parameters = malloc(command->parameterCount * sizeof(char *));
     if (parameters == NULL) {
         fprintf(stderr, "memory allocation failed for parameters\n");
-        free(inputCopy); // frees input copy if allocation fails
+        free(inputCopy);
         return NULL;
     }
 
-    // Check if the command is 'broadcast' or 'unicast'
-    if (strcmp(command->command, COMMAND_BROADCAST) == 0) {
-        // For broadcast, everything after the command is considered a single parameter
+    if (strcmp(command->command, COMMAND_BROADCAST) == 0 || strcmp(command->command, COMMAND_UNICAST) == 0) {
+        // For both broadcast and unicast, everything after the command is considered a single parameter
         char *message = strchr(inputCopy, ' ');
         if (message != NULL) {
             message++; // Move past the space to get the message
-            parameters[0] = strdup(message);
-            if (parameters[0] == NULL) {
+            if (strcmp(command->command, COMMAND_UNICAST) == 0) {
+                // Duplicate the message to avoid modifying the original with strtok
+                char *messageDup = strdup(message);
+                if (messageDup == NULL) {
+                    fprintf(stderr, "memory allocation failed for message duplication\n");
+                    free(parameters);
+                    free(inputCopy);
+                    return NULL;
+                }
+
+                // Use strtok on the duplicated string to get the handle
+                char *handle = strtok(messageDup, " ");
+                if (handle != NULL) {
+                    parameters[0] = strdup(handle);
+                    if (parameters[0] == NULL) {
+                        fprintf(stderr, "memory allocation failed for handle\n");
+                        free(messageDup);
+                        free(parameters);
+                        free(inputCopy);
+                        return NULL;
+                    }
+
+                    // Attempt to get the next part of the message, which should be the actual message
+                    char *actualMessage = strtok(NULL, "");
+                    if (actualMessage == NULL || *actualMessage == '\0') {
+                        free(parameters[0]);
+                        free(messageDup);
+                        free(parameters);
+                        free(inputCopy);
+                        return NULL;
+                    }
+
+                    // Set the message parameter
+                    message = strdup(actualMessage);
+                } else {
+                    // No handle found
+                    free(messageDup);
+                    free(parameters);
+                    free(inputCopy);
+                    return NULL;
+                }
+
+                // Free the duplicated message string
+                free(messageDup);
+            }
+
+            // This part is common for both broadcast and unicast (for unicast, it's everything after the handle)
+            parameters[strcmp(command->command, COMMAND_BROADCAST) == 0 ? 0 : 1] = strdup(message);
+            if (parameters[strcmp(command->command, COMMAND_BROADCAST) == 0 ? 0 : 1] == NULL) {
                 fprintf(stderr, "memory allocation failed for message\n");
+                if (strcmp(command->command, COMMAND_UNICAST) == 0) {
+                    free(parameters[0]); // Free the handle if it's unicast
+                }
                 free(parameters);
                 free(inputCopy);
                 return NULL;
             }
         } else {
             // No message found after the command
-            free(parameters);
-            free(inputCopy);
-            return NULL;
-        }
-    } else if (strcmp(command->command, COMMAND_UNICAST) == 0) {
-        // For unicast, the first parameter is the handle or alias, and everything after is the message
-        char *handle = strtok(NULL, " "); // Use strtok to get the first parameter after the command
-        if (handle != NULL) {
-            parameters[0] = strdup(handle);
-            if (parameters[0] == NULL) {
-                fprintf(stderr, "memory allocation failed for handle\n");
-                free(parameters);
-                free(inputCopy);
-                return NULL;
-            }
-            // Now, treat the rest of the input as the message
-            char *message = inputCopy + (handle - inputCopy) + strlen(handle) + 1; // Calculate position
-            parameters[1] = strdup(message);
-            if (parameters[1] == NULL) {
-                fprintf(stderr, "memory allocation failed for message\n");
-                free(parameters[0]);
-                free(parameters);
-                free(inputCopy);
-                return NULL;
-            }
-        } else {
-            // No handle found after the command
             free(parameters);
             free(inputCopy);
             return NULL;
@@ -151,6 +171,6 @@ char **parseCommandParameters(const Command *command, char *input) {
         }
     }
 
-    free(inputCopy); // frees the input copy after use
-    return parameters; // returns the parameters array
+    free(inputCopy);
+    return parameters;
 }

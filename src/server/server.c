@@ -58,7 +58,7 @@ int main() {
             HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);
             if (thread == NULL) {
                 // if thread creation fails, print an error message
-                printf("CreateThread failed with error code: %d", GetLastError());
+                printf("server CreateThread failed with error code: %d\n", GetLastError());
             } else {
                 // close the thread handle as it is not needed anymore
                 CloseHandle(thread);
@@ -76,7 +76,7 @@ int main() {
 
     // if accepting a client fails, print an error message
     if (clientSocket == INVALID_SOCKET) {
-        printf("accept failed with error code : %d", WSAGetLastError());
+        printf("accept failed with error code : %d\n", WSAGetLastError());
     }
 
     // perform cleanup: close the server socket and deinitialize the Windows Sockets API

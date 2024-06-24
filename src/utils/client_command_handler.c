@@ -54,9 +54,10 @@ int executeCommand(const char *command, char **parameters, char *message) {
         printCommands();
     } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
         // send a broadcast message to the server.
-        handleBroadcastCommand(&client.clientSocket, message);
+        handleBroadcastAndUnicast(&client.clientSocket, message);
     } else if (strcmp(command, COMMAND_UNICAST) == 0) {
         // send a unicast message to the server.
+        handleBroadcastAndUnicast(&client.clientSocket, message);
     } else {
         // handle unknown command.
         fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
@@ -72,13 +73,12 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 
     if (*sock != INVALID_SOCKET) {
         closesocket(*sock); // close the socket if it is already open
-        WSACleanup(); // clean up Winsock
     }
 
     *sock = socket(AF_INET, SOCK_STREAM, 0); // create a TCP socket for the client
 
     if (*sock == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create socket : %d", WSAGetLastError());
+        fprintf(stderr, "Could not create socket : %d\n", WSAGetLastError());
         return;
     }
 
@@ -92,14 +92,11 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     if (udpThread == NULL) {
         // if thread creation fails, print an error message
         printf("CreateThread failed with error code: %d", GetLastError());
-        WSACleanup();
     } 
 
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message
-        closesocket(*sock); // close socket on failure
-        WSACleanup(); // clean up Winsock
         *sock = INVALID_SOCKET; // set socket to invalid
         return;
     }
@@ -275,7 +272,6 @@ DWORD WINAPI listenForMessages(void *data) {
             int error = WSAGetLastError();
             if (error != WSAEWOULDBLOCK) {
                 // An error occurred, not just the non-blocking mode causing no data to be ready
-                fprintf(stderr, "recvfrom failed with error code: %d\n", error);
                 break; // Exit the loop on error
             }
         }
@@ -286,7 +282,7 @@ DWORD WINAPI listenForMessages(void *data) {
     return 0; // Return value is required for functions of type DWORD WINAPI
 }
 
-void handleBroadcastCommand(SOCKET *sock, const char *message) {
+void handleBroadcastAndUnicast(SOCKET *sock, const char *message) {
     sendMessage(sock, message, -1);
 
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply

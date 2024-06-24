@@ -12,9 +12,8 @@ void sendMessage(SOCKET *sock, const char *message, int length) {
     int sendResult = send(*sock, message, length, 0); // Send the message
 
     if (sendResult == SOCKET_ERROR) {
-        fprintf(stderr, "Send failed : %d", WSAGetLastError()); // Print error message
+        fprintf(stderr, "Send failed : %d\n", WSAGetLastError()); // Print error message
         closesocket(*sock); // Close the socket
-        WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     } else if (sendResult == 0) {
         fprintf(stderr, "Connection closed\n"); // Print error message
@@ -31,9 +30,8 @@ char *receiveResponse(SOCKET *sock, char *buffer, int bufferLength) {
         fprintf(stderr, "Connection closed\n"); // print error message
         return NULL; // return NULL
     } else {
-        fprintf(stderr, "Receive failed : %d", WSAGetLastError()); // print error message
+        fprintf(stderr, "Receive failed : %d\n", WSAGetLastError()); // print error message
         closesocket(*sock); // close the socket
-        WSACleanup(); // clean up Winsock
         *sock = INVALID_SOCKET; // set socket to invalid
         return NULL; // return NULL
     }
@@ -83,7 +81,17 @@ int commandRequiresRegistration(const char *command) {
 }
 
 void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const char *ip) {
+    if (*sock != INVALID_SOCKET) {
+        closesocket(*sock); // Close the socket
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+    
     *sock = socket(AF_INET, SOCK_DGRAM, 0); // Create a UDP socket
+
+    if (*sock == INVALID_SOCKET) {
+        fprintf(stderr, "Receiver socket creation failed with error code : %d\n", WSAGetLastError()); // Print error message
+        return; // Return from the function
+    }
 
     receiverAddress->sin_family = AF_INET; // Use IPv4 addresses
     receiverAddress->sin_addr.s_addr = inet_addr(ip); // Set the receiver IP address
@@ -94,7 +102,6 @@ void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const cha
     if (ioctlsocket(*sock, FIONBIO, &mode) == SOCKET_ERROR) {
         fprintf(stderr, "Receiver ioctlsocket failed with error code : %d\n", WSAGetLastError()); // Print error message
         closesocket(*sock); // Close the socket
-        WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     }
 
@@ -103,7 +110,6 @@ void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const cha
     if (setsockopt(*sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR) {
         fprintf(stderr, "Receiver setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
         closesocket(*sock); // Close the socket
-        WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     }
 
@@ -112,19 +118,31 @@ void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const cha
     if (setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == SOCKET_ERROR) {
         fprintf(stderr, "Receiver setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
         closesocket(*sock); // Close the socket
-        WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     }
 
     if (bind(*sock, (struct sockaddr *)receiverAddress, sizeof(*receiverAddress)) == SOCKET_ERROR) {
     fprintf(stderr, "Receiver Bind failed with error code : %d\n", WSAGetLastError());
     closesocket(*sock);
-    WSACleanup();
     *sock = INVALID_SOCKET;
+    }
+
+    int len = sizeof(*receiverAddress);
+    if (getsockname(*sock, (struct sockaddr *)receiverAddress, &len) == SOCKET_ERROR) {
+        fprintf(stderr, "Receiver getsockname failed with error code : %d\n", WSAGetLastError());
+        closesocket(*sock);
+        *sock = INVALID_SOCKET;
+    } else {
+        printf("Receiver socket bound to port %d\n", ntohs(receiverAddress->sin_port));
     }
 }
 
 void initUdpSenderSocket(SOCKET *sock) {
+    if (*sock != INVALID_SOCKET) {
+        closesocket(*sock); // Close the socket
+        *sock = INVALID_SOCKET; // Set socket to invalid
+    }
+    
     *sock = socket(AF_INET, SOCK_DGRAM, 0); // Create a UDP socket
 
     // set the socket to broadcast mode
@@ -132,7 +150,6 @@ void initUdpSenderSocket(SOCKET *sock) {
     if (setsockopt(*sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR) {
         fprintf(stderr, "Sender setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
         closesocket(*sock); // Close the socket
-        WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     }
 
@@ -141,7 +158,6 @@ void initUdpSenderSocket(SOCKET *sock) {
     if (setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == SOCKET_ERROR) {
         fprintf(stderr, "Sender setsockopt failed with error code : %d\n", WSAGetLastError()); // Print error message
         closesocket(*sock); // Close the socket
-        WSACleanup(); // Clean up Winsock
         *sock = INVALID_SOCKET; // Set socket to invalid
     }
 }

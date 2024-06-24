@@ -41,7 +41,7 @@ DWORD WINAPI client_handler(void* data) {
             // validate the command
             if (command == NULL) {
                 printf(ERROR_COMMAND_NOT_FOUND "\n"); // print error if command not found
-                continue; // skip to the next iteration on error
+                break;
             }
 
             char **parameters = parseCommandParameters(command, clientMessage); // parse parameters from the command
@@ -49,7 +49,7 @@ DWORD WINAPI client_handler(void* data) {
             // validate parameters
             if (parameters == NULL) {
                 printf(ERROR_INVALID_PARAMETERS "\n"); // print error if parameters are invalid
-                continue; // skip to the next iteration on error
+                break;
             }
 
             handleCommand(client, command->command, parameters); // execute the command
@@ -90,7 +90,9 @@ void handleCommand(Client *client, const char *command, char **parameters) {
         broadcastMessage(client, parameters[0]); // broadcast message to all clients
 
     } else if (strcmp(command, COMMAND_UNICAST) == 0) {
-        // unicastMessage(client, parameters[0], parameters[1]); // unicast message to specific client
+        printf("handle: %s\n", parameters[0]);
+        printf("message: %s\n", parameters[1]);
+        unicastMessage(client, parameters[0], parameters[1]); // unicast message to specific client
 
     } else {
         sendMessage(&client->clientSocket, ERROR_COMMAND_NOT_FOUND, strlen(ERROR_COMMAND_NOT_FOUND)); // send error message for unknown command
@@ -265,15 +267,12 @@ void broadcastMessage(Client *client, char *message) {
     strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
 
     // Format the message with the client's alias, timestamp, and the original message
-    if (client->clientAlias[0] != '\0' && strlen(client->clientAlias) > 0) {
-        sprintf(formattedMessage, SEND_MESSAGE_FORMAT, client->clientAlias, timeStr, message);
-    } else {
-        sprintf(formattedMessage, "<%s>: %s", timeStr, message); // Handle case where client alias might be empty
-    }
+    sprintf(formattedMessage, SEND_MESSAGE_FORMAT, client->clientAlias, timeStr, message);
 
     for (int i = 0; i < clientCount; i++) {
         if (clients[i].clientSocket != client->clientSocket) {
             // Use senderSocket for UDP broadcasting
+            printf("Sending broadcast message to client %d\n", clients[i].senderSocket);
             int sendResult = sendto(clients[i].senderSocket, formattedMessage, strlen(formattedMessage), 0, 
                                     (struct sockaddr *)&clients[i].clientAddress, sizeof(clients[i].clientAddress));
             if (sendResult == SOCKET_ERROR) {
@@ -286,4 +285,42 @@ void broadcastMessage(Client *client, char *message) {
 
     // Send confirmation message to the client that sent the broadcast
     sendMessage(&client->clientSocket, MESSAGE_SUCCESSFUL_BROADCAST, -1);
+}
+
+void unicastMessage(Client *client, char *targetAlias, char *message) {
+    char formattedMessage[DEFAULT_BUFLEN]; // Assuming DEFAULT_BUFLEN is defined and large enough
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char timeStr[20]; // for timestamp
+    strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    // Format the message with the client's alias, timestamp, and the original message
+    sprintf(formattedMessage, SEND_MESSAGE_FORMAT, client->clientAlias, timeStr, message);
+
+    printf("formatted message: %s\n", formattedMessage);
+
+    // Find the target client by alias
+    for (int i = 0; i < clientCount; i++) {
+        if (strcmp(clients[i].clientAlias, targetAlias) == 0) {
+            // Use senderSocket for UDP unicast
+            printf("Sending broadcast message to client %d\n", clients[i].senderSocket);
+            int sendResult = sendto(clients[i].senderSocket, formattedMessage, strlen(formattedMessage), 0, 
+                                    (struct sockaddr *)&clients[i].clientAddress, sizeof(clients[i].clientAddress));
+            if (sendResult == SOCKET_ERROR) {
+                printf("Failed to send message to client %s, error: %d\n", clients[i].clientAlias, WSAGetLastError());
+            } else {
+                printf("Unicast message sent to client %s\n", clients[i].clientAlias);
+            }
+
+            // Send confirmation message to the client that sent the unicast
+            char response[DEFAULT_BUFLEN];
+            sprintf(response, MESSAGE_SUCCESSFUL_UNICAST, targetAlias);
+            sendMessage(&client->clientSocket, response, -1);
+
+            return; // Message sent, exit the function
+        }
+    }
+
+    // If the function reaches this point, the target alias was not found
+    sendMessage(&client->clientSocket, ERROR_UNICAST_FAILED, -1);
 }

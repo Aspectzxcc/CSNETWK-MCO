@@ -25,5 +25,6 @@ void uploadFileFromClient(Client *client, char *filename);
 void sendFileToClient(SOCKET *clientSocket, const char *filename);
 void sendDirectoryFileList(SOCKET *clientSocket);
 void broadcastMessage(Client *client, char *message);
+void unicastMessage(Client *client, char *targetAlias, char *message);
 
 #endif // SERVER_COMMAND_HANDLER_H
