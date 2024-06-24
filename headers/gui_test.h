@@ -11,6 +11,7 @@
 // function prototypes
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK DialogProcedure(HWND, UINT, WPARAM, LPARAM);
+void CreateGetIpPortPanel(HWND hWnd);
 void CreateConsolePanel(HWND hWnd);
 void ShowNameChangeDialog(HWND hWnd);
 

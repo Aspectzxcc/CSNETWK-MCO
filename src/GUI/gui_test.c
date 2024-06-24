@@ -3,7 +3,7 @@
 
 // declare global variables to store handles to the console window, text box, and button
 HWND hwndTextBox, hwndButton, hwndHeader;
-HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnName;
+HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
 HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 // main entry point for a windows application
@@ -43,67 +43,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
         case WM_CREATE: // handle window creation
-            hwndHeader = CreateWindowW(
-                L"STATIC", // Predefined class; Static control
-                L"File Exchange System", // Button text 
-                WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE, // Styles; Visible, Child, Centered text, Centered image
-                0, // x position; Start from the left edge
-                10, // y position; A little down from the top edge
-                WINDOW_WIDTH, // Make it as wide as the window
-                40, // Height
-                hWnd, // Parent window
-                (HMENU)0, // No menu.
-                NULL, // No instance override
-                NULL); // No additional parameters
-
-            // Create a larger font
-            HFONT hFont = CreateFontW(
-                24, // nHeight
-                0, // nWidth
-                0, // nEscapement
-                0, // nOrientation
-                FW_BOLD, // nWeight
-                FALSE, // bItalic
-                FALSE, // bUnderline
-                0, // cStrikeOut
-                ANSI_CHARSET, // nCharSet
-                OUT_DEFAULT_PRECIS, // nOutPrecision
-                CLIP_DEFAULT_PRECIS, // nClipPrecision
-                DEFAULT_QUALITY, // nQuality
-                DEFAULT_PITCH | FF_SWISS, // nPitchAndFamily
-                L"Arial"); // lpszFacename
-
-            // Set the font for the static control
-            SendMessage(hwndHeader, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-            hwndTextBox = CreateWindowW(
-                L"EDIT", 
-                L"", 
-                WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER, 
-                (WINDOW_WIDTH - 400) / 2, // Center horizontally
-                250, // Fixed vertical position
-                400, // Width
-                25, 
-                hWnd, 
-                (HMENU)1, 
-                NULL, 
-                NULL); // create a text box control
-
-            SetFocus(hwndTextBox); // set focus to the text box control
-
-            hwndButton = CreateWindowW(
-                L"BUTTON", L"Join", 
-                WS_CHILD | WS_VISIBLE, 
-                (WINDOW_WIDTH - 110) / 2, // Center horizontally
-                290, // Below the text box with some spacing
-                100, // Width
-                30, // Height
-                hWnd, (HMENU)2, NULL, NULL); // create a button control
+            CreateGetIpPortPanel(hWnd); // create the initial panel with text box and button
             break;
         case WM_COMMAND: // handle commands, like button clicks
             if (LOWORD(wp) == 2) { // if the "Join" button was clicked
                 wchar_t ipAndPort[256]; // buffer to store text from the text box
                 GetWindowTextW(hwndTextBox, ipAndPort, 256); // get the text from the text box
+                
+                // append to connected string
+                wchar_t connected[256] = L"Connected to the server with\r\n";
+                wsprintfW(connected, L"Connected to the server with\r\n%s", ipAndPort);
 
                 // Hide the text box and button and header
                 ShowWindow(hwndTextBox, SW_HIDE);
@@ -112,6 +61,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             
                 // Create the console buttons
                 CreateConsolePanel(hWnd);
+
+                SetWindowTextW(hwndConsoleWindow, connected); // set the text of the console window
             }
 
             if (LOWORD(wp) == 7) {
@@ -125,6 +76,65 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             return DefWindowProc(hWnd, msg, wp, lp); // call the default window procedure
     }
     return 0;
+}
+
+void CreateGetIpPortPanel(HWND hWnd) {
+    hwndHeader = CreateWindowW(
+        L"STATIC", // Predefined class; Static control
+        L"File Exchange System", // Button text 
+        WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE, // Styles; Visible, Child, Centered text, Centered image
+        0, // x position; Start from the left edge
+        10, // y position; A little down from the top edge
+        WINDOW_WIDTH, // Make it as wide as the window
+        40, // Height
+        hWnd, // Parent window
+        (HMENU)0, // No menu.
+        NULL, // No instance override
+        NULL); // No additional parameters
+
+    // Create a larger font
+    HFONT hFont = CreateFontW(
+        24, // nHeight
+        0, // nWidth
+        0, // nEscapement
+        0, // nOrientation
+        FW_BOLD, // nWeight
+        FALSE, // bItalic
+        FALSE, // bUnderline
+        0, // cStrikeOut
+        ANSI_CHARSET, // nCharSet
+        OUT_DEFAULT_PRECIS, // nOutPrecision
+        CLIP_DEFAULT_PRECIS, // nClipPrecision
+        DEFAULT_QUALITY, // nQuality
+        DEFAULT_PITCH | FF_SWISS, // nPitchAndFamily
+        L"Arial"); // lpszFacename
+
+    // Set the font for the static control
+    SendMessage(hwndHeader, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+    hwndTextBox = CreateWindowW(
+        L"EDIT", 
+        L"", 
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER, 
+        (WINDOW_WIDTH - 400) / 2, // Center horizontally
+        250, // Fixed vertical position
+        400, // Width
+        25, 
+        hWnd, 
+        (HMENU)1, 
+        NULL, 
+        NULL); // create a text box control
+
+    SetFocus(hwndTextBox); // set focus to the text box control
+
+    hwndButton = CreateWindowW(
+        L"BUTTON", L"Join", 
+        WS_CHILD | WS_VISIBLE, 
+        (WINDOW_WIDTH - 110) / 2, // Center horizontally
+        290, // Below the text box with some spacing
+        100, // Width
+        30, // Height
+        hWnd, (HMENU)2, NULL, NULL); // create a button control
 }
 
 void CreateConsolePanel(HWND hWnd) {
@@ -184,9 +194,9 @@ void CreateConsolePanel(HWND hWnd) {
         NULL,
         NULL);
 
-    hwndConsoleBtnName = CreateWindowW(
+    hwndConsoleBtnAlias = CreateWindowW(
         L"BUTTON",  // Button class
-        L"Name",    // Button text
+        L"Alias",    // Button text
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
         WINDOW_WIDTH - 150,  // Rightmost position with a 20px margin
         yPos,        // y position
@@ -208,7 +218,7 @@ LRESULT CALLBACK DialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
                 GetWindowTextW(hwndDialogTextBox, name, 256);
 
                 // Set the text of the "Name" button to the entered name
-                SetWindowTextW(hwndConsoleBtnName, name);
+                SetWindowTextW(hwndConsoleBtnAlias, name);
 
                 // Close the dialog
                 DestroyWindow(hwndDialog);
