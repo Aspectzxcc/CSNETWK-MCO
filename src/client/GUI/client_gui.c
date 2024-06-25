@@ -53,6 +53,35 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_CREATE:
             CreateConsoleOutputWindow(hWnd, ((LPCREATESTRUCT)lp)->hInstance);
             break;
+        case WM_COMMAND:
+            // Handle button clicks
+            switch (LOWORD(wp)) {
+                case 100: // Join button
+                    CreateJoinDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
+                    break;
+                case 101: // Leave button
+                    MessageBoxW(hWnd, L"Leave button clicked", L"Button Clicked", MB_OK);
+                    break;
+                case 102: // Help button
+                    MessageBoxW(hWnd, L"Help button clicked", L"Button Clicked", MB_OK);
+                    break;
+                case 103: // Directory button
+                    MessageBoxW(hWnd, L"Directory button clicked", L"Button Clicked", MB_OK);
+                    break;
+                case 104: // Register button
+                    MessageBoxW(hWnd, L"Register button clicked", L"Button Clicked", MB_OK);
+                    break;
+                case 200: // Broadcast button
+                    MessageBoxW(hWnd, L"Broadcast button clicked", L"Button Clicked", MB_OK);
+                    break;
+                case 201: // Unicast button
+                    MessageBoxW(hWnd, L"Unicast button clicked", L"Button Clicked", MB_OK);
+                    break;
+                case 202: // Upload button
+                    MessageBoxW(hWnd, L"Upload button clicked", L"Button Clicked", MB_OK);
+                    break;
+            }
+            break;
          case WM_ERASEBKGND:
             {
                 HDC hdc = (HDC)wp;

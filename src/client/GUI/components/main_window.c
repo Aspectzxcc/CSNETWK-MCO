@@ -5,7 +5,7 @@
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     // Register the child window class
     WNDCLASSW wc = {0};
-    wc.lpszClassName = L"ConsoleMimicClass";
+    wc.lpszClassName = L"ConsoleOutputClass";
     wc.hInstance = hInst;
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpfnWndProc = ConsoleOutputProcedure;
@@ -22,11 +22,16 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
 
     // Create the child window
     CreateWindowExW(
-        0, L"ConsoleMimicClass", L"",
+        0, L"ConsoleOutputClass", L"",
         WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOVSCROLL,
         posX, posY, width, height,
         parentHwnd, NULL, hInst, NULL);
 
+    // Create buttons for the console output window
+    CreateConsoleOutputWindowButtons(parentHwnd, hInst, posX, posY, width, height);
+}
+
+void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX, int posY, int width, int height) {
     // Constants for button layout 
     const int buttonHeight = 30;
     const int gap = 5; // Gap between buttons
@@ -35,12 +40,11 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     const int buttonWidth = (width - totalGapsWidth) / 5; // Adjusted button width
 
     // Button labels
-    const wchar_t* labels[] = {L"Join", L"Leave", L"Help", L"Directory", L"Register"};
-
+    const wchar_t* topLabels[] = {L"Join", L"Leave", L"Help", L"Directory", L"Register"};
     // Create buttons with adjusted buttonWidth
     for (int i = 0; i < 5; i++) {
         CreateWindowExW(
-            0, L"BUTTON", labels[i],
+            0, L"BUTTON", topLabels[i],
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             posX + (buttonWidth + gap) * i, buttonYPos, buttonWidth, buttonHeight,
             parentHwnd, (HMENU)(INT_PTR)(100 + i), hInst, NULL);
@@ -50,7 +54,7 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     const int buttonYPosUnder = posY + height + gap; // New Y position for buttons under the console window
 
     // Button labels for the new buttons
-    const wchar_t* newLabels[] = {L"Broadcast", L"Unicast", L"Upload"};
+    const wchar_t* bottomLabels[] = {L"Broadcast", L"Unicast", L"Upload"};
 
     // Calculate the width for the three new buttons, considering the total width and gaps
     const int totalGapsWidthUnder = (3 - 1) * gap; // Total width taken by gaps between the new buttons
@@ -59,7 +63,7 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     // Create the new buttons under the console mimic window
     for (int i = 0; i < 3; i++) {
         CreateWindowExW(
-            0, L"BUTTON", newLabels[i],
+            0, L"BUTTON", bottomLabels[i],
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             posX + (buttonWidthUnder + gap) * i, buttonYPosUnder, buttonWidthUnder, buttonHeight,
             parentHwnd, (HMENU)(INT_PTR)(200 + i), hInst, NULL); // Using 200+i for ID to avoid conflict
