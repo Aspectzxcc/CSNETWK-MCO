@@ -1,7 +1,6 @@
 #include "../../../../headers/components.h"
 #include "../../../../headers/commands.h"
 #include <stdio.h>
-#include <CommCtrl.h>
 
 typedef struct {
     const char* command;

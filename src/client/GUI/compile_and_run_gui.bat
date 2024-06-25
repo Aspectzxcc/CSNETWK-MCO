@@ -1,6 +1,6 @@
 @echo off
 taskkill /F /IM client_gui.exe /T >nul 2>&1
-gcc client_gui.c components/main_window.c components/join_dialog.c components/help_dialog.c -o client_gui.exe -mwindows -lcomctl32
+gcc client_gui.c components/main_window.c components/join_dialog.c components/help_dialog.c components/dir_dialog.c -o client_gui.exe -mwindows -lcomctl32
 if %ERRORLEVEL% neq 0 (
     echo Compilation failed.
     exit /b %ERRORLEVEL%
