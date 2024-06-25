@@ -1,6 +1,7 @@
 #include "../../../headers/components.h"
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+HWND hConsoleOutput;
 
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {

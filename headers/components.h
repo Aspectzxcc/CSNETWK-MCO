@@ -4,6 +4,9 @@
 #include <windows.h>
 #include <commctrl.h>
 
+// console output window
+extern HWND hConsoleOutput;
+
 // function prototypes for window creation
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);
 void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX, int posY, int width, int height); 
