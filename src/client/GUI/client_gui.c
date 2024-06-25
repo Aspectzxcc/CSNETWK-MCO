@@ -1,4 +1,6 @@
-#include "../../../headers/client_gui.h"
+#include "../../../headers/components.h"
+
+LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
@@ -7,7 +9,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hInstance = hInst;
-    wc.lpszClassName = L"MyWindowClass";
+    wc.lpszClassName = L"MainWindowClass";
     wc.lpfnWndProc = WindowProcedure;
 
     // Register the window class
@@ -29,7 +31,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
     // Create the window centered on the screen
     CreateWindowW(
-        L"MyWindowClass", 
+        L"MainWindowClass", 
         L"File Exchange Client", 
         WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
         posX, posY, windowWidth, windowHeight, 
@@ -48,6 +50,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 // Window procedure definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
+        case WM_CREATE:
+            CreateConsoleOutputWindow(hWnd, ((LPCREATESTRUCT)lp)->hInstance);
+            break;
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
