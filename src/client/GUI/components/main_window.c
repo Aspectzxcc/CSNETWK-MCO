@@ -54,7 +54,7 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
     const int buttonYPosUnder = posY + height + gap; // New Y position for buttons under the console window
 
     // Button labels for the new buttons
-    const wchar_t* bottomLabels[] = {L"Broadcast", L"Unicast", L"Upload"};
+    const wchar_t* bottomLabels[] = {L"Broadcast", L"Unicast", L"Store"};
 
     // Calculate the width for the three new buttons, considering the total width and gaps
     const int totalGapsWidthUnder = (3 - 1) * gap; // Total width taken by gaps between the new buttons

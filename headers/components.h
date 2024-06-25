@@ -18,6 +18,8 @@ HTREEITEM AddItemToTreeView(HWND hTreeView, HTREEITEM hParent, char* text);
 void CreateRegisterDialog(HWND parentHwnd, HINSTANCE hInst, HWND registerHwnd);
 void CreateBroadcastDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateUnicastDialog(HWND parentHwnd, HINSTANCE hInst);
+void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst);
+void InitializeTreeViewForStore(HWND hTreeView);
 
 // function prototypes for window procedure
 LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -27,5 +29,6 @@ LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
 LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK BroadcastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK UnicastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 #endif // COMPONENTS_H

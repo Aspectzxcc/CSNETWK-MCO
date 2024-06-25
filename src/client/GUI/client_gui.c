@@ -81,7 +81,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                     CreateUnicastDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
                 case 202: // Upload button
-                    MessageBoxW(hWnd, L"Upload button clicked", L"Button Clicked", MB_OK);
+                    CreateStoreDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
             }
             break;
