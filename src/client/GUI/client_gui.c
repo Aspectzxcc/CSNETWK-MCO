@@ -53,6 +53,16 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_CREATE:
             CreateConsoleOutputWindow(hWnd, ((LPCREATESTRUCT)lp)->hInstance);
             break;
+         case WM_ERASEBKGND:
+            {
+                HDC hdc = (HDC)wp;
+                RECT rect;
+                GetClientRect(hWnd, &rect);
+                HBRUSH hBrush = CreateSolidBrush(RGB(192, 192, 192)); // A grayish color
+                FillRect(hdc, &rect, hBrush);
+                DeleteObject(hBrush);
+                return 1; // Return non-zero to indicate the message is handled
+            }
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
