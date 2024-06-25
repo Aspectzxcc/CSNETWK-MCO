@@ -8,15 +8,22 @@
 #define CENTERED_X 550
 #define CENTERED_Y 200
 
-HWND hwndConsoleWindow; 
-HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
-HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
-extern HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+// console window handlers
+extern HWND hwndConsoleWindow; 
+extern HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
+extern HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
+
+// join dialog handlers
+extern HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
+
+// alias change dialog handlers
+extern HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 // function prototypes
 void CreateConsoleWindow(HWND hWnd);
 void CreateConsoleWindowTopButtons(HWND hWnd);
 void CreateConsoleWindowBottomButtons(HWND hWnd);
+void CreateJoinDialog(HWND hWnd);
 void CreateRegisterDialog(HWND hWnd);
 
 // Custom message for dialog procedure

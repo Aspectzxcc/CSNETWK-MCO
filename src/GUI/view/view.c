@@ -8,8 +8,11 @@ HWND hwndConsoleWindow;
 HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
 HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 
+// join dialog handlers
+HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
+
 // alias change dialog handlers
-HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 void CreateConsoleWindow(HWND hWnd) {
     hwndConsoleWindow = CreateWindowW(
@@ -41,7 +44,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         100,        // Button width
         30,         // Button height
         hWnd,       // Parent window
-        (HMENU)4,   // Button ID
+        (HMENU)3,   // Button ID
         NULL,
         NULL);
 
@@ -148,9 +151,60 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         NULL);
 }
 
+void CreateJoinDialog(HWND hWnd) {
+    // Create a modeless dialog or a new window with CreateWindowEx
+    hwndJoinDialog = CreateWindowExW(
+        0, L"#32770", L"Join Dialog", // Use the predefined dialog box class "#32770"
+        WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
+        800, 450, 250, 200, // Increased height from 150 to 200
+        hWnd, NULL, NULL, NULL);
+
+    // Create a static text control for "IP Address"
+    CreateWindowW(
+        L"STATIC", L"IP Address:",
+        WS_VISIBLE | WS_CHILD | SS_CENTER,
+        10, 10, 230, 20, // Adjust size and position as needed
+        hwndJoinDialog, NULL, NULL, NULL);
+
+    // Create a text box for the IP Address
+    hwndEditIp = CreateWindowW(
+        L"EDIT", L"",
+        WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
+        30, 30, 180, 20,
+        hwndJoinDialog, (HMENU)1, NULL, NULL);
+
+    // Create a static text control for "Port"
+    CreateWindowW(
+        L"STATIC", L"Port:",
+        WS_VISIBLE | WS_CHILD | SS_CENTER,
+        10, 70, 230, 20, // Adjust size and position as needed
+        hwndJoinDialog, NULL, NULL, NULL);
+
+    // Create a text box for the Port
+    hwndEditPort = CreateWindowW(
+        L"EDIT", L"",
+        WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
+        30, 90, 180, 20,
+        hwndJoinDialog, (HMENU)2, NULL, NULL);
+
+    // Create an "OK" button inside the dialog
+    hwndJoinButton = CreateWindowW(
+        L"BUTTON", L"OK",
+        WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        75, 130, 100, 30,
+        hwndJoinDialog, (HMENU)9, NULL, NULL);
+
+    // Show the dialog
+    ShowWindow(hwndJoinDialog, SW_SHOW);
+    UpdateWindow(hwndJoinDialog);
+
+    // Set the dialog procedure for custom message handling
+    SetWindowLongPtr(hwndJoinDialog, GWLP_WNDPROC, (LONG_PTR)JoinDialogProcedure);
+}
+
 void CreateRegisterDialog(HWND hWnd) {
     // Create a modeless dialog or a new window with CreateWindowEx
-    hwndDialog = CreateWindowExW(
+    hwndRegisterDialog = CreateWindowExW(
         0, L"#32770", NULL, // Use the predefined dialog box class "#32770"
         WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
         800, 450, 250, 150,
@@ -161,25 +215,25 @@ void CreateRegisterDialog(HWND hWnd) {
         L"STATIC", L"Register Alias",
         WS_VISIBLE | WS_CHILD | SS_CENTER,
         10, 10, 230, 20, // Adjust size and position as needed
-        hwndDialog, NULL, NULL, NULL);
+        hwndRegisterDialog, NULL, NULL, NULL);
 
     // Create a text box inside the dialog
     hwndDialogTextBox = CreateWindowW(
         L"EDIT", L"",
         WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
         30, 40, 180, 20,
-        hwndDialog, (HMENU)8, NULL, NULL);
+        hwndRegisterDialog, (HMENU)8, NULL, NULL);
 
     // Create an "OK" button inside the dialog
     hwndDialogOkButton = CreateWindowW(
         L"BUTTON", L"OK",
         WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         75, 70, 100, 30,
-        hwndDialog, (HMENU)9, NULL, NULL);
+        hwndRegisterDialog, (HMENU)9, NULL, NULL);
 
     // Show the dialog
-    ShowWindow(hwndDialog, SW_SHOW);
-    UpdateWindow(hwndDialog);
+    ShowWindow(hwndRegisterDialog, SW_SHOW);
+    UpdateWindow(hwndRegisterDialog);
 
-    SetWindowLongPtr(hwndDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
+    SetWindowLongPtr(hwndRegisterDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
 }
