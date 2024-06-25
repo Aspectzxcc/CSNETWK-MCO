@@ -3,10 +3,19 @@
 #include "../../headers/view.h"
 #include "../../headers/controller.h"
 
-// declare global variables to store handles to the console window, text box, and button
-HWND hwndTextBox, hwndButton, hwndHeader;
-HWND hwndConsoleWindow, hwndConsoleBtnDisconnect, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnAlias;
-HWND hwndDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+// console window handlers
+HWND hwndConsoleWindow; 
+HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
+HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
+
+// join dialog handlers
+HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
+
+// alias change dialog handlers
+HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+
+// flags for open state
+int joinDialogOpen = 0;
 
 // main entry point for a windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {

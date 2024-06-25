@@ -29,16 +29,7 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
         case WM_COMMAND:
             // Step 2: Handle WM_COMMAND message
             if (LOWORD(wParam) == 9) { 
-                // Get the text from the text box in the dialog
-                wchar_t ip[256];
-                GetWindowTextW(hwndEditIp, ip, 256);
-
-                // Get the text from the text box in the dialog
-                wchar_t port[256];
-                GetWindowTextW(hwndEditPort, port, 256);
-
-                // Close the dialog
-                DestroyWindow(hwndJoinDialog);
+                handleIpAndPortSent(hwnd);
             }
             break;
         case WM_CLOSE:
@@ -73,4 +64,25 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
             return DefWindowProc(hwnd, message, wParam, lParam);
     }
     return 0;
+}
+
+void handleIpAndPortSent(HWND hWnd) {
+    wchar_t ip[256];
+    GetWindowTextW(hwndEditIp, ip, 256);
+
+    wchar_t port[256];
+    GetWindowTextW(hwndEditPort, port, 256);
+
+    // Prepare the text to be displayed in the console window
+    wchar_t consoleText[1024];
+    wsprintfW(consoleText, L"IP: %s\nPort: %s\n", ip, port);
+
+    // Get the current text length in the console window to append the new text
+    int textLength = GetWindowTextLengthW(hwndConsoleWindow);
+    SendMessageW(hwndConsoleWindow, EM_SETSEL, (WPARAM)textLength, (LPARAM)textLength); // Move the caret to the end
+    SendMessageW(hwndConsoleWindow, EM_REPLACESEL, FALSE, (LPARAM)consoleText); // Append the text
+
+    DestroyWindow(hWnd);
+
+    joinDialogOpen = 0;
 }

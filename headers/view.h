@@ -19,6 +19,9 @@ extern HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
 // alias change dialog handlers
 extern HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
+// flags for open state
+extern int joinDialogOpen;
+
 // function prototypes
 void CreateConsoleWindow(HWND hWnd);
 void CreateConsoleWindowTopButtons(HWND hWnd);

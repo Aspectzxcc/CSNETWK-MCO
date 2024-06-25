@@ -3,17 +3,6 @@
 #include "../../../headers/view.h"
 #include "../../../headers/controller.h"
 
-// console window handlers
-HWND hwndConsoleWindow; 
-HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
-HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
-
-// join dialog handlers
-HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
-
-// alias change dialog handlers
-HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
-
 void CreateConsoleWindow(HWND hWnd) {
     hwndConsoleWindow = CreateWindowW(
         L"EDIT", NULL,
@@ -152,7 +141,10 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
 }
 
 void CreateJoinDialog(HWND hWnd) {
-    // Create a modeless dialog or a new window with CreateWindowEx
+    if (joinDialogOpen) {
+        return;
+    }
+
     hwndJoinDialog = CreateWindowExW(
         0, L"#32770", L"Join Dialog", // Use the predefined dialog box class "#32770"
         WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
@@ -197,6 +189,8 @@ void CreateJoinDialog(HWND hWnd) {
     // Show the dialog
     ShowWindow(hwndJoinDialog, SW_SHOW);
     UpdateWindow(hwndJoinDialog);
+
+    joinDialogOpen = 1;
 
     // Set the dialog procedure for custom message handling
     SetWindowLongPtr(hwndJoinDialog, GWLP_WNDPROC, (LONG_PTR)JoinDialogProcedure);
