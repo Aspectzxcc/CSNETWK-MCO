@@ -1,3 +1,4 @@
+#include "../../../headers/commands.h"
 #include "../../../headers/controller.h"
 #include "../../../headers/view.h"
 
@@ -8,10 +9,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             CreateConsoleWindow(hWnd); // create the initial panel with text box and button
             break;
         case WM_COMMAND: // handle commands, like button clicks
-            if (LOWORD(wp) == 3) { 
+            if (LOWORD(wp) == 1) { 
                 CreateJoinDialog(hWnd); 
             }
-            if (LOWORD(wp) == 7) {
+            if (LOWORD(wp) == 5) {
                CreateRegisterDialog(hWnd); 
             }
             break;
@@ -28,12 +29,13 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
     switch (message) {
         case WM_COMMAND:
             // Step 2: Handle WM_COMMAND message
-            if (LOWORD(wParam) == 9) { 
+            if (LOWORD(wParam) == 3) { 
                 handleIpAndPortSent(hwnd);
             }
             break;
         case WM_CLOSE:
             DestroyWindow(hwnd);
+            joinDialogOpen = 0;
             break;
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);
@@ -45,12 +47,13 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
     switch (message) {
         case WM_COMMAND:
             // Step 2: Handle WM_COMMAND message
-            if (LOWORD(wParam) == 9) { 
+            if (LOWORD(wParam) == 2) { 
                 handleRegisterAlias();
             }
             break;
         case WM_CLOSE:
             DestroyWindow(hwnd);
+            registerDialogOpen = 0;
             break;
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);
@@ -59,15 +62,18 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
 }
 
 void handleIpAndPortSent() {
+    wchar_t command[256];
+    MultiByteToWideChar(CP_ACP, 0, COMMAND_JOIN, -1, command, 256);
+    
     wchar_t ip[256];
-    GetWindowTextW(hwndEditIp, ip, 256);
+    GetWindowTextW(hwndJoinDialogEditIp, ip, 256);
 
     wchar_t port[256];
-    GetWindowTextW(hwndEditPort, port, 256);
+    GetWindowTextW(hwndJoinDialogEditPort, port, 256);
 
     // Prepare the text to be displayed in the console window
     wchar_t consoleText[1024];
-    wsprintfW(consoleText, L"IP: %s\nPort: %s\n", ip, port);
+    wsprintfW(consoleText, L"%s %s %s\n", command, ip, port);
 
     // Get the current text length in the console window to append the new text
     int textLength = GetWindowTextLengthW(hwndConsoleWindow);
@@ -81,7 +87,7 @@ void handleIpAndPortSent() {
 
 void handleRegisterAlias() {
     wchar_t name[256];
-    GetWindowTextW(hwndRegisterDialog, name, 256);
+    GetWindowTextW(hwndRegisterDialogTextBox, name, 256);
 
     // Set the text of the "Name" button to the entered name
     SetWindowTextW(hwndConsoleBtnRegister, name);

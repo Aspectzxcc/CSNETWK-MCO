@@ -11,7 +11,7 @@ void CreateConsoleWindow(HWND hWnd) {
         80, // Start a bit below the top edge of the main window
         700, // Width
         400, // Height, making it pretty big but not occupying the entire window
-        hWnd, (HMENU)3, NULL, NULL);
+        hWnd, NULL, NULL, NULL);
 
     // set the font of the console output window to a more console-like font
     SendMessage(hwndConsoleWindow, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), TRUE);
@@ -33,7 +33,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         100,        // Button width
         30,         // Button height
         hWnd,       // Parent window
-        (HMENU)3,   // Button ID
+        (HMENU)1,   // Button ID
         NULL,
         NULL);
 
@@ -46,7 +46,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         100,        // Button width
         30,         // Button height
         hWnd,       // Parent window
-        (HMENU)4,   // Button ID
+        (HMENU)2,   // Button ID
         NULL,
         NULL);
 
@@ -61,7 +61,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         100,        // Button width
         30,         // Button height
         hWnd,
-        (HMENU)5,
+        (HMENU)3,
         NULL,
         NULL);
 
@@ -76,7 +76,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         100,        // Button width
         30,         // Button height
         hWnd,
-        (HMENU)6,
+        (HMENU)4,
         NULL,
         NULL);
 
@@ -89,7 +89,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         100,  // Button width
         30,          // Button height
         hWnd,        // Parent window
-        (HMENU)7,    // Button ID
+        (HMENU)5,    // Button ID
         NULL,
         NULL);
 }
@@ -108,7 +108,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         100, // Button width
         30,  // Button height
         hWnd,
-        (HMENU)10, // Unique Button ID
+        (HMENU)6, // Unique Button ID
         NULL,
         NULL);
 
@@ -122,7 +122,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         100, // Button width
         30,  // Button height
         hWnd,
-        (HMENU)11, // Unique Button ID
+        (HMENU)7, // Unique Button ID
         NULL,
         NULL);
 
@@ -135,7 +135,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         80,  // Button width
         30,          // Button height
         hWnd,        // Parent window
-        (HMENU)9,    // Button ID
+        (HMENU)8,    // Button ID
         NULL,
         NULL);
 }
@@ -159,7 +159,7 @@ void CreateJoinDialog(HWND hWnd) {
         hwndJoinDialog, NULL, NULL, NULL);
 
     // Create a text box for the IP Address
-    hwndEditIp = CreateWindowW(
+    hwndJoinDialogEditIp = CreateWindowW(
         L"EDIT", L"",
         WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
         30, 30, 180, 20,
@@ -173,18 +173,18 @@ void CreateJoinDialog(HWND hWnd) {
         hwndJoinDialog, NULL, NULL, NULL);
 
     // Create a text box for the Port
-    hwndEditPort = CreateWindowW(
+    hwndJoinDialogEditPort = CreateWindowW(
         L"EDIT", L"",
         WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
         30, 90, 180, 20,
         hwndJoinDialog, (HMENU)2, NULL, NULL);
 
     // Create an "OK" button inside the dialog
-    hwndJoinButton = CreateWindowW(
+    hwndJoinDialogJoinButton = CreateWindowW(
         L"BUTTON", L"OK",
         WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         75, 130, 100, 30,
-        hwndJoinDialog, (HMENU)9, NULL, NULL);
+        hwndJoinDialog, (HMENU)3, NULL, NULL);
 
     // Show the dialog
     ShowWindow(hwndJoinDialog, SW_SHOW);
@@ -209,25 +209,25 @@ void CreateRegisterDialog(HWND hWnd) {
         hWnd, NULL, NULL, NULL);
 
     // Create a static text control for "Change Name"
-    hwndDialogStaticText = CreateWindowW(
+    CreateWindowW(
         L"STATIC", L"Register Alias",
         WS_VISIBLE | WS_CHILD | SS_CENTER,
         10, 10, 230, 20, // Adjust size and position as needed
         hwndRegisterDialog, NULL, NULL, NULL);
 
     // Create a text box inside the dialog
-    hwndDialogTextBox = CreateWindowW(
+    hwndRegisterDialogTextBox = CreateWindowW(
         L"EDIT", L"",
         WS_BORDER | WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_CENTER,
         30, 40, 180, 20,
-        hwndRegisterDialog, (HMENU)8, NULL, NULL);
+        hwndRegisterDialog, (HMENU)1, NULL, NULL);
 
     // Create an "OK" button inside the dialog
-    hwndDialogOkButton = CreateWindowW(
-        L"BUTTON", L"OK",
+    hwndRegisterDialogRegisterButton = CreateWindowW(
+        L"BUTTON", L"Register",
         WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         75, 70, 100, 30,
-        hwndRegisterDialog, (HMENU)9, NULL, NULL);
+        hwndRegisterDialog, (HMENU)2, NULL, NULL);
 
     // Show the dialog
     ShowWindow(hwndRegisterDialog, SW_SHOW);

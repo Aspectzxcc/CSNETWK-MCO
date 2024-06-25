@@ -9,15 +9,15 @@
 #define CENTERED_Y 200
 
 // console window handlers
-extern HWND hwndConsoleWindow; 
+extern HWND hwndConsoleWindow;
 extern HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtnDir, hwndConsoleBtnRegister;
 extern HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 
 // join dialog handlers
-extern HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
+extern HWND hwndJoinDialog, hwndJoinDialogEditIp, hwndJoinDialogEditPort, hwndJoinDialogJoinButton;
 
 // alias change dialog handlers
-extern HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+extern HWND hwndRegisterDialog, hwndRegisterDialogTextBox, hwndRegisterDialogRegisterButton;
 
 // flags for open state
 extern int joinDialogOpen, registerDialogOpen;

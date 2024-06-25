@@ -9,10 +9,10 @@ HWND hwndConsoleBtnJoin, hwndConsoleBtnLeave, hwndConsoleBtnHelp, hwndConsoleBtn
 HWND hwndConsoleBtnBroadcast, hwndConsoleBtnUnicast, hwndConsoleBtnUpload;
 
 // join dialog handlers
-HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
+HWND hwndJoinDialog, hwndJoinDialogEditIp, hwndJoinDialogEditPort, hwndJoinDialogJoinButton;
 
 // alias change dialog handlers
-HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
+HWND hwndRegisterDialog, hwndRegisterDialogTextBox, hwndRegisterDialogRegisterButton;
 
 // flags for open state
 int joinDialogOpen = 0;
