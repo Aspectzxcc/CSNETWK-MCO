@@ -15,6 +15,9 @@ LRESULT CALLBACK WindowProcedure(HWND hwndParentWindow, UINT msg, WPARAM wp, LPA
             if (LOWORD(wp) == 2) {
                 handleLeave();
             }
+            if (LOWORD(wp) == 3) {
+                CreateHelpDialog(hwndParentWindow);
+            }
             if (LOWORD(wp) == 5) {
                CreateRegisterDialog(hwndParentWindow); 
             }
@@ -52,6 +55,23 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwndParentWindow, UINT message, WP
             if (LOWORD(wParam) == 2) { 
                 handleRegisterAlias();
             }
+            break;
+        case WM_CLOSE:
+            DestroyWindow(hwndParentWindow);
+            break;
+        default:
+            return DefWindowProc(hwndParentWindow, message, wParam, lParam);
+    }
+    return 0;
+}
+
+LRESULT CALLBACK HelpDialogProcedure(HWND hwndParentWindow, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+        case WM_CREATE:
+            // Initialization code here
+            break;
+        case WM_COMMAND:
+            // Handle commands, such as button presses
             break;
         case WM_CLOSE:
             DestroyWindow(hwndParentWindow);

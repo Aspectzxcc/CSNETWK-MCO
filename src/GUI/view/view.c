@@ -194,6 +194,28 @@ void CreateJoinDialog(HWND hwndParentWindow) {
     SetWindowLongPtr(hwndJoinDialog, GWLP_WNDPROC, (LONG_PTR)JoinDialogProcedure);
 }
 
+void CreateHelpDialog(HWND hwndParentWindow) {
+    // Create a popup window to act as the dialog
+    HWND hwndHelpDialog = CreateWindowExW(
+        0, // Extended window style for dialogs
+        L"STATIC",           // Predefined class; actual class depends on your needs
+        L"Help Dialog",      // Window text
+        WS_POPUPWINDOW | WS_VISIBLE | WS_SYSMENU | WS_CAPTION, // Window style
+        800, 450, 300, 200, // Position and dimensions
+        hwndParentWindow,          // Parent window
+        NULL,                // No menu
+        (HINSTANCE)GetWindowLongPtr(hwndParentWindow, GWLP_HINSTANCE),
+        NULL                 // No additional parameters
+    );
+
+    // Show and update the dialog window
+    ShowWindow(hwndHelpDialog, SW_SHOW);
+    UpdateWindow(hwndHelpDialog);
+
+    // Set the dialog procedure for custom message handling
+    SetWindowLongPtr(hwndHelpDialog, GWLP_WNDPROC, (LONG_PTR)HelpDialogProcedure);
+}
+
 void CreateRegisterDialog(HWND hwndParentWindow) {
     if (IsWindow(hwndRegisterDialog)) {
         return;
@@ -232,33 +254,4 @@ void CreateRegisterDialog(HWND hwndParentWindow) {
     UpdateWindow(hwndRegisterDialog);
 
     SetWindowLongPtr(hwndRegisterDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
-}
-
-void CreateHelpDialog(HWND hwndParentWindow) {
-    // Create a popup window to act as the dialog
-    HWND hwndHelpDialog = CreateWindowEx(
-        WS_EX_DLGMODALFRAME, // Extended window style for dialogs
-        L"STATIC",           // Predefined class; actual class depends on your needs
-        L"Help Dialog",      // Window text
-        WS_VISIBLE | WS_SYSMENU | WS_CAPTION, // Window style
-        CW_USEDEFAULT, CW_USEDEFAULT, 300, 200, // Position and dimensions
-        hwndParentWindow,          // Parent window
-        NULL,                // No menu
-        (HINSTANCE)GetWindowLongPtr(hwndParentWindow, GWLP_HINSTANCE),
-        NULL                 // No additional parameters
-    );
-
-    // Ensure the dialog window was created successfully
-    if (hwndHelpDialog == NULL) {
-        MessageBox(hwndParentWindow, L"Failed to create help dialog.", L"Error", MB_OK | MB_ICONERROR);
-        return;
-    }
-
-    // Create the list view inside the dialog
-    HWND hwndListView = CreateListView(hwndHelpDialog);
-    // Additional setup for the list view can go here
-
-    // Show and update the dialog window
-    ShowWindow(hwndHelpDialog, SW_SHOW);
-    UpdateWindow(hwndHelpDialog);
 }

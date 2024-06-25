@@ -3,9 +3,10 @@
 
 #include <windows.h>
 
-LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
-LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WindowProcedure(HWND hwndParentWindow, UINT msg, WPARAM wp, LPARAM lp);
+LRESULT CALLBACK JoinDialogProcedure(HWND hwndParentWindow, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK HelpDialogProcedure(HWND hwndParentWindow, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK RegisterDialogProcedure(HWND hwndParentWindow, UINT message, WPARAM wParam, LPARAM lParam);
 
 void handleIpAndPortSent();
 void handleRegisterAlias();
