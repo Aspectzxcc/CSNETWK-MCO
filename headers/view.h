@@ -20,7 +20,7 @@ extern HWND hwndJoinDialog, hwndEditIp, hwndEditPort, hwndJoinButton;
 extern HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkButton;
 
 // flags for open state
-extern int joinDialogOpen;
+extern int joinDialogOpen, registerDialogOpen;
 
 // function prototypes
 void CreateConsoleWindow(HWND hWnd);

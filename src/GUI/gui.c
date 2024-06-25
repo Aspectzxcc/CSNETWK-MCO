@@ -16,6 +16,7 @@ HWND hwndRegisterDialog, hwndDialogStaticText, hwndDialogTextBox, hwndDialogOkBu
 
 // flags for open state
 int joinDialogOpen = 0;
+int registerDialogOpen = 0;
 
 // main entry point for a windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {

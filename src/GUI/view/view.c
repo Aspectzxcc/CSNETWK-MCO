@@ -197,6 +197,10 @@ void CreateJoinDialog(HWND hWnd) {
 }
 
 void CreateRegisterDialog(HWND hWnd) {
+    if (registerDialogOpen) {
+        return;
+    }
+
     // Create a modeless dialog or a new window with CreateWindowEx
     hwndRegisterDialog = CreateWindowExW(
         0, L"#32770", NULL, // Use the predefined dialog box class "#32770"
@@ -228,6 +232,8 @@ void CreateRegisterDialog(HWND hWnd) {
     // Show the dialog
     ShowWindow(hwndRegisterDialog, SW_SHOW);
     UpdateWindow(hwndRegisterDialog);
+
+    registerDialogOpen = 1;
 
     SetWindowLongPtr(hwndRegisterDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
 }
