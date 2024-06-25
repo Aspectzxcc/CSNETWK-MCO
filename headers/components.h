@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <commctrl.h>
+#include "commands.h"
 
 // console output window
 extern HWND g_hConsoleOutput;
