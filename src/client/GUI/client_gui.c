@@ -69,7 +69,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                     CreateDirectoryDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
                 case 104: // Register button
-                    MessageBoxW(hWnd, L"Register button clicked", L"Button Clicked", MB_OK);
+                    {
+                        HWND hBtnRegister = GetDlgItem(hWnd, 104); // Assuming 104 is the ID for the Register button
+                        CreateRegisterDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), hBtnRegister);
+                    }
                     break;
                 case 200: // Broadcast button
                     MessageBoxW(hWnd, L"Broadcast button clicked", L"Button Clicked", MB_OK);

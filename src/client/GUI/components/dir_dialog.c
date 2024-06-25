@@ -43,7 +43,7 @@ void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst) {
 
     // Make the window modal
     EnableWindow(parentHwnd, FALSE);
-    SetWindowLongPtr(hDlg, GWLP_WNDPROC, (LONG_PTR)DirectoryDialogProcedure);
+    SetWindowLongPtrW(hDlg, GWLP_WNDPROC, (LONG_PTR)DirectoryDialogProcedure);
 
     // Message loop for the dialog
     MSG msg;
