@@ -35,7 +35,7 @@ void CreateJoinDialog(HWND parentHwnd, HINSTANCE hInst) {
     // Create an Edit control for IP input
     CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                     WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER,
-                    10, 40, 280, 20, // Adjust position and size as needed
+                    10, 40, 280, 25, // Adjust position and size as needed
                     hDlg, (HMENU)102, hInst, NULL); // 102 is the control ID for IP
 
     // Create a static text control for Port
@@ -47,7 +47,7 @@ void CreateJoinDialog(HWND parentHwnd, HINSTANCE hInst) {
     // Create an Edit control for Port input
     CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                     WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL | ES_CENTER,
-                    10, 100, 280, 20, // Adjust position and size as needed
+                    10, 100, 280, 25, // Adjust position and size as needed
                     hDlg, (HMENU)103, hInst, NULL); // 103 is the control ID for Port
 
     // Adjust the "Join" button position
