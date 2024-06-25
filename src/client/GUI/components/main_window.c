@@ -70,6 +70,15 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
     }
 }
 
+void AppendTextToConsoleOutput(HWND hConsoleOutput, const wchar_t* text) {
+    // Move the caret to the end of the text
+    int textLength = GetWindowTextLengthW(hConsoleOutput);
+    SendMessageW(hConsoleOutput, EM_SETSEL, (WPARAM)textLength, (LPARAM)textLength);
+    
+    // Insert the text at the new caret position
+    SendMessageW(hConsoleOutput, EM_REPLACESEL, FALSE, (LPARAM)text);
+}
+
 // Define the child window procedure for the console mimic
 LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
@@ -80,7 +89,6 @@ LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPAR
             SetTextColor(hdc, RGB(255, 255, 255)); // White text
             SetBkColor(hdc, RGB(0, 0, 0)); // Black background
             // Display some text as an example
-            TextOutW(hdc, 5, 5, L"Console Output Mimic", 21);
             EndPaint(hwnd, &ps);
         } break;
         default:

@@ -10,6 +10,7 @@ extern HWND g_hConsoleOutput;
 // function prototypes for window creation
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);
 void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX, int posY, int width, int height); 
+void AppendTextToConsoleOutput(wchar_t *text);
 void CreateJoinDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateHelpDialog(HWND parentHwnd, HINSTANCE hInst);
 void SetupListView(HWND hList);
