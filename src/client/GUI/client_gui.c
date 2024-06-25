@@ -63,7 +63,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                     MessageBoxW(hWnd, L"Leave button clicked", L"Button Clicked", MB_OK);
                     break;
                 case 102: // Help button
-                    MessageBoxW(hWnd, L"Help button clicked", L"Button Clicked", MB_OK);
+                    CreateHelpDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
                 case 103: // Directory button
                     MessageBoxW(hWnd, L"Directory button clicked", L"Button Clicked", MB_OK);
