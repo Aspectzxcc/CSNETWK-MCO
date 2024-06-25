@@ -3,7 +3,7 @@
 #include "../../../headers/view.h"
 #include "../../../headers/controller.h"
 
-void CreateConsoleWindow(HWND hWnd) {
+void CreateConsoleWindow(HWND hwndParentWindow) {
     hwndConsoleWindow = CreateWindowW(
         L"EDIT", NULL,
         WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
@@ -11,16 +11,16 @@ void CreateConsoleWindow(HWND hWnd) {
         80, // Start a bit below the top edge of the main window
         700, // Width
         400, // Height, making it pretty big but not occupying the entire window
-        hWnd, NULL, NULL, NULL);
+        hwndParentWindow, NULL, NULL, NULL);
 
     // set the font of the console output window to a more console-like font
     SendMessage(hwndConsoleWindow, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), TRUE);
 
-    CreateConsoleWindowTopButtons(hWnd);
-    CreateConsoleWindowBottomButtons(hWnd);
+    CreateConsoleWindowTopButtons(hwndParentWindow);
+    CreateConsoleWindowBottomButtons(hwndParentWindow);
 }
 
-void CreateConsoleWindowTopButtons(HWND hWnd) {
+void CreateConsoleWindowTopButtons(HWND hwndParentWindow) {
     int yPos = 35; 
     int buttonGap = 105;
 
@@ -32,7 +32,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         yPos,         // y position; above the console output window
         100,        // Button width
         30,         // Button height
-        hWnd,       // Parent window
+        hwndParentWindow,       // Parent window
         (HMENU)1,   // Button ID
         NULL,
         NULL);
@@ -45,7 +45,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         yPos,         // y position; above the console output window
         100,        // Button width
         30,         // Button height
-        hWnd,       // Parent window
+        hwndParentWindow,       // Parent window
         (HMENU)2,   // Button ID
         NULL,
         NULL);
@@ -60,7 +60,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         yPos,         // y position
         100,        // Button width
         30,         // Button height
-        hWnd,
+        hwndParentWindow,
         (HMENU)3,
         NULL,
         NULL);
@@ -75,7 +75,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         yPos,         // y position
         100,        // Button width
         30,         // Button height
-        hWnd,
+        hwndParentWindow,
         (HMENU)4,
         NULL,
         NULL);
@@ -88,13 +88,13 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
         yPos,        // y position
         100,  // Button width
         30,          // Button height
-        hWnd,        // Parent window
+        hwndParentWindow,        // Parent window
         (HMENU)5,    // Button ID
         NULL,
         NULL);
 }
 
-void CreateConsoleWindowBottomButtons(HWND hWnd) {
+void CreateConsoleWindowBottomButtons(HWND hwndParentWindow) {
     int yPos = 500; 
     int buttonGap = 105;
 
@@ -107,7 +107,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         yPos, // Same y position as the Upload button
         100, // Button width
         30,  // Button height
-        hWnd,
+        hwndParentWindow,
         (HMENU)6, // Unique Button ID
         NULL,
         NULL);
@@ -121,7 +121,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         yPos, // Same y position as the Upload button
         100, // Button width
         30,  // Button height
-        hWnd,
+        hwndParentWindow,
         (HMENU)7, // Unique Button ID
         NULL,
         NULL);
@@ -134,13 +134,13 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
         yPos,        // Align with the Message Box's y position for visual consistency
         80,  // Button width
         30,          // Button height
-        hWnd,        // Parent window
+        hwndParentWindow,        // Parent window
         (HMENU)8,    // Button ID
         NULL,
         NULL);
 }
 
-void CreateJoinDialog(HWND hWnd) {
+void CreateJoinDialog(HWND hwndParentWindow) {
     if (IsWindow(hwndJoinDialog)) {
         return;
     }
@@ -149,7 +149,7 @@ void CreateJoinDialog(HWND hWnd) {
         0, L"#32770", L"Join Dialog", // Use the predefined dialog box class "#32770"
         WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
         800, 450, 250, 200, // Increased height from 150 to 200
-        hWnd, NULL, NULL, NULL);
+        hwndParentWindow, NULL, NULL, NULL);
 
     // Create a static text control for "IP Address"
     CreateWindowW(
@@ -194,7 +194,7 @@ void CreateJoinDialog(HWND hWnd) {
     SetWindowLongPtr(hwndJoinDialog, GWLP_WNDPROC, (LONG_PTR)JoinDialogProcedure);
 }
 
-void CreateRegisterDialog(HWND hWnd) {
+void CreateRegisterDialog(HWND hwndParentWindow) {
     if (IsWindow(hwndRegisterDialog)) {
         return;
     }
@@ -204,7 +204,7 @@ void CreateRegisterDialog(HWND hWnd) {
         0, L"#32770", NULL, // Use the predefined dialog box class "#32770"
         WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
         800, 450, 250, 150,
-        hWnd, NULL, NULL, NULL);
+        hwndParentWindow, NULL, NULL, NULL);
 
     // Create a static text control for "Change Name"
     CreateWindowW(
@@ -232,4 +232,33 @@ void CreateRegisterDialog(HWND hWnd) {
     UpdateWindow(hwndRegisterDialog);
 
     SetWindowLongPtr(hwndRegisterDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
+}
+
+void CreateHelpDialog(HWND hwndParentWindow) {
+    // Create a popup window to act as the dialog
+    HWND hwndHelpDialog = CreateWindowEx(
+        WS_EX_DLGMODALFRAME, // Extended window style for dialogs
+        L"STATIC",           // Predefined class; actual class depends on your needs
+        L"Help Dialog",      // Window text
+        WS_VISIBLE | WS_SYSMENU | WS_CAPTION, // Window style
+        CW_USEDEFAULT, CW_USEDEFAULT, 300, 200, // Position and dimensions
+        hwndParentWindow,          // Parent window
+        NULL,                // No menu
+        (HINSTANCE)GetWindowLongPtr(hwndParentWindow, GWLP_HINSTANCE),
+        NULL                 // No additional parameters
+    );
+
+    // Ensure the dialog window was created successfully
+    if (hwndHelpDialog == NULL) {
+        MessageBox(hwndParentWindow, L"Failed to create help dialog.", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
+
+    // Create the list view inside the dialog
+    HWND hwndListView = CreateListView(hwndHelpDialog);
+    // Additional setup for the list view can go here
+
+    // Show and update the dialog window
+    ShowWindow(hwndHelpDialog, SW_SHOW);
+    UpdateWindow(hwndHelpDialog);
 }
