@@ -47,7 +47,7 @@ void CreateConsoleWindowTopButtons(HWND hWnd) {
 
     hwndConsoleBtnLeave = CreateWindowW(
         L"BUTTON",  // Predefined class; Button
-        L"Disconnect",      // Button text 
+        L"Leave",      // Button text 
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
         (WINDOW_WIDTH - 700) / 2 + buttonGap,         // x position 
         yPos,         // y position; above the console output window
@@ -158,7 +158,7 @@ void CreateRegisterDialog(HWND hWnd) {
 
     // Create a static text control for "Change Name"
     hwndDialogStaticText = CreateWindowW(
-        L"STATIC", L"Change Alias",
+        L"STATIC", L"Register Alias",
         WS_VISIBLE | WS_CHILD | SS_CENTER,
         10, 10, 230, 20, // Adjust size and position as needed
         hwndDialog, NULL, NULL, NULL);
