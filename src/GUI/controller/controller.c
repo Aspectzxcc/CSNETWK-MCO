@@ -46,15 +46,7 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
         case WM_COMMAND:
             // Step 2: Handle WM_COMMAND message
             if (LOWORD(wParam) == 9) { 
-                // Get the text from the text box in the dialog
-                wchar_t name[256];
-                GetWindowTextW(hwndRegisterDialog, name, 256);
-
-                // Set the text of the "Name" button to the entered name
-                SetWindowTextW(hwndConsoleBtnRegister, name);
-
-                // Close the dialog
-                DestroyWindow(hwndRegisterDialog);
+                handleRegisterAlias();
             }
             break;
         case WM_CLOSE:
@@ -66,7 +58,7 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
     return 0;
 }
 
-void handleIpAndPortSent(HWND hWnd) {
+void handleIpAndPortSent() {
     wchar_t ip[256];
     GetWindowTextW(hwndEditIp, ip, 256);
 
@@ -82,7 +74,20 @@ void handleIpAndPortSent(HWND hWnd) {
     SendMessageW(hwndConsoleWindow, EM_SETSEL, (WPARAM)textLength, (LPARAM)textLength); // Move the caret to the end
     SendMessageW(hwndConsoleWindow, EM_REPLACESEL, FALSE, (LPARAM)consoleText); // Append the text
 
-    DestroyWindow(hWnd);
+    DestroyWindow(hwndJoinDialog);
 
     joinDialogOpen = 0;
+}
+
+void handleRegisterAlias() {
+    wchar_t name[256];
+    GetWindowTextW(hwndRegisterDialog, name, 256);
+
+    // Set the text of the "Name" button to the entered name
+    SetWindowTextW(hwndConsoleBtnRegister, name);
+
+    // Close the dialog
+    DestroyWindow(hwndRegisterDialog);
+
+    registerDialogOpen = 0;
 }
