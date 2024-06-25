@@ -21,7 +21,7 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     int posY = (parentRect.bottom - height) / 2;
 
     // Create the child window
-    CreateWindowExW(
+    g_hConsoleOutput = CreateWindowExW(
         0, L"ConsoleOutputClass", L"",
         WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOVSCROLL,
         posX, posY, width, height,

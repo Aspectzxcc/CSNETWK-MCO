@@ -5,7 +5,7 @@
 #include <commctrl.h>
 
 // console output window
-extern HWND hConsoleOutput;
+extern HWND g_hConsoleOutput;
 
 // function prototypes for window creation
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);
