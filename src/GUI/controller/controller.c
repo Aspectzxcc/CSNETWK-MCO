@@ -38,7 +38,6 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
             break;
         case WM_CLOSE:
             DestroyWindow(hwnd);
-            joinDialogOpen = 0;
             break;
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);
@@ -56,7 +55,6 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
             break;
         case WM_CLOSE:
             DestroyWindow(hwnd);
-            registerDialogOpen = 0;
             break;
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);
@@ -84,8 +82,6 @@ void handleIpAndPortSent() {
     SendMessageW(hwndConsoleWindow, EM_REPLACESEL, FALSE, (LPARAM)consoleText); // Append the text
 
     DestroyWindow(hwndJoinDialog);
-
-    joinDialogOpen = 0;
 }
 
 void handleLeave() {
@@ -111,6 +107,4 @@ void handleRegisterAlias() {
 
     // Close the dialog
     DestroyWindow(hwndRegisterDialog);
-
-    registerDialogOpen = 0;
 }

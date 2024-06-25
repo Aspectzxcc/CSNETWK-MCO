@@ -9,5 +9,6 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
 
 void handleIpAndPortSent();
 void handleRegisterAlias();
+void handleLeave();
 
 #endif // CONTROLLER_H

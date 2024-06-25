@@ -14,10 +14,6 @@ HWND hwndJoinDialog, hwndJoinDialogEditIp, hwndJoinDialogEditPort, hwndJoinDialo
 // alias change dialog handlers
 HWND hwndRegisterDialog, hwndRegisterDialogTextBox, hwndRegisterDialogRegisterButton;
 
-// flags for open state
-int joinDialogOpen = 0;
-int registerDialogOpen = 0;
-
 // main entry point for a windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
     WNDCLASSW wc = {0}; // initialize a window class structure to zero

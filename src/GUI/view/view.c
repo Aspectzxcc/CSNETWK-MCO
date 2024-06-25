@@ -141,7 +141,7 @@ void CreateConsoleWindowBottomButtons(HWND hWnd) {
 }
 
 void CreateJoinDialog(HWND hWnd) {
-    if (joinDialogOpen) {
+    if (IsWindow(hwndJoinDialog)) {
         return;
     }
 
@@ -190,14 +190,12 @@ void CreateJoinDialog(HWND hWnd) {
     ShowWindow(hwndJoinDialog, SW_SHOW);
     UpdateWindow(hwndJoinDialog);
 
-    joinDialogOpen = 1;
-
     // Set the dialog procedure for custom message handling
     SetWindowLongPtr(hwndJoinDialog, GWLP_WNDPROC, (LONG_PTR)JoinDialogProcedure);
 }
 
 void CreateRegisterDialog(HWND hWnd) {
-    if (registerDialogOpen) {
+    if (IsWindow(hwndRegisterDialog)) {
         return;
     }
 
@@ -232,8 +230,6 @@ void CreateRegisterDialog(HWND hWnd) {
     // Show the dialog
     ShowWindow(hwndRegisterDialog, SW_SHOW);
     UpdateWindow(hwndRegisterDialog);
-
-    registerDialogOpen = 1;
 
     SetWindowLongPtr(hwndRegisterDialog, GWLP_WNDPROC, (LONG_PTR)RegisterDialogProcedure);
 }
