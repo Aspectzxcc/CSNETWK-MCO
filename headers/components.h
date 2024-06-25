@@ -16,6 +16,7 @@ void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst);
 void InitializeTreeView(HWND hTreeView);
 HTREEITEM AddItemToTreeView(HWND hTreeView, HTREEITEM hParent, char* text);
 void CreateRegisterDialog(HWND parentHwnd, HINSTANCE hInst, HWND registerHwnd);
+void CreateBroadcastDialog(HWND parentHwnd, HINSTANCE hInst);
 
 // function prototypes for window procedure
 LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -23,5 +24,6 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
 LRESULT CALLBACK HelpDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK BroadcastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 #endif // COMPONENTS_H
