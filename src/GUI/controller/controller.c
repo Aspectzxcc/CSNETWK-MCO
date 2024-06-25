@@ -12,6 +12,9 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             if (LOWORD(wp) == 1) { 
                 CreateJoinDialog(hWnd); 
             }
+            if (LOWORD(wp) == 2) {
+                handleLeave();
+            }
             if (LOWORD(wp) == 5) {
                CreateRegisterDialog(hWnd); 
             }
@@ -83,6 +86,20 @@ void handleIpAndPortSent() {
     DestroyWindow(hwndJoinDialog);
 
     joinDialogOpen = 0;
+}
+
+void handleLeave() {
+    wchar_t command[256];
+    MultiByteToWideChar(CP_ACP, 0, COMMAND_LEAVE, -1, command, 256);
+
+    // Prepare the text to be displayed in the console window
+    wchar_t consoleText[1024];
+    wsprintfW(consoleText, L"%s\n", command);
+
+    // Get the current text length in the console window to append the new text
+    int textLength = GetWindowTextLengthW(hwndConsoleWindow);
+    SendMessageW(hwndConsoleWindow, EM_SETSEL, (WPARAM)textLength, (LPARAM)textLength); // Move the caret to the end
+    SendMessageW(hwndConsoleWindow, EM_REPLACESEL, FALSE, (LPARAM)consoleText); // Append the text
 }
 
 void handleRegisterAlias() {
