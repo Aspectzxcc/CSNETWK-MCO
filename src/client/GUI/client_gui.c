@@ -55,7 +55,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             NMHDR* pNmhdr = (NMHDR*)lp;
             if (pNmhdr->code == EN_PROTECTED) {
                 ENPROTECTED* pEnProtected = (ENPROTECTED*)lp;
-                return TRUE; // Returning TRUE prevents the modification
+                return TRUE; // Prevent modifications elsewhere
             }
             break;
         }

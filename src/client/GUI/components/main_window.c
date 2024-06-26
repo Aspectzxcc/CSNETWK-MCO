@@ -96,44 +96,21 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
     }
 }
 
-void AppendReadOnlyTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
-    wchar_t msgBuffer[256]; // Buffer for message box text
-
+void AppendTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     // Move caret to the end, append new text
     int initialTextLength = GetWindowTextLengthW(hwndRichEdit);
     SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)initialTextLength, (LPARAM)-1); // Move to end
     SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)text); // Append text
 
-    // Show initial text length
-    wsprintfW(msgBuffer, L"Initial text length: %d", initialTextLength);
-    MessageBoxW(NULL, msgBuffer, L"Debug Info", MB_OK);
-
-    // Append a newline character
-    SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)L"\n"); // Append newline
-
-    // Get new text length after appending text
-    int newTextLength = GetWindowTextLengthW(hwndRichEdit);
-
-    // Show new text length
-    wsprintfW(msgBuffer, L"New text length: %d", newTextLength);
-    MessageBoxW(NULL, msgBuffer, L"Debug Info", MB_OK);
-
-    // Protect all text from the start up to the latest appended text
-    CHARRANGE cr = {0, newTextLength - 1}; // Exclude the newline from protection
-    SendMessageW(hwndRichEdit, EM_EXSETSEL, 0, (LPARAM)&cr); // Select text to protect
-
-    // Set the selected text as protected
+    // Protect all text in the control
     CHARFORMAT2 cf = {0};
     cf.cbSize = sizeof(cf);
     cf.dwMask = CFM_PROTECTED;
     cf.dwEffects = CFE_PROTECTED;
-    SendMessageW(hwndRichEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
+    SendMessageW(hwndRichEdit, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&cf);
 
-    // Move caret to the end to allow further input, starting from a new, unprotected line
+    int newTextLength = GetWindowTextLengthW(hwndRichEdit);
     SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)newTextLength, (LPARAM)-1); // Move to end after newline
-
-    // Ensure control is editable for future input
-    SendMessageW(hwndRichEdit, EM_SETREADONLY, FALSE, 0);
 }
 
 // Define the child window procedure for the console mimic
