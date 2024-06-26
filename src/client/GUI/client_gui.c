@@ -50,10 +50,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
 // Window procedure definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
+    static HBRUSH hbrBackground = NULL;
     switch (msg) {
         case WM_CREATE:
             CreateConsoleOutputWindow(hWnd, ((LPCREATESTRUCT)lp)->hInstance);
             break;
+        case WM_CTLCOLOREDIT: {
+            if (!hbrBackground) {
+                hbrBackground = CreateSolidBrush(RGB(0, 0, 0)); // Black background
+            }
+            HDC hdcEdit = (HDC)wp;
+            SetTextColor(hdcEdit, RGB(255, 255, 255)); // White text
+            SetBkColor(hdcEdit, RGB(0, 0, 0)); // Black background
+            return (LRESULT)hbrBackground;
+        }
         case WM_COMMAND:
             // Handle button clicks
             switch (LOWORD(wp)) {
@@ -97,6 +107,9 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                 return 1; // Return non-zero to indicate the message is handled
             }
         case WM_DESTROY:
+            if (hbrBackground) {
+                DeleteObject(hbrBackground); // Clean up the brush
+            }
             PostQuitMessage(0);
             break;
         default:

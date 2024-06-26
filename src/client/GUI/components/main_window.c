@@ -3,14 +3,16 @@
 
 // Function to create the console mimic window
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
-    // Register the child window class
+    // Register the child window class if not already registered
     WNDCLASSW wc = {0};
     wc.lpszClassName = L"ConsoleOutputClass";
     wc.hInstance = hInst;
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpfnWndProc = ConsoleOutputProcedure;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    RegisterClassW(&wc);
+    if (!GetClassInfoW(hInst, wc.lpszClassName, &wc)) {
+        RegisterClassW(&wc);
+    }
 
     // Calculate size and position to be slightly smaller than the parent window
     RECT parentRect;
@@ -20,10 +22,10 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     int posX = (parentRect.right - width) / 2;
     int posY = (parentRect.bottom - height) / 2;
 
-    // Create the child window
+    // Create the child window as an edit control
     g_hConsoleOutput = CreateWindowExW(
-        0, L"ConsoleOutputClass", L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOVSCROLL,
+        WS_EX_CLIENTEDGE, L"EDIT", L"",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOHSCROLL,
         posX, posY, width, height,
         parentHwnd, NULL, hInst, NULL);
 
@@ -49,6 +51,25 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
             posX + (buttonWidth + gap) * i, buttonYPos, buttonWidth, buttonHeight,
             parentHwnd, (HMENU)(INT_PTR)(100 + i), hInst, NULL);
     }
+
+    // After creating the console output window
+    HFONT hFont = CreateFontW(
+        16,                        // nHeight
+        0,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_NORMAL,                 // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        ANSI_CHARSET,              // nCharSet
+        OUT_DEFAULT_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        FIXED_PITCH | FF_MODERN,   // nPitchAndFamily
+        L"Consolas");              // lpszFacename
+
+    SendMessageW(g_hConsoleOutput, WM_SETFONT, (WPARAM)hFont, TRUE);
 
     // Adjust buttonYPos to position buttons under the console mimic window
     const int buttonYPosUnder = posY + height + gap; // New Y position for buttons under the console window
@@ -82,15 +103,9 @@ void AppendTextToConsoleOutput(HWND hConsoleOutput, const wchar_t* text) {
 // Define the child window procedure for the console mimic
 LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
-        case WM_PAINT: {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-            // Set text color and background
-            SetTextColor(hdc, RGB(255, 255, 255)); // White text
-            SetBkColor(hdc, RGB(0, 0, 0)); // Black background
-            // Display some text as an example
-            EndPaint(hwnd, &ps);
-        } break;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
         default:
             return DefWindowProc(hwnd, msg, wParam, lParam);
     }
