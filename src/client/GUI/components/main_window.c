@@ -1,8 +1,10 @@
-#include <windows.h>
 #include "../../../../headers/components.h"
 
 // Function to create the console mimic window
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
+    // Initialize Rich Edit library
+    LoadLibrary(TEXT("Msftedit.dll"));
+
     // Register the child window class if not already registered
     WNDCLASSW wc = {0};
     wc.lpszClassName = L"ConsoleOutputClass";
@@ -22,10 +24,10 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     int posX = (parentRect.right - width) / 2;
     int posY = (parentRect.bottom - height) / 2;
 
-    // Create the child window as an edit control
+    // Create the child window as a rich edit control
     g_hConsoleOutput = CreateWindowExW(
-        WS_EX_CLIENTEDGE, L"EDIT", L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOHSCROLL,
+        WS_EX_CLIENTEDGE, L"RICHEDIT50W", L"",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
         posX, posY, width, height,
         parentHwnd, NULL, hInst, NULL);
 
