@@ -2,7 +2,7 @@
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 HWND g_hConsoleOutput;
-int appendCount = 0;
+int g_appendCount = 0;
 
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
@@ -63,7 +63,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                 wsprintfW(text, L"Text Length: %d\ncpMin: %d\ncpMax: %d\n", textLength, pEnProtected->chrg.cpMin, pEnProtected->chrg.cpMax);
                 MessageBoxW(hWnd, text, L"EN_PROTECTED", MB_OK);
 
-                if (pEnProtected->chrg.cpMin + appendCount == textLength)
+                if (pEnProtected->chrg.cpMin + g_appendCount == textLength)
                     return FALSE;
                     
                 // Prevent modifications elsewhere

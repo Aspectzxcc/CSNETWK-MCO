@@ -112,7 +112,7 @@ void AppendTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     int newTextLength = GetWindowTextLengthW(hwndRichEdit);
     SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)newTextLength, (LPARAM)-1); // Move to end after newline
 
-    appendCount++;
+    g_appendCount++;
 }
 
 // Define the child window procedure for the console mimic
