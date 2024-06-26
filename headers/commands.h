@@ -12,6 +12,17 @@
 #define COMMAND_BROADCAST "/broadcast"
 #define COMMAND_UNICAST "/unicast"
 
+// wide character commands list
+#define COMMAND_JOIN_W L"/join"
+#define COMMAND_LEAVE_W L"/leave"
+#define COMMAND_REGISTER_W L"/register"
+#define COMMAND_STORE_W L"/store"
+#define COMMAND_DIR_W L"/dir"
+#define COMMAND_GET_W L"/get"
+#define COMMAND_HELP_W L"/?"
+#define COMMAND_BROADCAST_W L"/broadcast"
+#define COMMAND_UNICAST_W L"/unicast"
+
 // commands with help messages
 #define COMMAND_JOIN_PARAMETERS "<server_ip_add> <port>"
 #define COMMAND_REGISTER_PARAMETERS "<handle>"

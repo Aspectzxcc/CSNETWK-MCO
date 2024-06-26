@@ -91,9 +91,14 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
                 case IDOK: // Join button clicked
                     {
                         // Get the text from the edit control
-                        wchar_t text[256];
-                        GetWindowTextW(GetDlgItem(hwnd, 101), text, 256);
-                        MessageBoxW(hwnd, text, L"Join Details", MB_OK);
+                        wchar_t ip[16], port[6], command[DEFAULT_BUFLEN];
+                        GetWindowTextW(GetDlgItem(hwnd, 102), ip, 16);
+                        GetWindowTextW(GetDlgItem(hwnd, 103), port, 6);
+
+                        wsprintfW(command, L"%s %ls %ls\r\n", COMMAND_JOIN_W, ip, port);
+
+                        AppendTextToConsoleOutput(g_hConsoleOutput, command);
+
                         DestroyWindow(hwnd); // Close the dialog
                         return TRUE;
                     }
