@@ -96,8 +96,6 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
     }
 }
 
-#include <windows.h>
-
 void AppendReadOnlyTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     wchar_t msgBuffer[256]; // Buffer for message box text
 
