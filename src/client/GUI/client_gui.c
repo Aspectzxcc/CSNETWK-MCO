@@ -51,6 +51,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 // Window procedure definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
+        case WM_NOTIFY: {
+            NMHDR* pNmhdr = (NMHDR*)lp;
+            if (pNmhdr->code == EN_PROTECTED) {
+                ENPROTECTED* pEnProtected = (ENPROTECTED*)lp;
+                return TRUE; // Returning TRUE prevents the modification
+            }
+            break;
+        }
         case WM_CREATE: {
                 CreateConsoleOutputWindow(hWnd, ((LPCREATESTRUCT)lp)->hInstance);
                 

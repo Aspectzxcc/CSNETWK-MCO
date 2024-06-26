@@ -73,6 +73,9 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
 
     SendMessageW(g_hConsoleOutput, WM_SETFONT, (WPARAM)hFont, TRUE);
 
+    // receive EN_PROTECTED notifications
+    SendMessageW(g_hConsoleOutput, EM_SETEVENTMASK, 0, ENM_PROTECTED);
+
     // Adjust buttonYPos to position buttons under the console mimic window
     const int buttonYPosUnder = posY + height + gap; // New Y position for buttons under the console window
 
@@ -93,13 +96,32 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
     }
 }
 
-void AppendTextToConsoleOutput(HWND hConsoleOutput, const wchar_t* text) {
-    // Move the caret to the end of the text
-    int textLength = GetWindowTextLengthW(hConsoleOutput);
-    SendMessageW(hConsoleOutput, EM_SETSEL, (WPARAM)textLength, (LPARAM)textLength);
-    
-    // Insert the text at the new caret position
-    SendMessageW(hConsoleOutput, EM_REPLACESEL, FALSE, (LPARAM)text);
+void AppendReadOnlyTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
+    SendMessageW(hwndRichEdit, EM_SETREADONLY, FALSE, 0); // Ensure control is editable
+
+    // Get current text length before appending new text
+    int initialTextLength = GetWindowTextLengthW(hwndRichEdit);
+
+    // Move caret to the end and append new text
+    SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)initialTextLength, (LPARAM)-1); // Move to end
+    SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)text); // Append text
+
+    // Get new text length after appending
+    int newTextLength = GetWindowTextLengthW(hwndRichEdit);
+
+    // Select from the first character to the new text length to protect the entire range
+    CHARRANGE cr = {0, newTextLength - 1};
+    SendMessageW(hwndRichEdit, EM_EXSETSEL, 0, (LPARAM)&cr); // Select text to protect
+
+    // Set the selected text as protected
+    CHARFORMAT2 cf = {0};
+    cf.cbSize = sizeof(cf);
+    cf.dwMask = CFM_PROTECTED;
+    cf.dwEffects = CFE_PROTECTED;
+    SendMessageW(hwndRichEdit, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&cf);
+
+    // Move caret to the end to allow further input
+    SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)newTextLength, (LPARAM)-1); // Move to end
 }
 
 // Define the child window procedure for the console mimic
