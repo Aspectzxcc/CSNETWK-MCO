@@ -8,6 +8,7 @@
 
 // console output window
 extern HWND g_hConsoleOutput;
+extern int appendCount;
 
 // function prototypes for window creation
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);

@@ -95,7 +95,7 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
                         GetWindowTextW(GetDlgItem(hwnd, 102), ip, 16);
                         GetWindowTextW(GetDlgItem(hwnd, 103), port, 6);
 
-                        wsprintfW(command, L"%s %ls %ls\n", COMMAND_JOIN_W, ip, port);
+                        wsprintfW(command, L"%ls %ls %ls\n", COMMAND_JOIN_W, ip, port);
 
                         AppendTextToConsoleOutput(g_hConsoleOutput, command);
 

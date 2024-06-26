@@ -2,6 +2,7 @@
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 HWND g_hConsoleOutput;
+int appendCount = 0;
 
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
@@ -55,7 +56,18 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
             NMHDR* pNmhdr = (NMHDR*)lp;
             if (pNmhdr->code == EN_PROTECTED) {
                 ENPROTECTED* pEnProtected = (ENPROTECTED*)lp;
-                return TRUE; // Prevent modifications elsewhere
+                // Check if the modification is at the end of the text
+                int textLength = GetWindowTextLengthW(pEnProtected->nmhdr.hwndFrom);
+
+                wchar_t text[DEFAULT_BUFLEN];
+                wsprintfW(text, L"Text Length: %d\ncpMin: %d\ncpMax: %d\n", textLength, pEnProtected->chrg.cpMin, pEnProtected->chrg.cpMax);
+                MessageBoxW(hWnd, text, L"EN_PROTECTED", MB_OK);
+
+                if (pEnProtected->chrg.cpMin + appendCount == textLength)
+                    return FALSE;
+                    
+                // Prevent modifications elsewhere
+                return TRUE;
             }
             break;
         }
