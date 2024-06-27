@@ -72,6 +72,13 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
 
                     HandleCommand(command); // Handle the command
 
+                    if (client.registrationStatus == REGISTRATION_REGISTERED) {
+                        // set register button to alias 
+                        SetWindowTextW(g_registerHwnd, alias); // Change the Register button text to the alias
+                    } else {
+                        SetWindowTextW(g_registerHwnd, L"Register"); // Change the Register button text
+                    }
+
                     DestroyWindow(hwnd); // Close the dialog
                     return TRUE;
                 }
