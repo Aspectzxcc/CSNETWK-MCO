@@ -18,12 +18,16 @@ int executeCommand(const char *command, char **parameters, char *message) {
         if (strcmp(command, COMMAND_LEAVE) == 0) {
             if (g_isGUI) {
                 MessageBoxW(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_DISCONNECT_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
             } else {
                 fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
             }
         } else {
             if (g_isGUI) {
                 MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
             } else {
                 fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
             }
@@ -35,6 +39,8 @@ int executeCommand(const char *command, char **parameters, char *message) {
     if (commandRequiresRegistration(command) && client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
         if (g_isGUI) {
             MessageBoxW(NULL, ERROR_REGISTRATION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_REGISTRATION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
         } else {
             fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
         }
@@ -94,7 +100,15 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     *sock = socket(AF_INET, SOCK_STREAM, 0); // create a TCP socket for the client
 
     if (*sock == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create socket : %d\n", WSAGetLastError());
+        if (g_isGUI) {
+            wchar_t error[256];
+            wsprintfW(error, L"Could not create socket : %d", WSAGetLastError());
+            MessageBoxW(NULL, error, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, error);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, "Could not create socket : %d\n", WSAGetLastError());
+        }
         return;
     }
 
@@ -107,12 +121,26 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 
     if (udpThread == NULL) {
         // if thread creation fails, print an error message
-        printf("CreateThread failed with error code: %d", GetLastError());
+        if (g_isGUI) {
+            wchar_t error[256];
+            wsprintfW(error, L"CreateThread failed with error code: %d", GetLastError());
+            MessageBoxW(NULL, error, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, error);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, "CreateThread failed with error code: %d", GetLastError());
+        }
     } 
 
     // attempt to connect to the server
     if (connect(*sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        }
         *sock = INVALID_SOCKET; // set socket to invalid
         return;
     }
@@ -124,7 +152,12 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
     if (strcmp(serverReply, MESSAGE_SUCCESSFUL_CONNECTION) == 0) {
-        printf(MESSAGE_SUCCESSFUL_CONNECTION "\n"); // print success message
+        if (g_isGUI) {
+            AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_CONNECTION_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            printf(MESSAGE_SUCCESSFUL_CONNECTION "\n");
+        }
     }
 
     client.connectionStatus = CONNECTED; // set connection status flag to connected
