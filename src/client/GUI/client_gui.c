@@ -2,6 +2,7 @@
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 HWND g_hConsoleOutput;
+char g_serverDir[DEFAULT_BUFLEN];
 
 int g_isGUI = 1; // flag to determine if the client is running in GUI mode
 

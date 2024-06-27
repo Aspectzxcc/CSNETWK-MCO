@@ -315,8 +315,17 @@ void getServerDirectory(SOCKET *sock) {
     
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
+    strcpy(g_serverDir, serverReply); // store server directory listing (for GUI use)   
     
-    printf("%s\n", serverReply); // print directory listing
+    if (g_isGUI) {
+        wchar_t serverReplyW[DEFAULT_BUFLEN];
+        MultiByteToWideChar(CP_ACP, 0, serverReply, -1, serverReplyW, DEFAULT_BUFLEN);
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReplyW);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf(MESSAGE_SUCCESSFUL_DIR_LIST "\n", serverReply); // print server reply
+    
+    }
 }
 
 DWORD WINAPI listenForMessages(void *data) {

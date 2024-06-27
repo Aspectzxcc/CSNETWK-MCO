@@ -3,6 +3,7 @@
 
 extern int g_isGUI;
 extern HWND g_hConsoleOutput;
+extern char g_serverDir[DEFAULT_BUFLEN];
 
 typedef enum {
     DISCONNECTED,
