@@ -85,11 +85,15 @@ LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
     switch (message) {
         case WM_NOTIFY: {
             LPNMHDR lpnmh = (LPNMHDR)lParam;
-            if (lpnmh->idFrom == 105 && lpnmh->code == NM_DBLCLK) { // 105 is the TreeView control ID
-                HTREEITEM hSelectedItem = TreeView_GetSelection(lpnmh->hwndFrom);
-                if (hSelectedItem != g_hRoot) {
-                    MessageBoxW(hwnd, L"GET request made", L"Information", MB_OK | MB_ICONINFORMATION);
-                }
+            switch (lpnmh->code) {
+                case NM_DBLCLK: // Handle double-click event
+                    if (lpnmh->idFrom == 105) { // 105 is the TreeView control ID
+                        HTREEITEM hSelectedItem = TreeView_GetSelection(lpnmh->hwndFrom);
+                        if (hSelectedItem != g_hRoot) {
+                            MessageBoxA(hwnd, "GET request made", "Information", MB_OK | MB_ICONINFORMATION);
+                        }
+                    }
+                    break;
             }
             break;
         }
