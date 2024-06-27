@@ -197,6 +197,7 @@ void registerAlias(SOCKET *sock, const char *alias) {
     if (g_isGUI) {
         wchar_t serverReplyW[DEFAULT_BUFLEN];
         MultiByteToWideChar(CP_ACP, 0, serverReply, -1, serverReplyW, DEFAULT_BUFLEN);
+        MessageBoxW(NULL, serverReplyW, L"Server Reply", MB_OK | MB_ICONINFORMATION);
         AppendTextToConsoleOutput(g_hConsoleOutput, serverReplyW);
         AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
     } else {
