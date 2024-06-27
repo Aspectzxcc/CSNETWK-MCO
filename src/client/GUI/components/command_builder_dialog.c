@@ -4,7 +4,7 @@
 void CreateCommandBuilderDialog(HWND parentHwnd, HINSTANCE hInst) {
     // Dialog box dimensions, adjusted to match the Broadcast Dialog
     int dialogWidth = 400;
-    int dialogHeight = 180;
+    int dialogHeight = 220; // Adjusted height to accommodate larger edit window
 
     // Create a basic window to serve as a dialog
     HWND hDlg = CreateWindowExW(WS_EX_DLGMODALFRAME, L"STATIC", L"Command Builder Dialog",
@@ -34,7 +34,7 @@ void CreateCommandBuilderDialog(HWND parentHwnd, HINSTANCE hInst) {
 
     HWND hEdit = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                     WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE,
-                    10, 40, 380, 50, // Position and size
+                    10, 40, 380, 90, // Increased height for the edit window
                     hDlg, (HMENU)107, hInst, NULL); 
 
     // After creating the console output window
@@ -56,10 +56,10 @@ void CreateCommandBuilderDialog(HWND parentHwnd, HINSTANCE hInst) {
 
     SendMessageW(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-    // Adjust the "Execute" button position to match the Broadcast Dialog
+    // Adjust the "Execute" button position to match the increased height of the edit window
     CreateWindowExW(0, L"BUTTON", L"Execute", 
                     WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 
-                    160, 100, 80, 25, 
+                    160, 140, 80, 25, // Adjusted Y position for the button
                     hDlg, (HMENU)IDOK, hInst, NULL);
 
     // Make the window modal
