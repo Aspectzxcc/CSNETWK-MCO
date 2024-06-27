@@ -16,16 +16,28 @@ int executeCommand(const char *command, char **parameters, char *message) {
     if (commandRequiresConnection(command) && client.connectionStatus == DISCONNECTED) {
         // log error if trying to execute a command without being connected.
         if (strcmp(command, COMMAND_LEAVE) == 0) {
-            fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
+            if (g_isGUI) {
+                MessageBox(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+            } else {
+                fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
+            }
         } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+            if (g_isGUI) {
+                MessageBox(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+            }
         }
         return 0;
     }
 
     // check if the client is not registered and tries to execute commands that require registration.
     if (commandRequiresRegistration(command) && client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
-        fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
+        if (g_isGUI) {
+            MessageBox(NULL, ERROR_REGISTRATION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+        } else {
+            fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
+        }
         return 0;
     }
 
@@ -60,7 +72,11 @@ int executeCommand(const char *command, char **parameters, char *message) {
         handleBroadcastAndUnicast(&client.clientSocket, message);
     } else {
         // handle unknown command.
-        fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
+        if (g_isGUI) {
+            MessageBox(NULL, ERROR_COMMAND_NOT_FOUND_W, L"Error", MB_OK | MB_ICONERROR);
+        } else {
+            fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
+        }
     }
     return 0; // indicate no disconnection to the main loop.
 }   
