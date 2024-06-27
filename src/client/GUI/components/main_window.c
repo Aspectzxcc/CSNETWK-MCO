@@ -27,7 +27,7 @@ void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst) {
     // Create the child window as a rich edit control
     g_hConsoleOutput = CreateWindowExW(
         WS_EX_CLIENTEDGE, L"RICHEDIT50W", L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
         posX, posY, width, height,
         parentHwnd, NULL, hInst, NULL);
 
@@ -79,15 +79,15 @@ void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX
     // Adjust buttonYPos to position buttons under the console mimic window
     const int buttonYPosUnder = posY + height + gap; // New Y position for buttons under the console window
 
-    // Button labels for the new buttons
-    const wchar_t* bottomLabels[] = {L"Broadcast", L"Unicast", L"Store"};
+    // Button labels for the bottom buttons
+    const wchar_t* bottomLabels[] = {L"Broadcast", L"Unicast", L"Store", L"Command Builder"};
 
-    // Calculate the width for the three new buttons, considering the total width and gaps
-    const int totalGapsWidthUnder = (3 - 1) * gap; // Total width taken by gaps between the new buttons
-    const int buttonWidthUnder = (width - totalGapsWidthUnder) / 3; // Adjusted button width for the new buttons
+    // Recalculate the width for the four new buttons, considering the total width and gaps
+    const int totalGapsWidthUnder = (4 - 1) * gap; // Total width taken by gaps between the new buttons
+    const int buttonWidthUnder = (width - totalGapsWidthUnder) / 4; // Adjusted button width for the new buttons
 
     // Create the new buttons under the console mimic window
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         CreateWindowExW(
             0, L"BUTTON", bottomLabels[i],
             WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -101,18 +101,6 @@ void AppendTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     int initialTextLength = GetWindowTextLengthW(hwndRichEdit);
     SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)initialTextLength, (LPARAM)-1); // Move to end
     SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)text); // Append text
-
-    // Protect all text in the control
-    CHARFORMAT2 cf = {0};
-    cf.cbSize = sizeof(cf);
-    cf.dwMask = CFM_PROTECTED;
-    cf.dwEffects = CFE_PROTECTED;
-    SendMessageW(hwndRichEdit, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&cf);
-
-    int newTextLength = GetWindowTextLengthW(hwndRichEdit);
-    SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)newTextLength, (LPARAM)-1); // Move to end after newline
-
-    g_appendCount++;
 }
 
 // Define the child window procedure for the console mimic

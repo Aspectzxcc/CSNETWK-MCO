@@ -2,7 +2,6 @@
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 HWND g_hConsoleOutput;
-int g_appendCount = 0;
 
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
@@ -52,25 +51,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 // Window procedure definition
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
-        case WM_NOTIFY: {
-            NMHDR* pNmhdr = (NMHDR*)lp;
-            if (pNmhdr->code == EN_PROTECTED) {
-                ENPROTECTED* pEnProtected = (ENPROTECTED*)lp;
-                // Check if the modification is at the end of the text
-                int textLength = GetWindowTextLengthW(pEnProtected->nmhdr.hwndFrom);
-
-                wchar_t text[DEFAULT_BUFLEN];
-                wsprintfW(text, L"Text Length: %d\ncpMin: %d\ncpMax: %d\n", textLength, pEnProtected->chrg.cpMin, pEnProtected->chrg.cpMax);
-                MessageBoxW(hWnd, text, L"EN_PROTECTED", MB_OK);
-
-                if (pEnProtected->chrg.cpMin + g_appendCount == textLength)
-                    return FALSE;
-                    
-                // Prevent modifications elsewhere
-                return TRUE;
-            }
-            break;
-        }
         case WM_CREATE: {
                 CreateConsoleOutputWindow(hWnd, ((LPCREATESTRUCT)lp)->hInstance);
                 
@@ -116,6 +96,9 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                     break;
                 case 202: // Upload button
                     CreateStoreDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
+                    break;
+                case 203:
+                    CreateCommandBuilderDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
             }
             break;

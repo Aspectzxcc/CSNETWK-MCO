@@ -8,7 +8,6 @@
 
 // console output window
 extern HWND g_hConsoleOutput;
-extern int g_appendCount;
 
 // function prototypes for window creation
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);
@@ -27,6 +26,7 @@ void CreateBroadcastDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateUnicastDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst);
 void InitializeTreeViewForStore(HWND hTreeView);
+void CreateCommandBuilderDialog(HWND parentHwnd, HINSTANCE hInst);
 
 // function prototypes for window procedure
 LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -37,5 +37,6 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
 LRESULT CALLBACK BroadcastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK UnicastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK CommandBuilderDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 #endif // COMPONENTS_H
