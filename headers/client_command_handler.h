@@ -1,6 +1,9 @@
 #ifndef CLIENT_COMMAND_HANDLER_H
 #define CLIENT_COMMAND_HANDLER_H
 
+extern int g_isGUI;
+extern HWND g_hConsoleOutput;
+
 typedef enum {
     DISCONNECTED,
     CONNECTED

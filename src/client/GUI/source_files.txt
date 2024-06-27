@@ -1,5 +1,7 @@
 client_gui.c
 ../../utils/commands.c
+../../utils/client_command_handler.c
+../../utils/helpers.c
 components/main_window.c
 components/join_dialog.c
 components/help_dialog.c

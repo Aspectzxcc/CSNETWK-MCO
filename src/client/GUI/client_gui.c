@@ -3,9 +3,23 @@
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 HWND g_hConsoleOutput;
 
+int g_isGUI = 1; // flag to determine if the client is running in GUI mode
+
+Client client = {INVALID_SOCKET, INVALID_SOCKET, DISCONNECTED, REGISTRATION_NOT_REGISTERED};
+HANDLE udpThread; // thread handle for UDP communication
+
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
     WNDCLASSW wc = {0};
+    WSADATA wsaData;
+
+    // Initialize Winsock
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        wchar_t error[] = L"Failed to initialize Winsock";
+        wsprintfW(error, L"Failed to initialize Winsock. Error code : %d", WSAGetLastError());
+        MessageBoxW(NULL, error, L"Error", MB_OK);
+        return 1;
+    }
 
     wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);

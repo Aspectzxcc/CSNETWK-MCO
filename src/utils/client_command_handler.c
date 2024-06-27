@@ -5,6 +5,7 @@
 #include "../../headers/commands.h"
 #include "../../headers/client_command_handler.h"
 #include "../../headers/helpers.h"
+#include "../../headers/components.h"
 
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
@@ -16,16 +17,34 @@ int executeCommand(const char *command, char **parameters, char *message) {
     if (commandRequiresConnection(command) && client.connectionStatus == DISCONNECTED) {
         // log error if trying to execute a command without being connected.
         if (strcmp(command, COMMAND_LEAVE) == 0) {
-            fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
+            if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_DISCONNECT_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
+            }
         } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+            if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+            }
         }
         return 0;
     }
 
     // check if the client is not registered and tries to execute commands that require registration.
     if (commandRequiresRegistration(command) && client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
-        fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_REGISTRATION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_REGISTRATION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
+        }
         return 0;
     }
 
@@ -78,7 +97,12 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     *sock = socket(AF_INET, SOCK_STREAM, 0); // create a TCP socket for the client
 
     if (*sock == INVALID_SOCKET) {
-        fprintf(stderr, "Could not create socket : %d\n", WSAGetLastError());
+        if (g_isGUI) {
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        }
         return;
     }
 

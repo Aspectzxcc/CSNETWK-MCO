@@ -6,15 +6,11 @@
 #include <richedit.h>
 #include "commands.h"
 #include "client_command_handler.h"
-
-// console output window
-extern HWND g_hConsoleOutput;
+#include "helpers.h"
 
 // function prototypes for window creation
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);
 void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX, int posY, int width, int height); 
-void AppendTextToConsoleOutput(HWND hConsoleOutput, const wchar_t *text);
-void HandleCommand(const wchar_t *command);
 void CreateJoinDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateHelpDialog(HWND parentHwnd, HINSTANCE hInst);
 void SetupListView(HWND hList);

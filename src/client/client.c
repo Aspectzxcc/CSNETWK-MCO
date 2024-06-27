@@ -1,5 +1,7 @@
 #include "../../headers/client.h"
 
+int g_isGUI = 0; // flag to determine if the client is running in GUI mode
+
 // client structure to hold client socket and status information
 Client client = {INVALID_SOCKET, INVALID_SOCKET, DISCONNECTED, REGISTRATION_NOT_REGISTERED};
 HANDLE udpThread; // thread handle for UDP communication

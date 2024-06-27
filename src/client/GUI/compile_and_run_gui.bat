@@ -9,7 +9,7 @@ for /F "tokens=*" %%A in (%source_file%) do (
     set "object_files=!object_files! %%A"
 )
 
-gcc %object_files% -o client_gui.exe -mwindows -lcomctl32
+gcc %object_files% -o client_gui.exe -mwindows -lcomctl32 -lws2_32
 if %ERRORLEVEL% neq 0 (
     echo Compilation failed.
     exit /b %ERRORLEVEL%
