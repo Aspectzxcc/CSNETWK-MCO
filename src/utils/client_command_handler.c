@@ -184,8 +184,15 @@ void registerAlias(SOCKET *sock, const char *alias) {
     if (strcmp(serverReply, successMessage) == 0) {
         client.registrationStatus = REGISTRATION_REGISTERED; // set registration status to registered
     }
-
-    printf("%s\n", serverReply); // print server reply
+    
+    if (g_isGUI) {
+        wchar_t serverReplyW[DEFAULT_BUFLEN];
+        MultiByteToWideChar(CP_ACP, 0, serverReply, -1, serverReplyW, DEFAULT_BUFLEN);
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReplyW);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 }
 
 // sends a file to the server
