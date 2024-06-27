@@ -160,7 +160,7 @@ void AppendTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)text); // Append text
 }
 
-int HandleCommand(const wchar_t *command) {
+void HandleCommand(const wchar_t *command) {
     const Command *commandStruct;
     char commandBuffer[DEFAULT_BUFLEN], **parameters;
 
@@ -175,7 +175,7 @@ int HandleCommand(const wchar_t *command) {
         MessageBoxW(NULL, ERROR_COMMAND_NOT_FOUND_W, L"Error", MB_OK | MB_ICONERROR);
         AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_COMMAND_NOT_FOUND_W);
         AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        return 0;
+        return;
     } else {
         // Parse the command parameters
         parameters = parseCommandParameters(commandStruct, commandBuffer);
@@ -185,7 +185,7 @@ int HandleCommand(const wchar_t *command) {
             MessageBoxW(NULL, ERROR_INVALID_PARAMETERS_W, L"Error", MB_OK | MB_ICONERROR);
             AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_INVALID_PARAMETERS_W);
             AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-            return 0;
+            return;
         } else {
             // Here you would execute the command with the parsed parameters
             executeCommand(commandStruct->command, parameters, commandBuffer);
@@ -195,6 +195,4 @@ int HandleCommand(const wchar_t *command) {
             free(parameters);
         }
     }
-
-    return 1;
 }

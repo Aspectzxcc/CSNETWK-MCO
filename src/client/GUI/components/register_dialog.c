@@ -70,11 +70,7 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
                     AppendTextToConsoleOutput(g_hConsoleOutput, command);
                     AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
 
-                    int success = HandleCommand(command); // Handle the command
-
-                    if (success) {
-                        SetWindowTextW(g_registerHwnd, alias); // Set the alias as the new text
-                    }
+                    HandleCommand(command); // Handle the command
 
                     DestroyWindow(hwnd); // Close the dialog
                     return TRUE;

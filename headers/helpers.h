@@ -10,6 +10,6 @@ int commandRequiresRegistration(const char *command);
 void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const char *ip);
 void initUdpSenderSocket(SOCKET *senderSocket);
 void AppendTextToConsoleOutput(HWND hConsoleOutput, const wchar_t *text);
-int HandleCommand(const wchar_t *command);
+void HandleCommand(const wchar_t *command);
 
 #endif // HELPERS_H
