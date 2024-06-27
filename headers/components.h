@@ -18,6 +18,7 @@ void InitializeListViewColumns(HWND hList);
 void AddItemToListView(HWND hList, int itemIndex, const char* mainText, const char* paramText, const char* descText);
 void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst);
 void InitializeTreeView(HWND hTreeView);
+void AddFilesToTreeView(HWND hwndTreeView, HTREEITEM hRoot, const char* dir);
 HTREEITEM AddItemToTreeView(HWND hTreeView, HTREEITEM hParent, char* text);
 void CreateRegisterDialog(HWND parentHwnd, HINSTANCE hInst, HWND registerHwnd);
 void CreateBroadcastDialog(HWND parentHwnd, HINSTANCE hInst);

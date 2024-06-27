@@ -67,6 +67,21 @@ void InitializeTreeView(HWND hTreeView) {
     g_hRoot = AddItemToTreeView(hTreeView, NULL, "Server Directory");
 }
 
+void AddFilesToTreeView(HWND hwndTreeView, HTREEITEM hRoot, const char* dir) {
+    char* fileList = strstr(dir, "\n") + 1; // Skip "Server directory\n"
+    char* fileStart = fileList;
+    char* fileEnd = NULL;
+    while ((fileEnd = strstr(fileStart, "\n")) != NULL) {
+        *fileEnd = '\0'; // Temporarily terminate the current file name string
+        if (fileStart != fileEnd) { // Check if not an empty line
+            // Add the file name as a child item of the root
+            AddItemToTreeView(hwndTreeView, hRoot, fileStart);
+        }
+        fileStart = fileEnd + 1; // Move to the start of the next file name
+    }
+}
+
+
 HTREEITEM AddItemToTreeView(HWND hTreeView, HTREEITEM hParent, char* text) {
     TVINSERTSTRUCT tvInsert;
 
@@ -90,17 +105,8 @@ LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
                         if (client.connectionStatus == DISCONNECTED || client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
                             return TRUE;
                         }
-                        char* fileList = strstr(g_serverDir, "\n") + 1; // Skip "Server directory\n"
-                        char* fileStart = fileList;
-                        char* fileEnd = NULL;
-                        while ((fileEnd = strstr(fileStart, "\n")) != NULL) {
-                            *fileEnd = '\0'; // Temporarily terminate the current file name string
-                            if (fileStart != fileEnd) { // Check if not an empty line
-                                // Add the file name as a child item of the root
-                                AddItemToTreeView(lpnmh->hwndFrom, g_hRoot, fileStart);
-                            }
-                            fileStart = fileEnd + 1; // Move to the start of the next file name
-                        }
+                        
+                        AddFilesToTreeView(lpnmh->hwndFrom, g_hRoot, g_serverDir);
                     } else {
                         MessageBoxA(hwnd, "GET request made", "Information", MB_OK | MB_ICONINFORMATION);
                     }
