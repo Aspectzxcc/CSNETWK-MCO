@@ -153,6 +153,7 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 
     if (strcmp(serverReply, MESSAGE_SUCCESSFUL_CONNECTION) == 0) {
         if (g_isGUI) {
+            MessageBoxW(NULL, MESSAGE_SUCCESSFUL_CONNECTION_W, L"Success", MB_OK | MB_ICONINFORMATION);
             AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_CONNECTION_W);
             AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
         } else {
@@ -168,6 +169,14 @@ void disconnectFromServer(SOCKET *sock) {
     closesocket(*sock); // close the socket
     CloseHandle(udpThread); // close the UDP listener thread
     client.connectionStatus = DISCONNECTED; // set connection status to disconnected
+
+    if (g_isGUI) {
+        MessageBoxW(NULL, MESSAGE_SUCCESSFUL_DISCONNECTION_W, L"Success", MB_OK | MB_ICONINFORMATION);
+        AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_DISCONNECTION_W);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf(MESSAGE_SUCCESSFUL_DISCONNECTION "\n");
+    }
 }
 
 void registerAlias(SOCKET *sock, const char *alias) {

@@ -88,7 +88,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                     CreateJoinDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
                 case 101: // Leave button
-                    MessageBoxW(hWnd, L"Leave button clicked", L"Button Clicked", MB_OK);
+                    HandleCommand(COMMAND_LEAVE_W); // Handle the command
                     break;
                 case 102: // Help button
                     CreateHelpDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
