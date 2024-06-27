@@ -132,7 +132,12 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
     if (strcmp(serverReply, MESSAGE_SUCCESSFUL_CONNECTION) == 0) {
-        printf(MESSAGE_SUCCESSFUL_CONNECTION "\n"); // print success message
+        if (g_isGUI) {
+            AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_CONNECTION_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            printf("%s\n", MESSAGE_SUCCESSFUL_CONNECTION); // print success message
+        }
     }
 
     client.connectionStatus = CONNECTED; // set connection status flag to connected

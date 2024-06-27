@@ -44,6 +44,16 @@
 #define MESSAGE_SUCCESSFUL_BROADCAST "Broadcast message sent to all users."
 #define MESSAGE_SUCCESSFUL_UNICAST "Unicast message sent to %s." // %s is the user's handle or alias
 
+// wide character message success responses
+#define MESSAGE_SUCCESSFUL_CONNECTION_W L"Connection to the File Exchange Server is successful!"
+#define MESSAGE_SUCCESSFUL_DISCONNECTION_W L"Connection closed. Thank you!"
+#define MESSAGE_SUCCESSFUL_REGISTRATION_W L"Welcome %ls!" // %ls is the user's handle or alias
+#define MESSAGE_SUCCESSFUL_FILE_UPLOAD_W L"%ls<%ls>: Uploaded %ls" // %ls and %ls is the user's handle or alias, timestamp, and filename respectively
+#define MESSAGE_SUCCESSFUL_DIR_LIST_W L"Server Directory\n%ls" // %ls is the directory listing
+#define MESSAGE_SUCCESSFUL_FILE_DOWNLOAD_W L"File received from the server: %ls" // %ls is the filename
+#define MESSAGE_SUCCESSFUL_BROADCAST_W L"Broadcast message sent to all users."
+#define MESSAGE_SUCCESSFUL_UNICAST_W L"Unicast message sent to %ls." // %ls is the user's handle or alias
+
 // error messages
 #define ERROR_CONNECTION_FAILED "Error: Connection to the Server has failed! Please check IP Address and Port Number."
 #define ERROR_DISCONNECT_FAILED "Error: Disconnection failed. Please connect to the server first."
