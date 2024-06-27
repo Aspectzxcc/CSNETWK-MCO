@@ -126,15 +126,6 @@ void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const cha
     closesocket(*sock);
     *sock = INVALID_SOCKET;
     }
-
-    int len = sizeof(*receiverAddress);
-    if (getsockname(*sock, (struct sockaddr *)receiverAddress, &len) == SOCKET_ERROR) {
-        fprintf(stderr, "Receiver getsockname failed with error code : %d\n", WSAGetLastError());
-        closesocket(*sock);
-        *sock = INVALID_SOCKET;
-    } else {
-        printf("Receiver socket bound to port %d\n", ntohs(receiverAddress->sin_port));
-    }
 }
 
 void initUdpSenderSocket(SOCKET *sock) {
