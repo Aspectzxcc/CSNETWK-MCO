@@ -115,7 +115,11 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 
     if (udpThread == NULL) {
         // if thread creation fails, print an error message
-        printf("CreateThread failed with error code: %d", GetLastError());
+        if (g_isGUI) {
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
     } 
 
     // attempt to connect to the server
@@ -165,7 +169,12 @@ void registerAlias(SOCKET *sock, const char *alias) {
         client.registrationStatus = REGISTRATION_REGISTERED; // set registration status to registered
     }
 
-    printf("%s\n", serverReply); // print server reply
+    if (g_isGUI) {
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 }
 
 // sends a file to the server
@@ -176,7 +185,13 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
 
     file = fopen(filePath, "rb"); // open file in binary read mode
     if (file == NULL) {
-        fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_CLIENT_W, L"Error", MB_ICONERROR | MB_OK);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_CLIENT_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
+        }
         return;
     }
 
@@ -199,7 +214,13 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     // send the file data
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
         if (send(*sock, buffer, bytesRead, 0) == SOCKET_ERROR) {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
+            if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
+            }
             break; // exit loop on send failure
         }
     }
@@ -207,7 +228,12 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
-    printf("%s\n", serverReply); // print server reply
+    if (g_isGUI) {
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 
     fclose(file); // close the file
 }
@@ -226,21 +252,39 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
 
     // check if the received message is an error message
     if (strcmp(serverReply, ERROR_FILE_NOT_FOUND_SERVER) == 0) {
-        printf("%s\n", serverReply); // print error message
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_SERVER_W, L"Error", MB_ICONERROR | MB_OK);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_SERVER_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_FILE_NOT_FOUND_SERVER "\n"); // print error message on file not found
+        }
         return;
     }
 
     // open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb"); // open file in binary write mode
     if (file == NULL) {
-        fprintf(stderr, "Error opening file for writing.\n"); // print error message on file open failure
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_CLIENT_W, L"Error", MB_ICONERROR | MB_OK);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_CLIENT_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
+        }
         return;
     }
 
     // receive the file size
     long fileSizeNetOrder; // variable for file size in network byte order
     if (recv(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) <= 0) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+        }
         fclose(file); // close file
         return;
     }
@@ -259,7 +303,13 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
         } else if (bytesReceived == 0) {
             break; // break loop if connection closed
         } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+            if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+            }
             break; // break loop on receive failure
         }
     }
@@ -267,9 +317,20 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
     fclose(file); // close the file
 
     if (totalBytesReceived != fileSize) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message if file size mismatch
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on file size mismatch
+        }
     } else {
-        printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
+        if (g_isGUI) {
+            AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_FILE_DOWNLOAD_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
+        }
     }
 }
 
@@ -279,7 +340,12 @@ void getServerDirectory(SOCKET *sock) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
     
-    printf("%s\n", serverReply); // print directory listing
+    if (g_isGUI) {
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 }
 
 DWORD WINAPI listenForMessages(void *data) {
@@ -295,7 +361,12 @@ DWORD WINAPI listenForMessages(void *data) {
         if (bytesReceived > 0) {
             // Successfully received a message
             recvBuffer[bytesReceived] = '\0'; // Null-terminate the buffer
-            printf("%s\n", recvBuffer);
+            if (g_isGUI) {
+                AppendTextToConsoleOutput(g_hConsoleOutput, recvBuffer);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                printf("%s\n", recvBuffer); // Print the received message
+            }
             // Process the received message here
         } else if (bytesReceived == SOCKET_ERROR) {
             int error = WSAGetLastError();
@@ -317,5 +388,10 @@ void handleBroadcastAndUnicast(SOCKET *sock, const char *message) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
-    printf("%s\n", serverReply); // print server reply
+    if (g_isGUI) {
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 }
