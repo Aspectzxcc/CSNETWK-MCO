@@ -1,6 +1,15 @@
 @echo off
+setlocal enabledelayedexpansion
 taskkill /F /IM client_gui.exe /T >nul 2>&1
-gcc client_gui.c components/main_window.c components/join_dialog.c components/help_dialog.c components/dir_dialog.c components/register_dialog.c components/broadcast_dialog.c components/unicast_dialog.c components/store_dialog.c components/command_builder_dialog.c -o client_gui.exe -mwindows -lcomctl32
+
+set "source_file=source_files.txt"
+set "object_files="
+
+for /F "tokens=*" %%A in (%source_file%) do (
+    set "object_files=!object_files! %%A"
+)
+
+gcc %object_files% -o client_gui.exe -mwindows -lcomctl32
 if %ERRORLEVEL% neq 0 (
     echo Compilation failed.
     exit /b %ERRORLEVEL%

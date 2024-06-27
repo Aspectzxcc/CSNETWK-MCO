@@ -54,6 +54,16 @@
 #define ERROR_INVALID_PARAMETERS "Error: Command parameters do not match or is not allowed."
 #define ERROR_UNICAST_FAILED "Error: Handle or alias not found for unicast message."
 
+// wide character error messages
+#define ERROR_CONNECTION_FAILED_W L"Error: Connection to the Server has failed! Please check IP Address and Port Number."
+#define ERROR_DISCONNECT_FAILED_W L"Error: Disconnection failed. Please connect to the server first."
+#define ERROR_REGISTRATION_FAILED_W L"Error: Registration failed. Handle or alias already exists."
+#define ERROR_FILE_NOT_FOUND_CLIENT_W L"Error: File not found."
+#define ERROR_FILE_NOT_FOUND_SERVER_W L"Error: File not found in the server."
+#define ERROR_COMMAND_NOT_FOUND_W L"Error: Command not found."
+#define ERROR_INVALID_PARAMETERS_W L"Error: Command parameters do not match or is not allowed."
+#define ERROR_UNICAST_FAILED_W L"Error: Handle or alias not found for unicast message."
+
 #define DEFAULT_BUFLEN 1024 // default buffer length
 
 // command structure

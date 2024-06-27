@@ -5,6 +5,7 @@
 #include <commctrl.h>
 #include <richedit.h>
 #include "commands.h"
+#include "client_command_handler.h"
 
 // console output window
 extern HWND g_hConsoleOutput;

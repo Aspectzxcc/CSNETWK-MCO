@@ -1,0 +1,11 @@
+client_gui.c
+../../utils/commands.c
+components/main_window.c
+components/join_dialog.c
+components/help_dialog.c
+components/dir_dialog.c
+components/register_dialog.c
+components/broadcast_dialog.c
+components/unicast_dialog.c
+components/store_dialog.c
+components/command_builder_dialog.c
