@@ -5,7 +5,6 @@
 #include "../../headers/commands.h"
 #include "../../headers/client_command_handler.h"
 #include "../../headers/helpers.h"
-#include "../../headers/components.h"
 
 #define DEFAULT_BUFLEN 1024 // default buffer size for command input
 
@@ -17,34 +16,16 @@ int executeCommand(const char *command, char **parameters, char *message) {
     if (commandRequiresConnection(command) && client.connectionStatus == DISCONNECTED) {
         // log error if trying to execute a command without being connected.
         if (strcmp(command, COMMAND_LEAVE) == 0) {
-            if (g_isGUI) {
-                MessageBoxW(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_DISCONNECT_FAILED_W);
-                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-            } else {
-                fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
-            }
+            fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
         } else {
-            if (g_isGUI) {
-                MessageBoxW(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-            } else {
-                fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
-            }
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
         }
         return 0;
     }
 
     // check if the client is not registered and tries to execute commands that require registration.
     if (commandRequiresRegistration(command) && client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
-        if (g_isGUI) {
-            MessageBoxW(NULL, ERROR_REGISTRATION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_REGISTRATION_FAILED_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
-        }
+        fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
         return 0;
     }
 
@@ -97,12 +78,7 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     *sock = socket(AF_INET, SOCK_STREAM, 0); // create a TCP socket for the client
 
     if (*sock == INVALID_SOCKET) {
-        if (g_isGUI) {
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
-        }
+        fprintf(stderr, "Could not create socket : %d\n", WSAGetLastError());
         return;
     }
 
@@ -115,11 +91,7 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
 
     if (udpThread == NULL) {
         // if thread creation fails, print an error message
-        if (g_isGUI) {
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
+        printf("CreateThread failed with error code: %d", GetLastError());
     } 
 
     // attempt to connect to the server
@@ -136,12 +108,7 @@ void initSocketConnection(SOCKET *sock, const char *ip, int port) {
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
     if (strcmp(serverReply, MESSAGE_SUCCESSFUL_CONNECTION) == 0) {
-        if (g_isGUI) {
-            AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_CONNECTION_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            printf("%s\n", MESSAGE_SUCCESSFUL_CONNECTION); // print success message
-        }
+        printf(MESSAGE_SUCCESSFUL_CONNECTION "\n"); // print success message
     }
 
     client.connectionStatus = CONNECTED; // set connection status flag to connected
@@ -169,12 +136,7 @@ void registerAlias(SOCKET *sock, const char *alias) {
         client.registrationStatus = REGISTRATION_REGISTERED; // set registration status to registered
     }
 
-    if (g_isGUI) {
-        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
-        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-    } else {
-        printf("%s\n", serverReply); // print server reply
-    }
+    printf("%s\n", serverReply); // print server reply
 }
 
 // sends a file to the server
@@ -185,13 +147,7 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
 
     file = fopen(filePath, "rb"); // open file in binary read mode
     if (file == NULL) {
-        if (g_isGUI) {
-            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_CLIENT_W, L"Error", MB_ICONERROR | MB_OK);
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_CLIENT_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
-        }
+        fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
         return;
     }
 
@@ -214,13 +170,7 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     // send the file data
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
         if (send(*sock, buffer, bytesRead, 0) == SOCKET_ERROR) {
-            if (g_isGUI) {
-                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-            } else {
-                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
-            }
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
             break; // exit loop on send failure
         }
     }
@@ -228,12 +178,7 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
-    if (g_isGUI) {
-        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
-        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-    } else {
-        printf("%s\n", serverReply); // print server reply
-    }
+    printf("%s\n", serverReply); // print server reply
 
     fclose(file); // close the file
 }
@@ -252,39 +197,21 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
 
     // check if the received message is an error message
     if (strcmp(serverReply, ERROR_FILE_NOT_FOUND_SERVER) == 0) {
-        if (g_isGUI) {
-            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_SERVER_W, L"Error", MB_ICONERROR | MB_OK);
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_SERVER_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_FILE_NOT_FOUND_SERVER "\n"); // print error message on file not found
-        }
+        printf("%s\n", serverReply); // print error message
         return;
     }
 
     // open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb"); // open file in binary write mode
     if (file == NULL) {
-        if (g_isGUI) {
-            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_CLIENT_W, L"Error", MB_ICONERROR | MB_OK);
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_CLIENT_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
-        }
+        fprintf(stderr, "Error opening file for writing.\n"); // print error message on file open failure
         return;
     }
 
     // receive the file size
     long fileSizeNetOrder; // variable for file size in network byte order
     if (recv(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) <= 0) {
-        if (g_isGUI) {
-            MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
-        }
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
         fclose(file); // close file
         return;
     }
@@ -303,13 +230,7 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
         } else if (bytesReceived == 0) {
             break; // break loop if connection closed
         } else {
-            if (g_isGUI) {
-                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-            } else {
-                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
-            }
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
             break; // break loop on receive failure
         }
     }
@@ -317,20 +238,9 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
     fclose(file); // close the file
 
     if (totalBytesReceived != fileSize) {
-        if (g_isGUI) {
-            MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_ICONERROR | MB_OK);
-            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on file size mismatch
-        }
+        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message if file size mismatch
     } else {
-        if (g_isGUI) {
-            AppendTextToConsoleOutput(g_hConsoleOutput, MESSAGE_SUCCESSFUL_FILE_DOWNLOAD_W);
-            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-        } else {
-            printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
-        }
+        printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
     }
 }
 
@@ -340,12 +250,7 @@ void getServerDirectory(SOCKET *sock) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
     
-    if (g_isGUI) {
-        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
-        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-    } else {
-        printf("%s\n", serverReply); // print server reply
-    }
+    printf("%s\n", serverReply); // print directory listing
 }
 
 DWORD WINAPI listenForMessages(void *data) {
@@ -361,12 +266,7 @@ DWORD WINAPI listenForMessages(void *data) {
         if (bytesReceived > 0) {
             // Successfully received a message
             recvBuffer[bytesReceived] = '\0'; // Null-terminate the buffer
-            if (g_isGUI) {
-                AppendTextToConsoleOutput(g_hConsoleOutput, recvBuffer);
-                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-            } else {
-                printf("%s\n", recvBuffer); // Print the received message
-            }
+            printf("%s\n", recvBuffer);
             // Process the received message here
         } else if (bytesReceived == SOCKET_ERROR) {
             int error = WSAGetLastError();
@@ -388,10 +288,5 @@ void handleBroadcastAndUnicast(SOCKET *sock, const char *message) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
-    if (g_isGUI) {
-        AppendTextToConsoleOutput(g_hConsoleOutput, serverReply);
-        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-    } else {
-        printf("%s\n", serverReply); // print server reply
-    }
+    printf("%s\n", serverReply); // print server reply
 }
