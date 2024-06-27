@@ -17,13 +17,13 @@ int executeCommand(const char *command, char **parameters, char *message) {
         // log error if trying to execute a command without being connected.
         if (strcmp(command, COMMAND_LEAVE) == 0) {
             if (g_isGUI) {
-                MessageBox(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                MessageBoxW(NULL, ERROR_DISCONNECT_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
             } else {
                 fprintf(stderr, ERROR_DISCONNECT_FAILED "\n");
             }
         } else {
             if (g_isGUI) {
-                MessageBox(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
             } else {
                 fprintf(stderr, ERROR_CONNECTION_FAILED "\n");
             }
@@ -34,7 +34,7 @@ int executeCommand(const char *command, char **parameters, char *message) {
     // check if the client is not registered and tries to execute commands that require registration.
     if (commandRequiresRegistration(command) && client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
         if (g_isGUI) {
-            MessageBox(NULL, ERROR_REGISTRATION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+            MessageBoxW(NULL, ERROR_REGISTRATION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
         } else {
             fprintf(stderr, ERROR_REGISTRATION_FAILED "\n");
         }
@@ -73,7 +73,7 @@ int executeCommand(const char *command, char **parameters, char *message) {
     } else {
         // handle unknown command.
         if (g_isGUI) {
-            MessageBox(NULL, ERROR_COMMAND_NOT_FOUND_W, L"Error", MB_OK | MB_ICONERROR);
+            MessageBoxW(NULL, ERROR_COMMAND_NOT_FOUND_W, L"Error", MB_OK | MB_ICONERROR);
         } else {
             fprintf(stderr, ERROR_COMMAND_NOT_FOUND "\n");
         }
