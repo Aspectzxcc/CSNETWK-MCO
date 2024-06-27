@@ -63,12 +63,19 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
                 case IDOK: {
-                    wchar_t alias[256];
+                    wchar_t alias[256], command[DEFAULT_BUFLEN];
                     GetDlgItemTextW(hwnd, 106, alias, 256); // 106 is the Edit control ID
-                    if (wcslen(alias) > 0) {
-                        MessageBoxW(hwnd, L"Successful Registration", L"Button Clicked", MB_OK | MB_ICONINFORMATION);
+
+                    wsprintfW(command, L"%ls %ls", COMMAND_REGISTER_W, alias);
+                    AppendTextToConsoleOutput(g_hConsoleOutput, command);
+                    AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+
+                    int success = HandleCommand(command); // Handle the command
+
+                    if (success) {
                         SetWindowTextW(g_registerHwnd, alias); // Set the alias as the new text
                     }
+
                     DestroyWindow(hwnd); // Close the dialog
                     return TRUE;
                 }
