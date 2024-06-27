@@ -103,6 +103,39 @@ void AppendTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)text); // Append text
 }
 
+void HandleCommand(const wchar_t *command) {
+    const Command *commandStruct;
+    char commandBuffer[DEFAULT_BUFLEN], **parameters;
+
+    // Convert the wide character command to a multi-byte string
+    WideCharToMultiByte(CP_ACP, 0, command, -1, commandBuffer, DEFAULT_BUFLEN, NULL, NULL);
+
+    // Attempt to get the command structure
+    commandStruct = getCommand(commandBuffer);
+
+    if (commandStruct == NULL) {
+        // Command not found
+        AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_COMMAND_NOT_FOUND_W);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        // Parse the command parameters
+        parameters = parseCommandParameters(commandStruct, commandBuffer);
+
+        if (parameters == NULL) {
+            // Invalid parameters
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_INVALID_PARAMETERS_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            // Here you would execute the command with the parsed parameters
+            // executeCommand(parameters);
+            for (int i = 0; i < commandStruct->parameterCount; i++) {
+                free(parameters[i]);
+            }
+            free(parameters);
+        }
+    }
+}
+
 // Define the child window procedure for the console mimic
 LRESULT CALLBACK ConsoleOutputProcedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {

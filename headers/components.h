@@ -14,6 +14,7 @@ extern HWND g_hConsoleOutput;
 void CreateConsoleOutputWindow(HWND parentHwnd, HINSTANCE hInst);
 void CreateConsoleOutputWindowButtons(HWND parentHwnd, HINSTANCE hInst, int posX, int posY, int width, int height); 
 void AppendTextToConsoleOutput(HWND hConsoleOutput, const wchar_t *text);
+void HandleCommand(const wchar_t *command);
 void CreateJoinDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateHelpDialog(HWND parentHwnd, HINSTANCE hInst);
 void SetupListView(HWND hList);

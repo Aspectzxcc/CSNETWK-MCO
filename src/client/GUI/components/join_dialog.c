@@ -92,32 +92,15 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
                     {
                         // Get the text from the edit control
                         wchar_t ip[16], port[6], command[DEFAULT_BUFLEN];
-                        const Command *commandStruct;
-                        char commandBuffer[DEFAULT_BUFLEN], **parameters;
                         
                         GetWindowTextW(GetDlgItem(hwnd, 102), ip, 16);
                         GetWindowTextW(GetDlgItem(hwnd, 103), port, 6);
 
-                        wsprintfW(command, L"%ls %ls %ls\n", COMMAND_JOIN_W, ip, port);
+                        wsprintfW(command, L"%ls %ls %ls", COMMAND_JOIN_W, ip, port);
                         AppendTextToConsoleOutput(g_hConsoleOutput, command);
+                        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
 
-                        WideCharToMultiByte(CP_ACP, 0, command, -1, commandBuffer, DEFAULT_BUFLEN, NULL, NULL);
-
-                        commandStruct = getCommand(commandBuffer);
-
-                        if (commandStruct == NULL) {
-                            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_COMMAND_NOT_FOUND_W);
-                            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-                        } else {
-                            parameters = parseCommandParameters(commandStruct, commandBuffer);
-                            if (parameters == NULL) {
-                                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_INVALID_PARAMETERS_W);
-                                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-                            } else {
-                                //executeCommand();
-                                free(parameters);
-                            }
-                        }
+                        HandleCommand(command); // Handle the command
 
                         DestroyWindow(hwnd); // Close the dialog
                         return TRUE;
