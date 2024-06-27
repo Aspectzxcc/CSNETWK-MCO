@@ -58,6 +58,19 @@ DWORD WINAPI client_handler(void* data) {
 
     // cleanup before thread exit
     closesocket(client->clientSocket); // close the client socket
+    // remove the client from the clients array
+    for (int i = 0; i < clientCount; i++) {
+        if (clients[i].clientSocket == client->clientSocket) {
+            for (int j = i; j < clientCount - 1; j++) {
+                clients[j] = clients[j + 1];
+            }
+            clientCount--;
+
+            // remove the last client from the array
+            memset(&clients[clientCount], 0, sizeof(clients[0]));
+            break;
+        }
+    }
     return 0; // return success code
 }
 
