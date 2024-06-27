@@ -65,9 +65,6 @@ HTREEITEM g_hRoot = NULL; // Global variable to store the root node handle
 void InitializeTreeView(HWND hTreeView) {
     // Add sample items to the TreeView
     g_hRoot = AddItemToTreeView(hTreeView, NULL, "Server Directory");
-    AddItemToTreeView(hTreeView, g_hRoot, "Sample1.txt");
-    AddItemToTreeView(hTreeView, g_hRoot, "Sample2.txt");
-    AddItemToTreeView(hTreeView, g_hRoot, "Sample3.txt");
 }
 
 HTREEITEM AddItemToTreeView(HWND hTreeView, HTREEITEM hParent, char* text) {
@@ -89,8 +86,34 @@ LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
                 case NM_DBLCLK: // Handle double-click event
                     if (lpnmh->idFrom == 105) { // 105 is the TreeView control ID
                         HTREEITEM hSelectedItem = TreeView_GetSelection(lpnmh->hwndFrom);
-                        if (hSelectedItem != g_hRoot) {
+                        if (hSelectedItem == g_hRoot) {
+                            HandleCommand(COMMAND_DIR_W); // Handle the command
+                        } else {
                             MessageBoxA(hwnd, "GET request made", "Information", MB_OK | MB_ICONINFORMATION);
+                            // TCHAR szItemText[256]; // Buffer to store the item's name
+                            // TVITEM tvi; // Structure to hold item information
+
+                            // // Initialize the TVITEM structure
+                            // tvi.mask = TVIF_TEXT; // We want the text
+                            // tvi.hItem = hSelectedItem; // Specify the item we're interested in
+                            // tvi.pszText = szItemText; // Point to our buffer
+                            // tvi.cchTextMax = sizeof(szItemText)/sizeof(szItemText[0]); // Specify buffer size
+
+                            // // Get the item's name
+                            // if (TreeView_GetItem(lpnmh->hwndFrom, &tvi)) {
+                            //     // Now szItemText contains the item's name, and we can use it
+                            //     wchar_t command[DEFAULT_BUFLEN], szItemTextW[256];
+                            //     MultiByteToWideChar(CP_ACP, 0, szItemText, -1, szItemTextW, 256);
+                            //     wsprintfW(command, L"%ls %ls", COMMAND_GET_W, szItemTextW);
+                            //     HandleCommand(command); // Handle the command
+                            // } else {
+                            //     // Handle error, if needed
+                            //     MessageBoxW(hwnd, ERROR_INVALID_PARAMETERS_W, L"Error", MB_OK | MB_ICONERROR);
+                            // }
+
+                            // if (client.connectionStatus == DISCONNECTED || client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
+                            //     return TRUE;
+                            // }
                         }
                     }
                     break;

@@ -67,8 +67,6 @@ LRESULT CALLBACK RegisterDialogProcedure(HWND hwnd, UINT message, WPARAM wParam,
                     GetDlgItemTextW(hwnd, 106, alias, 256); // 106 is the Edit control ID
 
                     wsprintfW(command, L"%ls %ls", COMMAND_REGISTER_W, alias);
-                    AppendTextToConsoleOutput(g_hConsoleOutput, command);
-                    AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
 
                     HandleCommand(command); // Handle the command
 

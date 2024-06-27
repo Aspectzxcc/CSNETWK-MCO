@@ -164,6 +164,10 @@ void HandleCommand(const wchar_t *command) {
     const Command *commandStruct;
     char commandBuffer[DEFAULT_BUFLEN], **parameters;
 
+    // Append the command to the console output
+    AppendTextToConsoleOutput(g_hConsoleOutput, command);
+    AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+
     // Convert the wide character command to a multi-byte string
     WideCharToMultiByte(CP_ACP, 0, command, -1, commandBuffer, DEFAULT_BUFLEN, NULL, NULL);
 

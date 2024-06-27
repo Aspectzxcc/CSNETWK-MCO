@@ -97,9 +97,6 @@ LRESULT CALLBACK JoinDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPA
                         GetWindowTextW(GetDlgItem(hwnd, 103), port, 6);
 
                         wsprintfW(command, L"%ls %ls %ls", COMMAND_JOIN_W, ip, port);
-                        AppendTextToConsoleOutput(g_hConsoleOutput, command);
-                        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
-
                         HandleCommand(command); // Handle the command
 
                         DestroyWindow(hwnd); // Close the dialog
