@@ -4,6 +4,10 @@
 Client clients[MAX_CLIENTS];
 int clientCount = 0; // counter for the number of connected clients
 
+HWND g_hConsoleOutput; // handle to the console output window (if GUI is enabled)
+void executeCommand(const char *command, char **parameters, char *userInput);
+
+
 int main() {
     WSADATA wsaData; // structure to hold Windows Sockets API data
     SOCKET serverSocket, clientSocket; // descriptors for server and client sockets
@@ -84,4 +88,8 @@ int main() {
     WSACleanup();
 
     return 0;
+}
+
+void executeCommand(const char *command, char **parameters, char *userInput) {
+    // placeholder function only
 }
