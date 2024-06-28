@@ -67,11 +67,15 @@ LRESULT CALLBACK BroadcastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
                 case IDOK: {
-                    wchar_t message[256];
+                    wchar_t message[256], command[256];
                     GetDlgItemTextW(hwnd, 105, message, 256); // 105 is the Edit control ID for message input
-                    if (wcslen(message) > 0) {
-                        MessageBoxW(hwnd, L"Message sent successfully", L"Broadcast", MB_OK | MB_ICONINFORMATION);
-                    }
+
+                    // append message and command
+                    wsprintfW(command, L"%ls %ls", COMMAND_BROADCAST_W, message);
+
+                    // Handle the command
+                    HandleCommand(command);
+                    
                     DestroyWindow(hwnd); // Close the dialog
                     return TRUE;
                 }

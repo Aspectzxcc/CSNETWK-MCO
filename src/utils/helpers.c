@@ -126,6 +126,13 @@ void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const cha
     closesocket(*sock);
     *sock = INVALID_SOCKET;
     }
+
+    int len = sizeof(*receiverAddress);
+    if (getsockname(*sock, (struct sockaddr *)receiverAddress, &len) == SOCKET_ERROR) {
+        fprintf(stderr, "Receiver getsockname failed with error code : %d\n", WSAGetLastError());
+        closesocket(*sock);
+        *sock = INVALID_SOCKET;
+    }
 }
 
 void initUdpSenderSocket(SOCKET *sock) {

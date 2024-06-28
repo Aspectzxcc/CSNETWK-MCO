@@ -385,7 +385,14 @@ DWORD WINAPI listenForMessages(void *data) {
         if (bytesReceived > 0) {
             // Successfully received a message
             recvBuffer[bytesReceived] = '\0'; // Null-terminate the buffer
-            printf("%s\n", recvBuffer);
+            if (g_isGUI) {
+                wchar_t recvBufferW[DEFAULT_BUFLEN];
+                MultiByteToWideChar(CP_ACP, 0, recvBuffer, -1, recvBufferW, DEFAULT_BUFLEN);
+                AppendTextToConsoleOutput(g_hConsoleOutput, recvBufferW);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                printf("%s\n", recvBuffer);
+            }
             // Process the received message here
         } else if (bytesReceived == SOCKET_ERROR) {
             int error = WSAGetLastError();
@@ -407,5 +414,13 @@ void handleBroadcastAndUnicast(SOCKET *sock, const char *message) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
-    printf("%s\n", serverReply); // print server reply
+    if (g_isGUI) {
+        wchar_t serverReplyW[DEFAULT_BUFLEN];
+        MultiByteToWideChar(CP_ACP, 0, serverReply, -1, serverReplyW, DEFAULT_BUFLEN);
+        MessageBoxW(NULL, serverReplyW, L"Server Reply", MB_OK | MB_ICONINFORMATION);
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReplyW);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 }
