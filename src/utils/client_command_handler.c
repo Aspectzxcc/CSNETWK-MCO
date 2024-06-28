@@ -263,20 +263,43 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
 
     // check if the received message is an error message
     if (strcmp(serverReply, ERROR_FILE_NOT_FOUND_SERVER) == 0) {
-        printf("%s\n", serverReply); // print error message
+        if (g_isGUI) {
+            wchar_t serverReplyW[DEFAULT_BUFLEN];
+            MultiByteToWideChar(CP_ACP, 0, serverReply, -1, serverReplyW, DEFAULT_BUFLEN);
+            MessageBoxW(NULL, serverReplyW, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, serverReplyW);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            printf("%s\n", serverReply); // print error message
+        }
         return;
     }
 
     // open the file for writing in binary mode
     FILE *file = fopen(filePath, "wb"); // open file in binary write mode
     if (file == NULL) {
-        fprintf(stderr, "Error opening file for writing.\n"); // print error message on file open failure
+        if (g_isGUI) {
+            wchar_t error[256];
+            wsprintfW(error, L"Could not open file %s", filename);
+            MessageBoxW(NULL, error, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, error);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, "Could not open file %s\n", filename); // print error message on file open failure
+        }
         return;
     }
 
     // receive the file size
     long fileSizeNetOrder; // variable for file size in network byte order
     if (recv(*sock, (char*)&fileSizeNetOrder, sizeof(fileSizeNetOrder), 0) <= 0) {
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+        }
         fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
         fclose(file); // close file
         return;
@@ -296,7 +319,13 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
         } else if (bytesReceived == 0) {
             break; // break loop if connection closed
         } else {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+            if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+            }
             break; // break loop on receive failure
         }
     }
@@ -304,9 +333,24 @@ void receiveFileFromServer(SOCKET *sock, const char *filename) {
     fclose(file); // close the file
 
     if (totalBytesReceived != fileSize) {
-        fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message if file size mismatch
+        if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on receive failure
+            }
     } else {
-        printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
+        if (g_isGUI) {
+            wchar_t filenameW[256], message[256];
+            MultiByteToWideChar(CP_ACP, 0, filename, -1, filenameW, 256);
+            wsprintfW(message, MESSAGE_SUCCESSFUL_FILE_DOWNLOAD_W, filenameW);
+            MessageBoxW(NULL, message, L"Success", MB_OK | MB_ICONINFORMATION);
+            AppendTextToConsoleOutput(g_hConsoleOutput, message);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            printf(MESSAGE_SUCCESSFUL_FILE_DOWNLOAD "\n", filename); // print success message
+        }
     }
 }
 
