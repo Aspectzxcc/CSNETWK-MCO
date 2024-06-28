@@ -23,13 +23,21 @@
 #define COMMAND_BROADCAST_W L"/broadcast"
 #define COMMAND_UNICAST_W L"/unicast"
 
-// commands with help messages
+// command parameters
 #define COMMAND_JOIN_PARAMETERS "<server_ip_add> <port>"
 #define COMMAND_REGISTER_PARAMETERS "<handle>"
 #define COMMAND_STORE_PARAMETERS "<filename>"
 #define COMMAND_GET_PARAMETERS "<filename>"
 #define COMMAND_BROADCAST_PARAMETERS "<message>"
 #define COMMAND_UNICAST_PARAMETERS "<handle> <message>"
+
+// wide character command parameters
+#define COMMAND_JOIN_PARAMETERS_W L"<server_ip_add> <port>"
+#define COMMAND_REGISTER_PARAMETERS_W L"<handle>"
+#define COMMAND_STORE_PARAMETERS_W L"<filename>"
+#define COMMAND_GET_PARAMETERS_W L"<filename>"
+#define COMMAND_BROADCAST_PARAMETERS_W L"<message>"
+#define COMMAND_UNICAST_PARAMETERS_W L"<handle> <message>"
 
 // broadcast and unicast message format
 #define SEND_MESSAGE_FORMAT "%s<%s>: %s" // handle, timestamp, message

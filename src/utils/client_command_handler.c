@@ -69,7 +69,11 @@ int executeCommand(const char *command, char **parameters, char *message) {
         getServerDirectory(&client.clientSocket);
     } else if (strcmp(command, COMMAND_HELP) == 0) {
         // print available commands.
-        printCommands();
+        if (g_isGUI) {
+            printCommandsW();
+        } else {
+            printCommands();
+        }
     } else if (strcmp(command, COMMAND_BROADCAST) == 0) {
         // send a broadcast message to the server.
         handleBroadcastAndUnicast(&client.clientSocket, message);
@@ -442,5 +446,38 @@ void handleBroadcastAndUnicast(SOCKET *sock, const char *message) {
         AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
     } else {
         printf("%s\n", serverReply); // print server reply
+    }
+}
+
+#include <windows.h>
+
+void printCommandsW() {
+    wchar_t message[DEFAULT_BUFLEN];
+    wchar_t wideCommand[256]; // Buffer for the converted command string
+
+    wsprintfW(message, L"Available commands:\n");
+    AppendTextToConsoleOutput(g_hConsoleOutput, message);
+
+    for (int i = 0; i < commandsCount; i++) {
+        // Convert commands[i].command from char* to wchar_t*
+        MultiByteToWideChar(CP_UTF8, 0, commands[i].command, -1, wideCommand, 256);
+
+        if (strcmp(commands[i].command, COMMAND_JOIN) == 0) {
+            wsprintfW(message, L"%s %s\n", wideCommand, COMMAND_JOIN_PARAMETERS_W);
+        } else if (strcmp(commands[i].command, COMMAND_REGISTER) == 0) {
+            wsprintfW(message, L"%s %s\n", wideCommand, COMMAND_REGISTER_PARAMETERS_W);
+        } else if (strcmp(commands[i].command, COMMAND_STORE) == 0) {
+            wsprintfW(message, L"%s %s\n", wideCommand, COMMAND_STORE_PARAMETERS_W);
+        } else if (strcmp(commands[i].command, COMMAND_GET) == 0) {
+            wsprintfW(message, L"%s %s\n", wideCommand, COMMAND_GET_PARAMETERS_W);
+        } else if (strcmp(commands[i].command, COMMAND_BROADCAST) == 0) {
+            wsprintfW(message, L"%s %s\n", wideCommand, COMMAND_BROADCAST_PARAMETERS_W);
+        } else if (strcmp(commands[i].command, COMMAND_UNICAST) == 0) {
+            wsprintfW(message, L"%s %s\n", wideCommand, COMMAND_UNICAST_PARAMETERS_W);
+        } else {
+            wsprintfW(message, L"%s\n", wideCommand);
+        }
+
+        AppendTextToConsoleOutput(g_hConsoleOutput, message);
     }
 }

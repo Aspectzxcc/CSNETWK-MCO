@@ -93,6 +93,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
                     SetWindowTextW(GetDlgItem(hWnd, 104), L"Register"); // Reset the Register button text
                     break;
                 case 102: // Help button
+                    HandleCommand(COMMAND_HELP_W); // Handle the command
                     CreateHelpDialog(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE));
                     break;
                 case 103: // Directory button

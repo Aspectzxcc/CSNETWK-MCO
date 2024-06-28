@@ -35,5 +35,6 @@ void receiveFileFromServer(SOCKET *sock, const char *filename);
 void getServerDirectory(SOCKET *sock);
 DWORD WINAPI listenForMessages(void *data);
 void handleBroadcastAndUnicast(SOCKET *sock, const char *message);
+void printCommandsW();
 
 #endif // COMMAND_HANDLER_H
