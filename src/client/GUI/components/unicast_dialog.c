@@ -63,13 +63,14 @@ LRESULT CALLBACK UnicastDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, 
         case WM_COMMAND:
             switch (LOWORD(wParam)) {
                 case IDOK: {
-                    wchar_t alias[256], message[256];
+                    wchar_t alias[256], message[256], command[256];
                     GetDlgItemTextW(hwnd, 106, alias, 256); // Retrieve alias/handle
                     GetDlgItemTextW(hwnd, 105, message, 256); // Retrieve message
-                    if (wcslen(message) > 0) {
-                        // Handle sending the unicast message using the alias and message
-                        MessageBoxW(hwnd, L"Unicast message sent successfully", L"Unicast", MB_OK | MB_ICONINFORMATION);
-                    }
+                    wsprintfW(command, L"%ls %ls %ls", COMMAND_UNICAST_W, alias, message); // Format command
+
+                    // Handle the command
+                    HandleCommand(command);
+                    
                     DestroyWindow(hwnd);
                     return TRUE;
                 }
