@@ -62,6 +62,8 @@ void CreateCommandBuilderDialog(HWND parentHwnd, HINSTANCE hInst) {
                     160, 140, 80, 25, // Adjusted Y position for the button
                     hDlg, (HMENU)IDOK, hInst, NULL);
 
+    SetFocus(hEdit); // Set focus to the Edit control
+
     // Make the window modal
     EnableWindow(parentHwnd, FALSE);
     SetWindowLongPtrW(hDlg, GWLP_WNDPROC, (LONG_PTR)CommandBuilderDialogProcedure);

@@ -43,6 +43,8 @@ void CreateUnicastDialog(HWND parentHwnd, HINSTANCE hInst) {
                     160, 170, 80, 25,
                     hDlg, (HMENU)IDOK, hInst, NULL);
 
+    SetFocus(GetDlgItem(hDlg, 106)); // Set focus to alias/handle field
+
     EnableWindow(parentHwnd, FALSE);
     SetWindowLongPtrW(hDlg, GWLP_WNDPROC, (LONG_PTR)UnicastDialogProcedure);
 

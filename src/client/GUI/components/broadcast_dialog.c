@@ -43,6 +43,8 @@ void CreateBroadcastDialog(HWND parentHwnd, HINSTANCE hInst) {
                     160, 100, 80, 25, // Adjust position to fit within the dialog
                     hDlg, (HMENU)IDOK, hInst, NULL);
 
+    SetFocus(GetDlgItem(hDlg, 105)); // Set focus to the message input control
+
     // Make the window modal
     EnableWindow(parentHwnd, FALSE);
     SetWindowLongPtrW(hDlg, GWLP_WNDPROC, (LONG_PTR)BroadcastDialogProcedure);
