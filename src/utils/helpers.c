@@ -165,6 +165,9 @@ void AppendTextToConsoleOutput(HWND hwndRichEdit, const wchar_t* text) {
     int initialTextLength = GetWindowTextLengthW(hwndRichEdit);
     SendMessageW(hwndRichEdit, EM_SETSEL, (WPARAM)initialTextLength, (LPARAM)-1); // Move to end
     SendMessageW(hwndRichEdit, EM_REPLACESEL, FALSE, (LPARAM)text); // Append text
+
+    // Automatically scroll to the bottom
+    SendMessage(hwndRichEdit, WM_VSCROLL, (WPARAM)SB_BOTTOM, (LPARAM)NULL);
 }
 
 void HandleCommand(const wchar_t *command) {
