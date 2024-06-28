@@ -17,14 +17,13 @@ void SetupListView(HWND hList);
 void InitializeListViewColumns(HWND hList);
 void AddItemToListView(HWND hList, int itemIndex, const char* mainText, const char* paramText, const char* descText);
 void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst);
-void InitializeTreeView(HWND hTreeView);
 void AddFilesToTreeView(HWND hwndTreeView, HTREEITEM hRoot, const char* dir);
 HTREEITEM AddItemToTreeView(HWND hTreeView, HTREEITEM hParent, char* text);
 void CreateRegisterDialog(HWND parentHwnd, HINSTANCE hInst, HWND registerHwnd);
 void CreateBroadcastDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateUnicastDialog(HWND parentHwnd, HINSTANCE hInst);
 void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst);
-void InitializeTreeViewForStore(HWND hTreeView);
+void PopulateTreeViewWithClientDirectory(HWND hTreeView);
 void CreateCommandBuilderDialog(HWND parentHwnd, HINSTANCE hInst);
 
 // function prototypes for window procedure

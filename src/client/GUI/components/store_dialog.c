@@ -1,5 +1,7 @@
 #include "../../../../headers/components.h"
 
+HTREEITEM g_hRootStore = NULL; // Global variable to store the root item in Store Dialog
+
 // Function to create and display a custom dialog box for Upload
 void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst) {
     // Dialog box dimensions
@@ -32,8 +34,11 @@ void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst) {
                                      10, 10, 380, 240, // Adjust position and size as needed
                                      hDlg, (HMENU)106, hInst, NULL); // 106 is the control ID for TreeView in Store Dialog
 
+    g_hRootStore = AddItemToTreeView(hTreeView, NULL, "Client Directory");
+
     // Initialize the TreeView with sample items for client directory
-    InitializeTreeViewForStore(hTreeView);
+    PopulateTreeViewWithClientDirectory(hTreeView);
+
     // Adjust the "Close" button position
     CreateWindowExW(0, L"BUTTON", L"Close",
                     WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
@@ -56,22 +61,59 @@ void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst) {
     DestroyWindow(hDlg);
 }
 
-// Function to initialize TreeView with sample items for client directory
-void InitializeTreeViewForStore(HWND hTreeView) {
-    HTREEITEM g_hRootUpload = AddItemToTreeView(hTreeView, NULL, "Client Directory");
-    AddItemToTreeView(hTreeView, g_hRootUpload, "ClientSample1.txt");
-    AddItemToTreeView(hTreeView, g_hRootUpload, "ClientSample2.txt");
-    AddItemToTreeView(hTreeView, g_hRootUpload, "ClientSample3.txt");
+void PopulateTreeViewWithClientDirectory(HWND hTreeView) {
+
+    // Step 2: Find files in the "files" directory
+    WIN32_FIND_DATA findFileData;
+    HANDLE hFind = FindFirstFile("./files/*", &findFileData); // Adjust the path as needed
+
+    if (hFind == INVALID_HANDLE_VALUE) {
+        MessageBox(NULL, "Failed to read files directory", "Error", MB_OK);
+        return;
+    }
+
+    do {
+        // Step 3: Skip directories, only list files
+        if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            // Step 4: Add each file to the TreeView under the "Files Directory" root item
+            AddItemToTreeView(hTreeView, g_hRootStore, findFileData.cFileName);
+        }
+    } while (FindNextFile(hFind, &findFileData) != 0);
+
+    FindClose(hFind);
 }
 
-// Procedure for handling messages in the Upload Dialog
 LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
         case WM_NOTIFY: {
             LPNMHDR lpnmh = (LPNMHDR)lParam;
-            if (lpnmh->idFrom == 106 && lpnmh->code == NM_DBLCLK) { // 106 is the TreeView control ID in Upload Dialog
-                HTREEITEM hSelectedItem = TreeView_GetSelection(lpnmh->hwndFrom);
-                MessageBoxW(hwnd, L"STORE request made", L"Information", MB_OK | MB_ICONINFORMATION);
+            if (lpnmh->idFrom == 106) { // Assuming 106 is the TreeView control ID in Store Dialog
+                switch (lpnmh->code) {
+                    case NM_DBLCLK: { // Handle double-click event
+                        HTREEITEM hSelectedItem = TreeView_GetSelection(lpnmh->hwndFrom);
+                        if (hSelectedItem == g_hRootStore) {
+                            HTREEITEM hChildItem = TreeView_GetChild(lpnmh->hwndFrom, g_hRootStore);
+
+                            if (hChildItem == NULL) {
+                                // Populate the TreeView with the client directory's files
+                                PopulateTreeViewWithClientDirectory(lpnmh->hwndFrom);
+                            }
+                        }
+                        break;
+                    }
+                    case TVN_ITEMEXPANDED: { // Assuming you want to handle the ANSI version
+                        NMTREEVIEW* pnmTreeView = (NMTREEVIEW*)lParam;
+                        if (pnmTreeView->action == TVE_COLLAPSE) {
+                            HTREEITEM hChildItem = TreeView_GetChild(lpnmh->hwndFrom, g_hRootStore);
+                            while (hChildItem != NULL) {
+                                HTREEITEM hNextItem = TreeView_GetNextSibling(lpnmh->hwndFrom, hChildItem);
+                                TreeView_DeleteItem(lpnmh->hwndFrom, hChildItem);
+                                hChildItem = hNextItem;
+                            }
+                        }
+                        break;
+                    }
+                }
             }
             break;
         }
@@ -87,7 +129,7 @@ LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LP
             DestroyWindow(hwnd);
             return TRUE;
         case WM_DESTROY:
-            PostQuitMessage(0); // Ends the modal loop initiated in CreateUploadDialog
+            PostQuitMessage(0); // Ends the modal loop initiated in CreateStoreDialog
             return TRUE;
     }
     return DefWindowProc(hwnd, message, wParam, lParam); // Default message handling

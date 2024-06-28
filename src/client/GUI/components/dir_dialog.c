@@ -1,5 +1,7 @@
 #include "../../../../headers/components.h"
 
+HTREEITEM g_hRoot = NULL; // Global variable to store the root node handle
+
 // Function to create and display a custom dialog box for Directory
 void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst) {
     // Dialog box dimensions
@@ -32,8 +34,7 @@ void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst) {
                                      10, 10, 380, 240, // Adjust position and size as needed
                                      hDlg, (HMENU)105, hInst, NULL); // 105 is the control ID for TreeView
 
-    // Initialize the TreeView with sample items
-    InitializeTreeView(hTreeView);
+    g_hRoot = AddItemToTreeView(hTreeView, NULL, "Server Directory");
 
     // Adjust the "Close" button position
     CreateWindowExW(0, L"BUTTON", L"Close",
@@ -58,13 +59,6 @@ void CreateDirectoryDialog(HWND parentHwnd, HINSTANCE hInst) {
     EnableWindow(parentHwnd, TRUE);
     SetForegroundWindow(parentHwnd);
     DestroyWindow(hDlg);
-}
-
-HTREEITEM g_hRoot = NULL; // Global variable to store the root node handle
-
-void InitializeTreeView(HWND hTreeView) {
-    // Add sample items to the TreeView
-    g_hRoot = AddItemToTreeView(hTreeView, NULL, "Server Directory");
 }
 
 void AddFilesToTreeView(HWND hwndTreeView, HTREEITEM hRoot, const char* dir) {
