@@ -103,7 +103,9 @@ LRESULT CALLBACK CommandBuilderDialogProcedure(HWND hwnd, UINT message, WPARAM w
                 case IDOK: {
                     wchar_t command[256];
                     GetDlgItemTextW(hwnd, 107, command, 256); // 107 is the Edit control ID for command input
-                    MessageBoxW(hwnd, L"Command executed successfully", L"Command Builder", MB_OK | MB_ICONINFORMATION);
+                    
+                    HandleCommand(command); // Handle the command
+                    
                     DestroyWindow(hwnd); // Close the dialog
                     return TRUE;
                 }
