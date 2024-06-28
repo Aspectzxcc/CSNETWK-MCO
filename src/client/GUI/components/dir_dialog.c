@@ -101,7 +101,12 @@ LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
                 case NM_DBLCLK: { // Handle double-click event
                     HTREEITEM hSelectedItem = TreeView_GetSelection(lpnmh->hwndFrom);
                     if (hSelectedItem == g_hRoot) {
-                        HandleCommand(COMMAND_DIR_W); // Handle the command
+                        HTREEITEM hChildItem = TreeView_GetChild(lpnmh->hwndFrom, g_hRoot);
+
+                        if (hChildItem == NULL) {
+                            HandleCommand(COMMAND_DIR_W); // Handle the command
+                        }
+                        
                         if (client.connectionStatus == DISCONNECTED || client.registrationStatus == REGISTRATION_NOT_REGISTERED) {
                             return TRUE;
                         }
