@@ -36,9 +36,6 @@ void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst) {
 
     g_hRootStore = AddItemToTreeView(hTreeView, NULL, "Client Directory");
 
-    // Initialize the TreeView with sample items for client directory
-    PopulateTreeViewWithClientDirectory(hTreeView);
-
     // Adjust the "Close" button position
     CreateWindowExW(0, L"BUTTON", L"Close",
                     WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
@@ -62,8 +59,10 @@ void CreateStoreDialog(HWND parentHwnd, HINSTANCE hInst) {
 }
 
 void PopulateTreeViewWithClientDirectory(HWND hTreeView) {
+    // Initialize an integer flag to track the number of files added
+    int filesAdded = 0;
 
-    // Step 2: Find files in the "files" directory
+    // Find files in the "files" directory
     WIN32_FIND_DATA findFileData;
     HANDLE hFind = FindFirstFile("./files/*", &findFileData); // Adjust the path as needed
 
@@ -73,14 +72,20 @@ void PopulateTreeViewWithClientDirectory(HWND hTreeView) {
     }
 
     do {
-        // Step 3: Skip directories, only list files
+        // Skip directories, only list files
         if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-            // Step 4: Add each file to the TreeView under the "Files Directory" root item
+            // Add each file to the TreeView under the "Files Directory" root item
             AddItemToTreeView(hTreeView, g_hRootStore, findFileData.cFileName);
+            filesAdded++; // Increment the counter for each file added
         }
     } while (FindNextFile(hFind, &findFileData) != 0);
 
     FindClose(hFind);
+
+    // Check if no files were added and display a message box if so
+    if (filesAdded == 0) {
+        MessageBox(NULL, "No files found in the directory.", "Information", MB_OK | MB_ICONINFORMATION);
+    }
 }
 
 LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -101,7 +106,7 @@ LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LP
                         }
                         break;
                     }
-                    case TVN_ITEMEXPANDED: { // Assuming you want to handle the ANSI version
+                    case TVN_ITEMEXPANDEDW: { // Assuming you want to handle the ANSI version
                         NMTREEVIEW* pnmTreeView = (NMTREEVIEW*)lParam;
                         if (pnmTreeView->action == TVE_COLLAPSE) {
                             HTREEITEM hChildItem = TreeView_GetChild(lpnmh->hwndFrom, g_hRootStore);
