@@ -218,7 +218,7 @@ void sendFileToClient(SOCKET *clientSocket, const char *filename) {
     // open the file for reading in binary mode
     FILE *file = fopen(filePath, "rb");
     if (file == NULL) {
-        sendMessage(clientSocket, ERROR_FILE_NOT_FOUND_CLIENT, -1);
+        sendMessage(clientSocket, ERROR_FILE_NOT_FOUND_SERVER, -1);
         return;
     }
 
