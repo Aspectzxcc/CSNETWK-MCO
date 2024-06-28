@@ -103,6 +103,28 @@ LRESULT CALLBACK StoreDialogProcedure(HWND hwnd, UINT message, WPARAM wParam, LP
                                 // Populate the TreeView with the client directory's files
                                 PopulateTreeViewWithClientDirectory(lpnmh->hwndFrom);
                             }
+                        } else {
+                            // Buffer to store the item's name
+                            char szItemText[256] = {0}; // Adjust the size as needed
+
+                            // Set up the TVITEM structure to request the text of the selected item
+                            TVITEM tvi;
+                            tvi.mask = TVIF_TEXT; // We want the text
+                            tvi.hItem = hSelectedItem; // The item we're interested in
+                            tvi.pszText = szItemText; // Buffer to store the text
+                            tvi.cchTextMax = sizeof(szItemText)/sizeof(szItemText[0]); // Size of the buffer
+
+                            // Retrieve the item's information
+                            if (TreeView_GetItem(lpnmh->hwndFrom, &tvi)) {
+                                // Use the item's name as needed, for example, show it in a message box
+                                wchar_t wItemText[256], command[256];
+                                MultiByteToWideChar(CP_ACP, 0, szItemText, -1, wItemText, 256);
+                                wsprintfW(command, L"%ls %ls", COMMAND_STORE_W, wItemText);
+
+                                HandleCommand(command); // Handle the command
+                            } else {
+                                MessageBoxW(hwnd, ERROR_FILE_NOT_FOUND_CLIENT_W, L"Error", MB_OK | MB_ICONERROR);
+                            }
                         }
                         break;
                     }

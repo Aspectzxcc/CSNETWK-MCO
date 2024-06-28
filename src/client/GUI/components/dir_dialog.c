@@ -122,7 +122,7 @@ LRESULT CALLBACK DirectoryDialogProcedure(HWND hwnd, UINT message, WPARAM wParam
                             // Use the item's name as needed, for example, show it in a message box
                             wchar_t wItemText[256], command[256];
                             MultiByteToWideChar(CP_ACP, 0, szItemText, -1, wItemText, 256);
-                            wsprintfW(command, L"%s %s", COMMAND_GET_W, wItemText);
+                            wsprintfW(command, L"%ls %ls", COMMAND_GET_W, wItemText);
 
                             HandleCommand(command); // Handle the command
                         } else {

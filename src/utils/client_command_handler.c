@@ -213,7 +213,13 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
 
     file = fopen(filePath, "rb"); // open file in binary read mode
     if (file == NULL) {
-        fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
+        if (g_isGUI) {
+            MessageBoxW(NULL, ERROR_FILE_NOT_FOUND_CLIENT_W, L"Error", MB_OK | MB_ICONERROR);
+            AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_FILE_NOT_FOUND_CLIENT_W);
+            AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+        } else {
+            fprintf(stderr, ERROR_FILE_NOT_FOUND_CLIENT "\n"); // print error message on file open failure
+        }
         return;
     }
 
@@ -236,7 +242,13 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     // send the file data
     while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
         if (send(*sock, buffer, bytesRead, 0) == SOCKET_ERROR) {
-            fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
+            if (g_isGUI) {
+                MessageBoxW(NULL, ERROR_CONNECTION_FAILED_W, L"Error", MB_OK | MB_ICONERROR);
+                AppendTextToConsoleOutput(g_hConsoleOutput, ERROR_CONNECTION_FAILED_W);
+                AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+            } else {
+                fprintf(stderr, ERROR_CONNECTION_FAILED "\n"); // print error message on send failure
+            }
             break; // exit loop on send failure
         }
     }
@@ -244,7 +256,15 @@ void sendFileToServer(SOCKET *sock, const char *filename) {
     char serverReply[DEFAULT_BUFLEN]; // buffer for server reply
     strcpy(serverReply, receiveResponse(sock, serverReply, DEFAULT_BUFLEN)); // receive server reply
 
-    printf("%s\n", serverReply); // print server reply
+    if (g_isGUI) {
+        wchar_t serverReplyW[DEFAULT_BUFLEN];
+        MultiByteToWideChar(CP_ACP, 0, serverReply, -1, serverReplyW, DEFAULT_BUFLEN);
+        MessageBoxW(NULL, serverReplyW, L"Server Reply", MB_OK | MB_ICONINFORMATION);
+        AppendTextToConsoleOutput(g_hConsoleOutput, serverReplyW);
+        AppendTextToConsoleOutput(g_hConsoleOutput, L"\n");
+    } else {
+        printf("%s\n", serverReply); // print server reply
+    }
 
     fclose(file); // close the file
 }
