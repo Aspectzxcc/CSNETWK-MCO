@@ -1,7 +1,7 @@
 #include "../../headers/server.h"
 
 // array to store client information
-Client clients[MAX_CLIENTS];
+Client *clients[MAX_CLIENTS];
 int clientCount = 0; // counter for the number of connected clients
 
 HWND g_hConsoleOutput; // handle to the console output window (if GUI is enabled)
@@ -39,12 +39,18 @@ int main() {
 
         // check if the maximum number of clients has not been reached
         if (clientCount < MAX_CLIENTS) {
-            // add the new client to the array of clients
-            clients[clientCount].clientSocket = clientSocket;
+            // Dynamically allocate memory for a new client
+            Client *newClient = (Client *)malloc(sizeof(Client));
+            if (newClient == NULL) {
+                printf("Failed to allocate memory for new client.\n");
+                closesocket(clientSocket);
+                continue;
+            }
 
-            // take the client address
-            memcpy(&clients[clientCount].clientAddress, &client, sizeof(SOCKADDR_IN));
-            clients[clientCount].clientAddress.sin_port = htons(8888);
+            // Initialize the new client's data
+            newClient->clientSocket = clientSocket;
+            memcpy(&newClient->clientAddress, &client, sizeof(SOCKADDR_IN));
+            newClient->clientAddress.sin_port = htons(8888);
 
             char portBuffer[sizeof(u_short)];
             int bytesRead = recv(clientSocket, portBuffer, sizeof(u_short), 0);
@@ -52,29 +58,30 @@ int main() {
             if (bytesRead > 0) {
                 u_short port;
                 memcpy(&port, portBuffer, sizeof(u_short));
-                clients[clientCount].clientAddress.sin_port = htons(port);
+                newClient->clientAddress.sin_port = htons(port);
             }
 
-            sendMessage(&clients[clientCount].clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, -1);
-            initUdpSenderSocket(&clients[clientCount].senderSocket);
+            sendMessage(&newClient->clientSocket, MESSAGE_SUCCESSFUL_CONNECTION, -1);
+            initUdpSenderSocket(&newClient->senderSocket);
 
-            // create a new thread to handle the client
-            HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)&clients[clientCount], 0, NULL);
+            // Add the new client to the array of clients
+            clients[clientCount] = newClient;
+
+            // Create a new thread to handle the client
+            HANDLE thread = CreateThread(NULL, 0, client_handler, (void*)newClient, 0, NULL);
             if (thread == NULL) {
-                // if thread creation fails, print an error message
                 printf("server CreateThread failed with error code: %d\n", GetLastError());
+                // Cleanup if thread creation fails
+                closesocket(newClient->clientSocket);
+                free(newClient);
             } else {
-                // close the thread handle as it is not needed anymore
-                CloseHandle(thread);
+                CloseHandle(thread); // Close the thread handle as it is not needed anymore
+                clientCount++; // Increment the client count only on successful thread creation
             }
-
-            // increment the client count
-            clientCount++;
         } else {
             // if the maximum number of clients has been reached, reject the connection
             printf("Maximum number of clients reached. Connection rejected.\n");
             closesocket(clientSocket);
-            continue;
         }
     }
 

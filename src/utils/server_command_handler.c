@@ -30,7 +30,6 @@ DWORD WINAPI client_handler(void* data) {
             fprintf(stderr, "recv failed in client_handler : %d\n", WSAGetLastError()); // log recv error
             break; // exit the loop on error
         } else if (bytesRead == 0) {
-            printf("Client disconnected\n"); // log client disconnection
             break; // exit loop if client disconnected
         } else {
             clientMessage[bytesRead] = '\0'; // null-terminate the received message
@@ -58,16 +57,18 @@ DWORD WINAPI client_handler(void* data) {
 
     // cleanup before thread exit
     closesocket(client->clientSocket); // close the client socket
+    printf("Client disconnected\n");
     // remove the client from the clients array
     for (int i = 0; i < clientCount; i++) {
-        if (clients[i].clientSocket == client->clientSocket) {
+        if (clients[i]->clientSocket == client->clientSocket) { // Access clientSocket using pointer
+            free(clients[i]); // Free the memory allocated for the client
             for (int j = i; j < clientCount - 1; j++) {
                 clients[j] = clients[j + 1];
             }
             clientCount--;
 
             // remove the last client from the array
-            memset(&clients[clientCount], 0, sizeof(clients[0]));
+            clients[clientCount] = NULL; // Set the last client pointer to NULL
             break;
         }
     }
@@ -116,9 +117,9 @@ void handleRegisterAlias(Client *client, char *alias) {
     // check if the alias is already in use
     if (clientCount > 0) {
         for (int i = 0; i < clientCount; i++) {
-            if (strcmp(clients[i].clientAlias, alias) == 0) {
+            if (strcmp(clients[i]->clientAlias, alias) == 0) { // Access clientAlias using pointer
                 char response[DEFAULT_BUFLEN];
-                printf("Client alias %s already registered.\n", clients[i].clientAlias);
+                printf("Client alias %s already registered.\n", clients[i]->clientAlias); // Access clientAlias using pointer
                 sprintf(response, ERROR_REGISTRATION_FAILED, alias);
                 sendMessage(&client->clientSocket, response, strlen(response));
                 return;
@@ -283,15 +284,15 @@ void broadcastMessage(Client *client, char *message) {
     sprintf(formattedMessage, SEND_MESSAGE_FORMAT, client->clientAlias, timeStr, message);
 
     for (int i = 0; i < clientCount; i++) {
-        if (clients[i].clientSocket != client->clientSocket) {
+        if (clients[i]->clientSocket != client->clientSocket) {
             // Use senderSocket for UDP broadcasting
-            printf("Sending broadcast message to client %d\n", clients[i].senderSocket);
-            int sendResult = sendto(clients[i].senderSocket, formattedMessage, strlen(formattedMessage), 0, 
-                                    (struct sockaddr *)&clients[i].clientAddress, sizeof(clients[i].clientAddress));
+            printf("Sending broadcast message to client %d\n", clients[i]->senderSocket);
+            int sendResult = sendto(clients[i]->senderSocket, formattedMessage, strlen(formattedMessage), 0, 
+                                    (struct sockaddr *)&clients[i]->clientAddress, sizeof(clients[i]->clientAddress));
             if (sendResult == SOCKET_ERROR) {
-                printf("Failed to send message to client %s, error: %d\n", clients[i].clientAlias, WSAGetLastError());
+                printf("Failed to send message to client %s, error: %d\n", clients[i]->clientAlias, WSAGetLastError());
             } else {
-                printf("Broadcast message sent to client %s\n", clients[i].clientAlias);
+                printf("Broadcast message sent to client %s\n", clients[i]->clientAlias);
             }
         }
     }
@@ -314,15 +315,15 @@ void unicastMessage(Client *client, char *targetAlias, char *message) {
 
     // Find the target client by alias
     for (int i = 0; i < clientCount; i++) {
-        if (strcmp(clients[i].clientAlias, targetAlias) == 0) {
+        if (strcmp(clients[i]->clientAlias, targetAlias) == 0) {
             // Use senderSocket for UDP unicast
-            printf("Sending broadcast message to client %d\n", clients[i].senderSocket);
-            int sendResult = sendto(clients[i].senderSocket, formattedMessage, strlen(formattedMessage), 0, 
-                                    (struct sockaddr *)&clients[i].clientAddress, sizeof(clients[i].clientAddress));
+            printf("Sending broadcast message to client %d\n", clients[i]->senderSocket);
+            int sendResult = sendto(clients[i]->senderSocket, formattedMessage, strlen(formattedMessage), 0, 
+                                    (struct sockaddr *)&clients[i]->clientAddress, sizeof(clients[i]->clientAddress));
             if (sendResult == SOCKET_ERROR) {
-                printf("Failed to send message to client %s, error: %d\n", clients[i].clientAlias, WSAGetLastError());
+                printf("Failed to send message to client %s, error: %d\n", clients[i]->clientAlias, WSAGetLastError());
             } else {
-                printf("Unicast message sent to client %s\n", clients[i].clientAlias);
+                printf("Unicast message sent to client %s\n", clients[i]->clientAlias);
             }
 
             // Send confirmation message to the client that sent the unicast

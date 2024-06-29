@@ -14,7 +14,7 @@ typedef struct Client {
     char clientAlias[MAX_ALIAS_LENGTH]; // Alias of the client
 } Client;
 
-extern Client clients[MAX_CLIENTS]; // Array to hold client information
+extern Client *clients[MAX_CLIENTS]; // Array to hold client information
 extern int clientCount; // Number of clients connected to the server
 
 // Function prototypes
