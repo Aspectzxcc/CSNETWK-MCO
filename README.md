@@ -6,25 +6,24 @@ The CSNETWK-MCO File Exchange System is designed as the final project for our CS
 
 ## Current State of the Project
 
-As of now, the project has successfully implemented the foundational aspects of both the server and client applications using TCP protocol. The server can initialize sockets, bind to an address and port, and listen for connections. The server still lacks handling of the commands and no commands are being sent to the server from the client yet as the client command execution is still being developed.
+- The project has been successfully completed using the C programming language, fulfilling all specifications outlined in the CSNETWK - Machine Project Demo Kit T3 AY2023-2024 document. It includes all required functionalities and introduces a bonus GUI application that supports both broadcast and unicast messaging features.
+- For communication, the client application establishes a stateful connection using a TCP socket, while a separate thread manages a UDP socket to asynchronously receive broadcast and unicast messages.
 
-### Project Structure and Dependencies
+## Project Structure
 
-The project is organized into several key directories to ensure modularity and ease of navigation:
+This project is organized into several directories to separate the concerns of client, server, and utility functions:
 
-- `src/`: Contains the source code for the project, further organized into subdirectories for clarity:
-  - `client/`: Houses the client application source code (`client.c`), responsible for interfacing with the user and communicating with the server.
-  - `server/`: Contains the server application source code (`server.c`), which listens for and handles requests from clients.
-  - `utils/`: Includes utility functions and common code used by both the client and server applications, such as file handling and network utilities.
-- `headers/`: Includes header files such as `server.h` and `client.h`, which define necessary structures and prototypes for the server and client applications, respectively.
-- `.gitignore`: Specifies intentionally untracked files to ignore.
+- `src/`: Contains the source code for the project.
+  - `client/`: Contains the client application code, including a GUI and command-line interface.
+  - `server/`: Contains the server application code.
+  - `utils/`: Includes utility functions and common code used by both the client (CLI and GUI) and server applications, such as file handling and network utilities.
+- `headers/`: Includes header files for all of the source files used to provide `#define` macros and variable and function prototypes.
+- `.gitignore`: Specifies intentionally untracked files to ignore in Git.
 
 Dependencies include:
 
 - **Winsock2 Library**: For socket programming on Windows.
 - **C Standard Library**: Utilized for basic input/output operations, string manipulation, and memory management.
-
-### Development and Testing
 
 #### Development Tools
 
@@ -33,14 +32,24 @@ Dependencies include:
 
 ### Running the Applications
 
-To set up the applications, open multiple terminals - one for the server and additional ones for each client. Navigate to the server directory in one terminal and to the client directory in others. Run the designated batch files for compilation and execution in each terminal individually:
+To set up the applications, open multiple terminals - one for the server and additional ones for each client (For the GUI, only one terminal is needed to set up multiple client GUI applications). Navigate to the server directory in one terminal and to the client directory in others. Run the designated batch files for compilation and execution in each terminal individually:
 
 - For the server: Execute `compile_server.bat` to compile and then run the server application.
 - For each client: Execute `compile_client.bat` to compile and then run the client application.
+- For each client GUI: Execute `compile_and_run_gui.bat` to both compile and run the GUI application.
+
+## Special Libraries and Tools Used
+
+- **Winsock2**: This project makes extensive use of the Winsock2 library for network communication between the client and server applications. This library is essential for socket programming on Windows platforms.
+- **Windows API**: The client GUI is built using the Windows API, allowing for a native application experience.
+- **Common Controls (commctrl.h)**: Utilized for incorporating advanced user interface elements in the Windows GUI, such as buttons, toolbars, and status bars. This library is part of the Windows API that provides a set of functions to create and manage control windows.
+- **Rich Edit Control (richedit.h)**: This library is used to embed rich text editing capabilities within the GUI application. It allows for the display and editing of text with various formatting options, such as different fonts, colors, and sizes, enhancing the user interface for message composition and display.
 
 ## Resources
 
 - **Winsock2 Documentation**: Essential for understanding Windows socket programming. [Winsock2 Documentation](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/).
 - **C Standard Library**: For a comprehensive overview of available functions and their uses.
+- **Common Controls Documentation**: Provides information on using common controls to enhance the application's GUI. [Common Controls](https://learn.microsoft.com/en-us/windows/win32/controls/common-controls-intro).
+- **Rich Edit Control Documentation**: Offers guidance on integrating rich text editing features. [Rich Edit Controls](https://learn.microsoft.com/en-us/windows/win32/controls/rich-edit-controls).
 
-This README provides a snapshot of the project's current state, dependencies, and how to run the applications. Future updates will include more detailed instructions on using the system and additional features as they are developed.
+This README provides a snapshot of the completed project, including its dependencies, and instructions on how to run the applications. The project features both a command-line interface (CLI) and a graphical user interface (GUI) for the client, as well as comprehensive server functionality.
