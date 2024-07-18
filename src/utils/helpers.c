@@ -122,14 +122,14 @@ void initUdpReceiverSocket(SOCKET *sock, SOCKADDR_IN *receiverAddress, const cha
     }
 
     if (bind(*sock, (struct sockaddr *)receiverAddress, sizeof(*receiverAddress)) == SOCKET_ERROR) {
-    fprintf(stderr, "Receiver Bind failed with error code : %d\n", WSAGetLastError());
-    closesocket(*sock);
-    *sock = INVALID_SOCKET;
+        // fprintf(stderr, "Receiver Bind failed with error code : %d\n", WSAGetLastError());
+        closesocket(*sock);
+        *sock = INVALID_SOCKET;
     }
 
     int len = sizeof(*receiverAddress);
     if (getsockname(*sock, (struct sockaddr *)receiverAddress, &len) == SOCKET_ERROR) {
-        fprintf(stderr, "Receiver getsockname failed with error code : %d\n", WSAGetLastError());
+        // fprintf(stderr, "Receiver getsockname failed with error code : %d\n", WSAGetLastError());
         closesocket(*sock);
         *sock = INVALID_SOCKET;
     }
