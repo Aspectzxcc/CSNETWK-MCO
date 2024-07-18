@@ -258,7 +258,7 @@ void sendDirectoryFileList(SOCKET *clientSocket) {
     } 
 
     // buffer to store the directory listing
-    char directoryListing[1024] = "Server directory\n";
+    char directoryListing[1024] = "";
     do {
         // skip directories, only list files
         if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
