@@ -4,4 +4,4 @@
 # ignore .vscsode
 .vscode
 
-files/
+src/server/files
